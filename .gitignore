@@ -1,3 +1,27 @@
+# DATASHIFT
+
+sandbox
+sandbox/**
+
+# developing a gem so don't commit lock file
+Gemfile.lock
+
+*.gem
+.~lock.*
+*~
+*.cache
+*.log
+*.pid
+*.tmproj
+*.sw?
+logs
+logs/**
+spec/logs
+spec/fixtures/results
+
+nbproject
+Thumbs.db
+
 *.rbc
 *.sassc
 .sass-cache
