@@ -21,11 +21,15 @@
 #             N.B Some or all of Spree Tests may fail very first time run,
 #             as the database is auto generated
 # =>          
-
+require 'spree'
+require 'spree_core'
+    
 module DataShift
     
   module SpreeHelper
-            
+       
+
+      
     def self.root
       Gem.loaded_specs['spree_core'] ? Gem.loaded_specs['spree_core'].full_gem_path  : ""
     end
@@ -49,7 +53,7 @@ module DataShift
     end
     
     def self.version
-       Gem.loaded_specs['spree'] ? Gem.loaded_specs['spree'].version.version : "0.0.0"
+      Gem.loaded_specs['spree'] ? Gem.loaded_specs['spree'].version.version : "0.0.0"
     end
     
     def self.is_namespace_version

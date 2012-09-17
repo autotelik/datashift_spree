@@ -73,13 +73,29 @@ RSpec.configure do |config|
     ifixture(source)
   end
   
+  def bundler_setup(gemfile)
+    ENV['BUNDLE_GEMFILE'] = gemfile
+
+    begin
+      Bundler.setup(:default, :development)
+    rescue Bundler::BundlerError => e
+      $stderr.puts e.message
+      $stderr.puts "Run `bundle install` to install missing gems"
+      exit e.status_code
+    end
+  end
+  
   # SPREE
   def spree_sandbox_path
     File.join(File.dirname(__FILE__), 'sandbox')
   end
-    
+      
   def before_all_spree 
- 
+  
+    puts "SET", File.expand_path(File.dirname(__FILE__)) + '/Gemfile'
+    
+    bundler_setup( File.expand_path(File.dirname(__FILE__)) + '/Gemfile')
+    
     # We are not a Spree project, so we implement a spree application of our own
     # 
     if(DataShift::SpreeHelper::is_namespace_version )
@@ -108,6 +124,17 @@ RSpec.configure do |config|
     end
   end
   
+  def set_logger( name = 'datashift_spree_spec.log')
+    
+    require 'logger'
+    logdir = File.dirname(__FILE__) + '/logs'
+    FileUtils.mkdir_p(logdir) unless File.exists?(logdir)
+    ActiveRecord::Base.logger = Logger.new( File.join(logdir, name) )
+
+    # Anyway to direct one logger to another ????? ... Logger.new(STDOUT)
+    
+    @dslog = ActiveRecord::Base.logger
+  end
    
   # Datashift is usually included and tasks pulled in by a parent/host application.
   # So here we are hacking our way around the fact that datashift is not a Rails/Spree app/engine
@@ -119,7 +146,7 @@ RSpec.configure do |config|
   #    chdir back after environment loaded
     
   def spree_boot()
-    puts "def spree_boot()", spree_sandbox_app_path
+    puts "def spree_boot()", spree_sandbox_path
     ActiveRecord::Base.clear_active_connections!() 
 
     spree_sandbox_app_path = spree_sandbox_path
