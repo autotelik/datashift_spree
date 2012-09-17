@@ -9,7 +9,7 @@
 #             Provides Loaders and rake tasks specifically tailored for uploading or exporting
 #             Spree Products, associations and Images
 #
-require File.join(File.expand_path(File.dirname(__FILE__)  + '/..'), "spec_helper")
+require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 
 require 'product_loader'
   
@@ -219,21 +219,21 @@ describe 'SpreeLoader' do
  
   
   it "should raise exception when mandatory columns missing from .xls", :ex => true do
-    expect {@product_loader.perform_load($SpreeNegativeFixturePath + '/SpreeProdMissManyMandatory.xls', :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMissManyMandatory.xls'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
   end
   
 
   it "should raise exception when single mandatory column missing from .xls", :ex => true do
-    expect {@product_loader.perform_load($SpreeNegativeFixturePath + '/SpreeProdMiss1Mandatory.xls', :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMiss1Mandatory.xls'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
   end
 
   it "should raise exception when mandatory columns missing from .csv", :ex => true do
-    expect {@product_loader.perform_load($SpreeNegativeFixturePath + '/SpreeProdMissManyMandatory.csv', :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMissManyMandatory.csv'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
   end
   
 
   it "should raise exception when single mandatory column missing from .csv", :ex => true do
-    expect {@product_loader.perform_load($SpreeNegativeFixturePath + '/SpreeProdMiss1Mandatory.csv', :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMiss1Mandatory.csv'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
   end
 
   

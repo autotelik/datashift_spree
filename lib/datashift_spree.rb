@@ -1,6 +1,6 @@
 # Copyright:: (c) Autotelik Media Ltd 2010 - 2012 Tom Statter
 # Author ::   Tom Statter
-# Date ::     Aug 2010
+# Date ::     Aug 2012
 # License::   Free, Open Source.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -28,43 +28,16 @@
 # 
 # To pull DataShift commands into your main application :
 #
-#     require 'datashift'
+#     require 'datashift_spree'
 #
-#     DataShift::load_commands
+#     DataShift::Spree::load_commands
 #
 require 'rbconfig'
   
 module DataShift
 
-  module Guards
-
-    def self.jruby?
-      return RUBY_PLATFORM == "java"
-    end
-    def self.mac?
-      RbConfig::CONFIG['target_os'] =~ /darwin/i
-    end
-
-    def self.linux?
-      RbConfig::CONFIG['target_os'] =~ /linux/i
-    end
-
-    def self.windows?
-      RbConfig::CONFIG['target_os'] =~ /mswin|mingw/i
-    end
-
-  end
-
-  if(Guards::jruby?)
-    require 'java'
-      
-    class Object
-      def add_to_classpath(path)
-        $CLASSPATH << File.join( DataShift.root_path, 'lib', path.gsub("\\", "/") )
-      end
-    end
-  end
-
+  module Spree
+    
   def self.gem_version
     unless(@gem_version)
       if(File.exists?('VERSION'))
@@ -78,7 +51,7 @@ module DataShift
   end
 
   def self.gem_name
-    "datashift"
+    "datashift_spree"
   end
 
   def self.root_path
@@ -141,7 +114,7 @@ module DataShift
       Thor::Util.load_thorfile(f)
     end
   end
-  
+  end
 end
 
-DataShift::require_libraries
+DataShift::Spree::require_libraries

@@ -18,6 +18,8 @@ logs
 logs/**
 spec/logs
 spec/fixtures/results
+/spec/tmp/*
+/spec/sandbox
 
 nbproject
 Thumbs.db
@@ -34,7 +36,6 @@ capybara-*.html
 /db/*.sqlite3
 /public/system/*
 /coverage/
-/spec/tmp/*
 **.orig
 rerun.txt
 pickle-email-*.html

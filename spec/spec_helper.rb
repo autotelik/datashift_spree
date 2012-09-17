@@ -15,6 +15,7 @@ require 'bundler'
 require 'stringio'
 
 require 'datashift'
+require 'datashift_spree'
 
 require 'spree_helper'
 
@@ -52,13 +53,33 @@ RSpec.configure do |config|
 
   alias :silence :capture  
   
+  def fixtures_path()
+    File.expand_path(File.dirname(__FILE__) + '/fixtures')
+  end
+  
+  def ifixture_file( name )
+    File.join(fixtures_path(), name)
+  end
+  
+  def results_path
+    File.join(fixtures_path(), 'results')
+  end
+  
+  def spree_negative_fixture_path
+    File.join(fixtures_path, 'negative')   
+  end
+  
+  def self.spree_fixture( source)
+    ifixture(source)
+  end
+  
   # SPREE
   def spree_sandbox_path
     File.join(File.dirname(__FILE__), 'sandbox')
   end
     
   def before_all_spree 
-    puts "before_all_spree"
+ 
     # We are not a Spree project, so we implement a spree application of our own
     # 
     if(DataShift::SpreeHelper::is_namespace_version )
@@ -98,24 +119,28 @@ RSpec.configure do |config|
   #    chdir back after environment loaded
     
   def spree_boot()
-    
+    puts "def spree_boot()", spree_sandbox_app_path
     ActiveRecord::Base.clear_active_connections!() 
-      
-    store_path = Dir.pwd
-        
+
     spree_sandbox_app_path = spree_sandbox_path
         
     unless(File.exists?(spree_sandbox_app_path))
       puts "Creating new Rails sandbox for Spree : #{spree_sandbox_app_path}"
-      Dir.chdir( File.expand_path( "#{spree_sandbox_app_path}/..") )
-      system('rails new sandbox')
-      Dir.chdir(spree_sandbox_app_path)
-      system('spree install')
+      
+      run_in(File.expand_path( "#{spree_sandbox_app_path}/..")) {
+        system('rails new sandbox')
+      }
+      
+      run_in(spree_sandbox_app_path) {
+        system('spree install')      
+      
+        # add in User model if new 1.2 version which splits out Auth from spree core
+        if(DataShift::SpreeHelper::version.to_f >= 1.2)
+          append_file('Gemfile', "gem 'spree_auth_devise', :git => \"git://github.com/spree/spree_auth_devise\"" )
           
-      if(DataShift::SpreeHelper::version.to_f >= 1.2)
-        append_file('Gemfile', "gem 'spree_auth_devise', :git => \"git://github.com/spree/spree_auth_devise\"" )
-      end
-          
+          system('bundle install')   
+        end
+      }
     end
   
     puts "Using Rails sandbox for Spree : #{spree_sandbox_app_path}"
@@ -139,14 +164,7 @@ RSpec.configure do |config|
   end
   
   include Thor::Actions 
-    
-  $SpreeFixturePath = File.join($DataShiftFixturePath, 'spree')    
-  $SpreeNegativeFixturePath = File.join($DataShiftFixturePath, 'negative')   
-  
-  def self.spree_fixture( source)
-    File.join($SpreeFixturePath, source)
-  end
-  
+      
   def set_spree_class_helpers
     @spree_klass_list  =  %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
     
