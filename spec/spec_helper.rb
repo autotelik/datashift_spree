@@ -19,7 +19,6 @@ require 'datashift_spree'
 
 require 'spree_helper'
 
- 
 RSpec.configure do |config|
   config.before do
     ARGV.replace []
@@ -65,12 +64,33 @@ RSpec.configure do |config|
     File.join(fixtures_path(), 'results')
   end
   
-  def spree_negative_fixture_path
+  def negative_fixture_path
     File.join(fixtures_path, 'negative')   
   end
   
-  def self.spree_fixture( source)
-    ifixture(source)
+  def negative_fixture_file( source )
+    File.join(negative_fixture_path, source)   
+  end
+   
+  # Return location of an expected results file and ensure tree clean before test
+  def result_file( name )
+    expect = File.join(results_path, name)
+
+    begin FileUtils.rm(expect); rescue; end
+
+    expect
+  end
+  
+  def results_clear
+    begin FileUtils.rm_rf(results_path); rescue; end
+    
+    FileUtils.mkdir(results_path) unless File.exists?(results_path);
+  end
+  
+
+  
+  def spree_fixture( source)
+    ifixture_file(source)
   end
   
   def bundler_setup(gemfile)
@@ -92,18 +112,13 @@ RSpec.configure do |config|
       
   def before_all_spree 
   
-    puts "SET", File.expand_path(File.dirname(__FILE__)) + '/Gemfile'
-    
-    bundler_setup( File.expand_path(File.dirname(__FILE__)) + '/Gemfile')
-    
     # We are not a Spree project, so we implement a spree application of our own
-    # 
     if(DataShift::SpreeHelper::is_namespace_version )
       spree_boot
     else
-      RSpecSpreeHelper::boot('test_spree_standalone')             # key to YAML db e.g  test_memory, test_mysql
+      boot('test_spree_standalone')             # key to YAML db e.g  test_memory, test_mysql
     end
-    
+        
     puts "Testing Spree standalone - version #{DataShift::SpreeHelper::version}"
 
     set_spree_class_helpers
@@ -136,6 +151,28 @@ RSpec.configure do |config|
     @dslog = ActiveRecord::Base.logger
   end
    
+  def db_connect( env = 'development' )
+    # Some active record stuff seems to rely on the RAILS_ENV being set ?
+
+    ENV['RAILS_ENV'] = env
+
+    configuration = {}
+    
+    database_yml_path = File.join(spree_sandbox_path, 'config', 'database.yml')
+    
+    configuration[:database_configuration] = YAML::load( ERB.new( IO.read(database_yml_path) ).result )
+    db = configuration[:database_configuration][ env ]
+
+    puts "Setting DB Config:", db.inspect
+    ActiveRecord::Base.configurations = db   
+    
+    puts "Connecting to DB"
+    
+    ActiveRecord::Base.establish_connection( db )
+
+    puts "Connected to DB"
+  end
+  
   # Datashift is usually included and tasks pulled in by a parent/host application.
   # So here we are hacking our way around the fact that datashift is not a Rails/Spree app/engine
   # so that we can ** run our specs ** directly in datashift library
@@ -146,9 +183,7 @@ RSpec.configure do |config|
   #    chdir back after environment loaded
     
   def spree_boot()
-    puts "def spree_boot()", spree_sandbox_path
-    ActiveRecord::Base.clear_active_connections!() 
-
+    
     spree_sandbox_app_path = spree_sandbox_path
         
     unless(File.exists?(spree_sandbox_app_path))
@@ -173,7 +208,9 @@ RSpec.configure do |config|
     puts "Using Rails sandbox for Spree : #{spree_sandbox_app_path}"
         
     run_in(spree_sandbox_app_path) {
-                  
+       
+      db_connect
+          
       begin
         require 'config/environment.rb'
       rescue => e
@@ -215,7 +252,7 @@ RSpec.configure do |config|
       boot_pre_1
       @dslog.info "Booted Spree using pre 1.0.0 version"
                 
-      RSpecSpreeHelper::migrate_up      # create an sqlite Spree database on the fly
+      migrate_up      # create an sqlite Spree database on the fly
     end
   end
 

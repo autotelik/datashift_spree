@@ -15,9 +15,6 @@ require 'product_loader'
 
 describe 'Spree Variants Loader' do
   
-  include RSpecSpreeHelper
-  extend RSpecSpreeHelper
-  
   before(:all) do
     before_all_spree
   end
@@ -32,11 +29,11 @@ describe 'Spree Variants Loader' do
       @Taxon_klass.count.should == 0
       @Variant_klass.count.should == 0
       
-      MethodDictionary.clear
+      DataShift::MethodDictionary.clear
       
       # For Spree important to get instance methods too as Product delegates
       # many important attributes to Variant (master)
-      MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+      DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
 
       # want to test both lookup and dynamic creation - this Taxonomy should be found, rest created
       root = @Taxonomy_klass.create( :name => 'Paintings' )
@@ -62,7 +59,7 @@ describe 'Spree Variants Loader' do
   end
 
   
-  it "should load Products and create Variants from multiple column #{RSpecSpreeHelper::spree_fixture('SpreeProductsMultiColumn.xls')}" do
+  it "should load Products and create Variants from multiple column #{ifixture_file('SpreeProductsMultiColumn.xls')}" do
     test_variants_creation('SpreeProductsMultiColumn.xls')
   end
   
@@ -76,7 +73,7 @@ describe 'Spree Variants Loader' do
     @Product_klass.count.should == 0
     @Variant_klass.count.should == 0
     
-    @product_loader.perform_load( SpecHelper::spree_fixture(source), :mandatory => ['sku', 'name', 'price'] )
+    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
     
     expected_multi_column_variants
   end
@@ -148,7 +145,7 @@ describe 'Spree Variants Loader' do
   # which creates a SINGLE Variant with 2 option types
 
   it "should create Variants with MULTIPLE option types from single column", :new => true  do
-    @product_loader.perform_load( RSpecSpreeHelper::spree_fixture('SpreeMultiVariant.csv'), :mandatory => ['sku', 'name', 'price'] )
+    @product_loader.perform_load( ifixture_file('SpreeMultiVariant.csv'), :mandatory => ['sku', 'name', 'price'] )
      
     # Product 1)
     # 1 + 2) mime_type:jpeg,PDF;print_type:colour	 equivalent to (mime_type:jpeg;print_type:colour|mime_type:PDF;print_type:colour)

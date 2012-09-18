@@ -27,9 +27,7 @@ require 'spree_core'
 module DataShift
     
   module SpreeHelper
-       
-
-      
+        
     def self.root
       Gem.loaded_specs['spree_core'] ? Gem.loaded_specs['spree_core'].full_gem_path  : ""
     end
@@ -46,9 +44,9 @@ module DataShift
       
     def self.get_product_class
       if(is_namespace_version())
-        Spree::Product
+        Object.const_get('Spree').const_get('Product')
       else
-        Product
+        Object.const_get('Product')
       end
     end
     

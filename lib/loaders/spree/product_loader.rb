@@ -24,16 +24,16 @@ module DataShift
       # depending on version get_product_class should return us right class, namespaced or not
 
       def initialize(product = nil)
-        super( SpreeHelper::get_product_class(), product, :instance_methods => true  )
+        super( DataShift::SpreeHelper::get_product_class(), product, :instance_methods => true  )
      
-        @@image_klass ||= SpreeHelper::get_spree_class('Image')
-        @@option_type_klass ||= SpreeHelper::get_spree_class('OptionType')
-        @@option_value_klass ||= SpreeHelper::get_spree_class('OptionValue')
-        @@property_klass ||= SpreeHelper::get_spree_class('Property')
-        @@product_property_klass ||= SpreeHelper::get_spree_class('ProductProperty')
-        @@taxonomy_klass ||= SpreeHelper::get_spree_class('Taxonomy')
-        @@taxon_klass ||= SpreeHelper::get_spree_class('Taxon')
-        @@variant_klass ||= SpreeHelper::get_spree_class('Variant')
+        @@image_klass ||= DataShift::SpreeHelper::get_spree_class('Image')
+        @@option_type_klass ||= DataShift::SpreeHelper::get_spree_class('OptionType')
+        @@option_value_klass ||= DataShift::SpreeHelper::get_spree_class('OptionValue')
+        @@property_klass ||= DataShift::SpreeHelper::get_spree_class('Property')
+        @@product_property_klass ||= DataShift::SpreeHelper::get_spree_class('ProductProperty')
+        @@taxonomy_klass ||= DataShift::SpreeHelper::get_spree_class('Taxonomy')
+        @@taxon_klass ||= DataShift::SpreeHelper::get_spree_class('Taxon')
+        @@variant_klass ||= DataShift::SpreeHelper::get_spree_class('Variant')
         
         raise "Failed to create Product for loading" unless @load_object
         

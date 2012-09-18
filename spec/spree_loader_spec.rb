@@ -15,9 +15,6 @@ require 'product_loader'
   
 describe 'SpreeLoader' do
       
-  include RSpecSpreeHelper
-  extend RSpecSpreeHelper  
-      
   before(:all) do
     before_all_spree
   end
@@ -32,11 +29,11 @@ describe 'SpreeLoader' do
       @Taxon_klass.count.should == 0
       @Variant_klass.count.should == 0
       
-      MethodDictionary.clear
+      DataShift::MethodDictionary.clear
       
       # For Spree important to get instance methods too as Product delegates
       # many important attributes to Variant (master)
-      MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+      DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
     
       @product_loader = DataShift::SpreeHelper::ProductLoader.new
     rescue => e
@@ -50,9 +47,9 @@ describe 'SpreeLoader' do
 
     @Zone_klass.delete_all
 
-    loader = ExcelLoader.new(@Zone_klass)
+    loader = DataShift::ExcelLoader.new(@Zone_klass)
     
-    loader.perform_load( SpecHelper::spree_fixture('SpreeZoneExample.xls') )
+    loader.perform_load( ifixture_file('SpreeZoneExample.xls') )
 
     loader.loaded_count.should == @Zone_klass.count
   end
@@ -61,19 +58,19 @@ describe 'SpreeLoader' do
 
     @Zone_klass.delete_all
 
-    loader = CsvLoader.new(@Zone_klass)
+    loader = DataShift::CsvLoader.new(@Zone_klass)
 
-    loader.perform_load( SpecHelper::spree_fixture('SpreeZoneExample.csv') )
+    loader.perform_load( ifixture_file('SpreeZoneExample.csv') )
 
     loader.loaded_count.should == @Zone_klass.count
   end
   
   it "should raise an error for missing file" do
-    lambda { test_basic_product('SpreeProductsSimple.txt') }.should raise_error BadFile
+    lambda { test_basic_product('SpreeProductsSimple.txt') }.should raise_error DataShift::BadFile
   end
 
   it "should raise an error for unsupported file types" do
-    lambda { test_basic_product('SpreeProductsDefaults.yml') }.should raise_error UnsupportedFileType
+    lambda { test_basic_product('SpreeProductsDefaults.yml') }.should raise_error DataShift::UnsupportedFileType
   end
   
   # Loader should perform identically regardless of source, whether csv, .xls etc
@@ -88,7 +85,7 @@ describe 'SpreeLoader' do
 
   def test_basic_product( source )
     
-    @product_loader.perform_load( SpecHelper::spree_fixture(source), :mandatory => ['sku', 'name', 'price'] )
+    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
 
     @Product_klass.count.should == 3
     
@@ -117,7 +114,7 @@ describe 'SpreeLoader' do
     p.has_variants?.should be false
     p.master.count_on_hand.should == 12
      
-    SpreeHelper::version < "1.1.3" ?  p.count_on_hand.should == 12 : p.count_on_hand.should == 0
+    DataShift::SpreeHelper::version < "1.1.3" ?  p.count_on_hand.should == 12 : p.count_on_hand.should == 0
    
     @Product_klass.last.master.count_on_hand.should == 23
   end
@@ -141,7 +138,7 @@ describe 'SpreeLoader' do
 
   it "should support default values from config for Spree Products loader" do
    
-    @product_loader.configure_from(  SpecHelper::spree_fixture('SpreeProductsDefaults.yml') )
+    @product_loader.configure_from(  ifixture_file('SpreeProductsDefaults.yml') )
     
     @product_loader.set_prefix('sku', 'SPEC_')
       
@@ -150,7 +147,7 @@ describe 'SpreeLoader' do
   end
   
   def test_default_values
-    @product_loader.perform_load( SpecHelper::spree_fixture('SpreeProductsMandatoryOnly.xls'), :mandatory => ['sku', 'name', 'price'] )
+    @product_loader.perform_load( ifixture_file('SpreeProductsMandatoryOnly.xls'), :mandatory => ['sku', 'name', 'price'] )
     
     @Product_klass.count.should == 3
 
@@ -192,7 +189,7 @@ describe 'SpreeLoader' do
 
     @Property_klass.count.should == 1
 
-    @product_loader.perform_load( SpecHelper::spree_fixture(source), :mandatory => ['sku', 'name', 'price'] )
+    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
     
     expected_multi_column_properties
   
@@ -219,21 +216,21 @@ describe 'SpreeLoader' do
  
   
   it "should raise exception when mandatory columns missing from .xls", :ex => true do
-    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMissManyMandatory.xls'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(negative_fixture_file('SpreeProdMissManyMandatory.xls'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
   end
   
 
   it "should raise exception when single mandatory column missing from .xls", :ex => true do
-    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMiss1Mandatory.xls'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(negative_fixture_file('SpreeProdMiss1Mandatory.xls'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
   end
 
   it "should raise exception when mandatory columns missing from .csv", :ex => true do
-    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMissManyMandatory.csv'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(negative_fixture_file('SpreeProdMissManyMandatory.csv'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
   end
   
 
   it "should raise exception when single mandatory column missing from .csv", :ex => true do
-    expect {@product_loader.perform_load(spree_negative_fixture_path('SpreeProdMiss1Mandatory.csv'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {@product_loader.perform_load(negative_fixture_file('SpreeProdMiss1Mandatory.csv'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
   end
 
   

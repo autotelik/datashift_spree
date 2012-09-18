@@ -14,9 +14,6 @@ require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 require 'product_loader'
 
 describe 'SpreeLoader' do
-
-  include RSpecSpreeHelper
-  extend RSpecSpreeHelper
         
   before(:all) do
     before_all_spree
@@ -31,11 +28,11 @@ describe 'SpreeLoader' do
       @Product_klass.count.should == 0
       @Taxon_klass.count.should == 0
       
-      MethodDictionary.clear
+      DataShift::MethodDictionary.clear
       
       # For Spree important to get instance methods too as Product delegates
       # many important attributes to Variant (master)
-      MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+      DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
     
       @product_loader = DataShift::SpreeHelper::ProductLoader.new
     rescue => e
@@ -77,7 +74,7 @@ describe 'SpreeLoader' do
     root.root.children.should have_exactly(1).items
     root.root.children[0].name.should == 'Landscape'
     
-    @product_loader.perform_load( SpecHelper::spree_fixture(source), :mandatory => ['sku', 'name', 'price'] )
+    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
     
     expected_multi_column_taxons
   end
@@ -143,7 +140,7 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.count.should == 0
     @Taxon_klass.count.should == 0 
     
-    @product_loader.perform_load( SpecHelper::spree_fixture('SpreeProductsComplexTaxons.xls') )
+    @product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.xls') )
     
     expected_nested_multi_column_taxons
   end
@@ -156,7 +153,7 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.count.should == 0
     @Taxon_klass.count.should == 0 
     
-    @product_loader.perform_load( SpecHelper::spree_fixture('SpreeProductsComplexTaxons.csv') )
+    @product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.csv') )
     
     expected_nested_multi_column_taxons
     

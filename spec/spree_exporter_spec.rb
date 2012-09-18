@@ -1,6 +1,6 @@
 # Copyright:: (c) Autotelik Media Ltd 2011
 # Author ::   Tom Statter
-# Date ::     Summer 2011
+# Date ::     Summer 2012
 #
 # License::   MIT - Free, OpenSource
 #
@@ -38,7 +38,7 @@ describe 'SpreeExporter' do
 
     expect = result_file('taxon_export_spec.xls')
 
-    exporter = ExcelExporter.new(expect)
+    exporter = DataShift::ExcelExporter.new(expect)
 
     items = @Taxon_klass.all
 
@@ -51,7 +51,7 @@ describe 'SpreeExporter' do
 
     expect = result_file('taxon_and_assoc_export_spec.xls')
 
-    exporter = ExcelExporter.new(expect)
+    exporter = DataShift::ExcelExporter.new(expect)
 
     items = @Taxon_klass.all
       

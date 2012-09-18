@@ -15,9 +15,7 @@ require 'excel_generator'
 
 describe 'SpreeGenerator' do
 
-  include RSpecSpreeHelper
-  extend RSpecSpreeHelper
-    
+   
   before(:all) do
     before_all_spree
   end
@@ -29,7 +27,7 @@ describe 'SpreeGenerator' do
     # Create some test data
     root = @Taxonomy_klass.create( :name => 'Paintings' )
     
-    if(SpreeHelper::version.to_f > 1 )
+    if(DataShift::SpreeHelper::version.to_f > 1 )
       root.taxons.create( :name => 'Landscape' )
       root.taxons.create( :name => 'Sea' )
     else
@@ -42,7 +40,7 @@ describe 'SpreeGenerator' do
 
     expect = result_file('taxonomy_export_spec.xls')
 
-    excel = ExcelGenerator.new(expect)
+    excel = DataShift::ExcelGenerator.new(expect)
 
     excel.generate(@Taxonomy_klass)
 
@@ -66,7 +64,7 @@ describe 'SpreeGenerator' do
 
     expect = result_file('product_and_assoc_export_spec.xls')
 
-    excel = ExcelGenerator.new(expect)
+    excel = DataShift::ExcelGenerator.new(expect)
       
     excel.generate_with_associations(@Product_klass)
 
@@ -80,7 +78,7 @@ describe 'SpreeGenerator' do
 
     expect = result_file('product_and_assoc_export_spec.xls')
 
-    excel = ExcelGenerator.new(expect)
+    excel = DataShift::ExcelGenerator.new(expect)
       
     excel.generate_with_associations(@Product_klass, :exclude => :has_many)
 

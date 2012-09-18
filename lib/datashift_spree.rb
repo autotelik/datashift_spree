@@ -26,22 +26,23 @@
 
 # Details::   Active Record Loader
 # 
-# To pull DataShift commands into your main application :
+# To pull DataShift commands into your main Spree application :
 #
 #     require 'datashift_spree'
 #
-#     DataShift::Spree::load_commands
+#     DataShift::SpreeHelper::load_commands
 #
 require 'rbconfig'
+require 'datashift'
   
 module DataShift
 
-  module Spree
+  module SpreeHelper
     
   def self.gem_version
     unless(@gem_version)
-      if(File.exists?('VERSION'))
-        File.read( File.join('VERSION') ).match(/.*(\d+.\d+.\d+)/)
+      if(File.exists?(File.join(root_path, 'VERSION') ))
+        File.read( File.join(root_path, 'VERSION') ).match(/.*(\d+.\d+.\d+)/)
         @gem_version = $1
       else
         @gem_version = '1.0.0'
@@ -82,13 +83,11 @@ module DataShift
       end
     end
     
-    require_libs = %w{ datashift loaders helpers }
-
+    require_libs = %w{ loaders helpers }
     require_libs.each do |base|
-      Dir[File.join(library_path, base, '*.rb')].each do |rb|
+      Dir[File.join(library_path, base, '**/*.rb')].each do |rb|
         unless File.directory? rb
-          #puts rb
-          require rb
+         # require rb
         end
       end
     end
@@ -117,4 +116,4 @@ module DataShift
   end
 end
 
-DataShift::Spree::require_libraries
+DataShift::SpreeHelper::require_libraries

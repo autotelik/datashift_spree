@@ -4,7 +4,7 @@
 # License::   MIT. Free, Open Source.
 #
 require 'loader_base'
-require 'paperclip/attachment_loader'
+#require 'paperclip/attachment_loader'
 
 module DataShift
 
@@ -22,9 +22,9 @@ module DataShift
         
         opts = options.merge(:load => false)  # Don't need operators and no table Spree::Image
 
-        super( SpreeHelper::get_spree_class('Image'), image, opts )
+        super( DataShift::SpreeHelper::get_spree_class('Image'), image, opts )
         
-        if(SpreeHelper::version.to_f > 1.0 )
+        if(DataShift::SpreeHelper::version.to_f > 1.0 )
           @attachment_klazz  = DataShift::SpreeHelper::get_spree_class('Variant' )
         else
           @attachment_klazz  = DataShift::SpreeHelper::get_spree_class('Product' )

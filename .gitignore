@@ -16,6 +16,8 @@ Gemfile.lock
 *.sw?
 logs
 logs/**
+public
+public/**
 spec/logs
 spec/fixtures/results
 /spec/tmp/*

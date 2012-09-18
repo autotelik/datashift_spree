@@ -14,9 +14,6 @@ require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 require 'product_loader'
 
 describe 'SpreeImageLoading' do
-
-  include RSpecSpreeHelper
-  extend RSpecSpreeHelper
       
   before(:all) do
     before_all_spree
@@ -31,16 +28,17 @@ describe 'SpreeImageLoading' do
       @Image_klass.count.should == 0
       @Product_klass.count.should == 0
       
-      MethodDictionary.clear
+      DataShift::MethodDictionary.clear
       
       # For Spree important to get instance methods too as Product delegates
       # many important attributes to Variant (master)
-      MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+      DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
     
       @product_loader = DataShift::SpreeHelper::ProductLoader.new
     rescue => e
       puts e.inspect
       puts e.backtrace
+      raise e
     end
   end
 
@@ -49,7 +47,7 @@ describe 'SpreeImageLoading' do
        
     options = {:mandatory => ['sku', 'name', 'price']}
     
-    @product_loader.perform_load( SpecHelper::spree_fixture('SpreeProductsWithImages.csv'), options )
+    @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
      
     @Image_klass.all.each_with_index {|i, x| puts "SPEC CHECK IMAGE #{x}", i.inspect }
         
@@ -70,7 +68,7 @@ describe 'SpreeImageLoading' do
    
     options = {:mandatory => ['sku', 'name', 'price']}
     
-    @product_loader.perform_load( SpecHelper::spree_fixture('SpreeProductsWithImages.xls'), options )
+    @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
         
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
     
@@ -87,17 +85,17 @@ describe 'SpreeImageLoading' do
   
     pending "Currently functionality supplied by a thor task images()"
     
-    MethodDictionary.find_operators( @Image_klass )
+    DataShift::MethodDictionary.find_operators( @Image_klass )
     
     @Product_klass.count.should == 0
     
-    @product_loader.perform_load( SpecHelper::spree_fixture('SpreeProducts.xls'))
+    @product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
     
     @Image_klass.all.size.should == 0
 
     loader = DataShift::SpreeHelper::ImageLoader.new(nil, options)
     
-    loader.perform_load( SpecHelper::spree_fixture('SpreeImages.xls'), options )
+    loader.perform_load( ifixture_file('SpreeImages.xls'), options )
    
   end
   

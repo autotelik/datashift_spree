@@ -22,7 +22,7 @@ end
 gem 'datashift', :path => '../../datashift'
 
 gem 'rails', '3.2.8'
-gem 'spree', '1.2.0'
+gem 'spree', '1.1.3'
 
 
 
