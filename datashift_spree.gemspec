@@ -1,7 +1,8 @@
 lib = File.expand_path('../lib/', __FILE__)
+puts lib
+$:.unshift '.' 
 $:.unshift lib unless $:.include?(lib)
 
-  
 require 'rake'
   
 require 'datashift_spree'
@@ -30,6 +31,6 @@ Gem::Specification.new do |s|
   s.rubygems_version = "1.8.15"
   s.summary = "Shift data betwen Excel/CSV and Ruby"
   
-  s.add_dependency(%q<datashift>, [">= 0"])
+  s.add_dependency(%q<datashift>, [">= 0.9.0"])
 end
 
