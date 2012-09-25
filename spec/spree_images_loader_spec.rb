@@ -12,38 +12,21 @@
 require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 
 require 'product_loader'
+require 'image_loader'
 
 describe 'SpreeImageLoading' do
-      
+   
+  include_context 'populate_dictionary ready for product_loader'
+        
   before(:all) do
     before_all_spree
   end
 
   before(:each) do
-
-    begin
-    
-      before_each_spree
-
-      @Image_klass.count.should == 0
-      @Product_klass.count.should == 0
-      
-      DataShift::MethodDictionary.clear
-      
-      # For Spree important to get instance methods too as Product delegates
-      # many important attributes to Variant (master)
-      DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
-    
-      @product_loader = DataShift::SpreeHelper::ProductLoader.new
-    rescue => e
-      puts e.inspect
-      puts e.backtrace
-      raise e
-    end
   end
 
 
-  it "should create Image from path in Product loading column from CSV", :fail => true do
+  it "should create Image from path in Product loading column from CSV" do
        
     options = {:mandatory => ['sku', 'name', 'price']}
     
@@ -64,7 +47,7 @@ describe 'SpreeImageLoading' do
   end
   
   
-  it "should create Image from path in Product loading column from Excel", :fail => true do
+  it "should create Image from path in Product loading column from Excel" do
    
     options = {:mandatory => ['sku', 'name', 'price']}
     
@@ -81,9 +64,8 @@ describe 'SpreeImageLoading' do
 
   end
   
-  it "should be able to assign Images to preloaded Products"  do
   
-    pending "Currently functionality supplied by a thor task images()"
+  it "should be able to assign Images via Excel to preloaded Products", :fail => true  do
     
     DataShift::MethodDictionary.find_operators( @Image_klass )
     
@@ -92,11 +74,45 @@ describe 'SpreeImageLoading' do
     @product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
     
     @Image_klass.all.size.should == 0
-
-    loader = DataShift::SpreeHelper::ImageLoader.new(nil, options)
     
-    loader.perform_load( ifixture_file('SpreeImages.xls'), options )
+    p = @Product_klass.find_by_name("Demo third row in future")
+     
+    p.images.should have_exactly(0).items
+     
+    loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
+    
+    loader.perform_load( ifixture_file('SpreeImages.xls'), {} )
    
+    # fixtures/images/DEMO_001_ror_bag.jpeg
+    # fixtures/images/DEMO_002_Powerstation.jpg
+    # fixtures/images/DEMO_003_ror_mug.jpeg
+
+    p.reload
+
+    p.images.should have_exactly(1).items
+  end
+  
+  it "should be able to set alternative text", :fail => true do
+   
+    options = {:mandatory => ['sku', 'name', 'price']}
+    
+    @product_loader.perform_load( ifixture_file('SpreeProductsWithMultipleImages.xls'), options )
+     
+    product = @Product_klass.where( :sku => 'MULTI_002').first
+    
+    puts product.inspect
+    
+    p = DataShift::SpreeHelper::get_image_owner( @Product_klass.where( :sku => 'MULTI_002') )
+    
+    p.name.should == "Demo Product for AR Loader"
+    p.images.should have_exactly(2).items
+    
+    # attr_accessible :alt, :attachment, :position, :viewable_type, :viewable_id
+    p.images[1].alt.should == 'some random alt text'
+    
+    puts p.images[1].inspect
+     
+    @Image_klass.count.should == 5
   end
   
 end

@@ -50,6 +50,10 @@ module DataShift
       end
     end
     
+    def self.get_image_owner(product)
+      (SpreeHelper::version.to_f > 1) ? product.master : product
+    end
+    
     def self.version
       Gem.loaded_specs['spree'] ? Gem.loaded_specs['spree'].version.version : "0.0.0"
     end

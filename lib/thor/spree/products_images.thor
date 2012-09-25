@@ -121,15 +121,15 @@ module Datashift
       puts "Using Product Name for lookup" unless(options[:sku])
       puts "Using SKU for lookup" if(options[:sku])
        
-      image_klazz = DataShift::SpreeHelper::get_spree_class('Image' )
+     # image_klazz = DataShift::SpreeHelper::get_spree_class('Image' )
        
-      attachment_klazz  = DataShift::SpreeHelper::get_spree_class('Product' )
-      attachment_field  = 'name'
+     # attachment_klazz  = DataShift::SpreeHelper::get_spree_class('Product' )
+    #  attachment_field  = 'name'
 
-      if(options[:sku] || SpreeHelper::version.to_f > 1)
-        attachment_klazz =  DataShift::SpreeHelper::get_spree_class('Variant' ) 
-        attachment_field = 'sku'
-      end
+     # if(options[:sku] || SpreeHelper::version.to_f > 1)
+      #  attachment_klazz =  DataShift::SpreeHelper::get_spree_class('Variant' ) 
+     #   attachment_field = 'sku'
+     # end
 
       image_loader = DataShift::SpreeHelper::ImageLoader.new(nil, options)
  

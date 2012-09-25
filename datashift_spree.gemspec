@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Statter"]
-  s.date = "2012-09-10"
-  s.description = "Comprehensive tools to import/export between Excel/CSV and ActiveRecord databases, Rails apps, and any Ruby project"
+  s.date = "2012-09-25"
+  s.description = "Comprehensive Product, Image loaders. Export any Spree models with associations"
   s.email = "rubygems@autotelik.co.uk"
   
   s.files = FileList["datashift_spree.thor", 
@@ -25,12 +25,12 @@ Gem::Specification.new do |s|
     "LICENSE.txt", 
     "{lib,spec}/**/*"].exclude("rdoc").exclude("nbproject").exclude("fixtures").exclude(".log").exclude(".contrib").to_a
   
-  s.homepage = "http://github.com/autotelik/datashift"
+  s.homepage = "http://github.com/autotelik/datashift_spree"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.15"
   s.summary = "Shift data betwen Excel/CSV and Ruby"
   
-  s.add_dependency(%q<datashift>, [">= 0.9.0"])
+  s.add_dependency(%q<datashift>, [">= 0.10.1"])
 end
 

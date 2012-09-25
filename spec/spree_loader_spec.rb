@@ -14,34 +14,12 @@ require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 require 'product_loader'
   
 describe 'SpreeLoader' do
-      
+  
+  include_context 'populate_dictionary ready for product_loader'
+  
   before(:all) do
     before_all_spree
   end
-
-  before(:each) do
-
-    begin
-        
-      before_each_spree
-    
-      @Product_klass.count.should == 0
-      @Taxon_klass.count.should == 0
-      @Variant_klass.count.should == 0
-      
-      DataShift::MethodDictionary.clear
-      
-      # For Spree important to get instance methods too as Product delegates
-      # many important attributes to Variant (master)
-      DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
-    
-      @product_loader = DataShift::SpreeHelper::ProductLoader.new
-    rescue => e
-      puts e.inspect
-      puts e.backtrace
-    end
-  end
-
 
   it "should process a simple .xls spreadsheet" do
 

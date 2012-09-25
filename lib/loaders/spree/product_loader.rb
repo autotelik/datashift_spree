@@ -5,42 +5,27 @@
 #
 # Details::   Specific over-rides/additions to support Spree Products
 #
-require 'loader_base'
-require 'csv_loader'
-require 'excel_loader'
-
-require 'image_loading'
+require 'spree_base_loader'
 
 module DataShift
 
   module SpreeHelper
 
-    class ProductLoader < LoaderBase
-
-      include DataShift::CsvLoading
-      include DataShift::ExcelLoading
-      include DataShift::ImageLoading
+    class ProductLoader < SpreeBaseLoader
 
       # depending on version get_product_class should return us right class, namespaced or not
 
       def initialize(product = nil)
         super( DataShift::SpreeHelper::get_product_class(), product, :instance_methods => true  )
      
-        @@image_klass ||= DataShift::SpreeHelper::get_spree_class('Image')
-        @@option_type_klass ||= DataShift::SpreeHelper::get_spree_class('OptionType')
-        @@option_value_klass ||= DataShift::SpreeHelper::get_spree_class('OptionValue')
-        @@property_klass ||= DataShift::SpreeHelper::get_spree_class('Property')
-        @@product_property_klass ||= DataShift::SpreeHelper::get_spree_class('ProductProperty')
-        @@taxonomy_klass ||= DataShift::SpreeHelper::get_spree_class('Taxonomy')
-        @@taxon_klass ||= DataShift::SpreeHelper::get_spree_class('Taxon')
-        @@variant_klass ||= DataShift::SpreeHelper::get_spree_class('Variant')
-        
         raise "Failed to create Product for loading" unless @load_object
         
         logger.debug "PRODUCT #{@load_object.inspect} MASTER: #{@load_object.master.inspect}"
       end
 
-      def perform_load( file_name, options = {} )
+      def perform_load( file_name, opts = {} )
+        options = opts.dup
+        
          # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
         options[:force_inclusion] = options[:force_inclusion] ? ['images'] : [*options[:force_inclusion]] << 'images'
     
@@ -71,7 +56,7 @@ module DataShift
 
         elsif(@current_method_detail.operator?('images') && current_value)
 
-          add_images
+          add_images( (SpreeHelper::version.to_f > 1) ? @load_object.master : @load_object )
           
         elsif(current_value && (@current_method_detail.operator?('count_on_hand') || @current_method_detail.operator?('on_hand')) )
 
@@ -90,12 +75,12 @@ module DataShift
           # on_hand and on_hand=
           if(@load_object.variants.size > 0)
             
-            if(current_value.to_s.include?(LoaderBase::multi_assoc_delim))
+            if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
 
               #puts "DEBUG: COUNT_ON_HAND PER VARIANT",current_value.is_a?(String),
           
               # Check if we processed Option Types and assign count per option
-              values = current_value.to_s.split(LoaderBase::multi_assoc_delim)
+              values = current_value.to_s.split(Delimiters::multi_assoc_delim)
 
               if(@load_object.variants.size == values.size)
                 @load_object.variants.each_with_index {|v, i| v.on_hand = values[i].to_i }
@@ -108,9 +93,9 @@ module DataShift
           # Can only set count on hand on Product if no Variants exist, else model throws
             
           elsif(@load_object.variants.size == 0) 
-            if(current_value.to_s.include?(LoaderBase::multi_assoc_delim))
+            if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
               puts "WARNING: Multiple count_on_hand values specified but no Variants/OptionTypes created" 
-              load_object.on_hand = current_value.to_s.split(LoaderBase::multi_assoc_delim).first.to_i
+              load_object.on_hand = current_value.to_s.split(Delimiters::multi_assoc_delim).first.to_i
             else
               load_object.on_hand = current_value.to_i
             end
@@ -144,7 +129,7 @@ module DataShift
 
         # example : mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
         
-        variants = get_each_assoc#current_value.split( LoaderBase::multi_assoc_delim )
+        variants = get_each_assoc#current_value.split( Delimiters::multi_assoc_delim )
 
         # 1) mime_type:jpeg;print_type:black_white  2) mime_type:jpeg  3) mime_type:png, PDF;print_type:colour
 
@@ -229,31 +214,7 @@ module DataShift
         end
 
       end # each Variant
-
-      # Special case for Images
-      # A list of paths to Images with a optional 'alt' value - supplied in form :
-      #   path:alt|path2:alt2|path_3:alt3 etc
-      #
-      def add_images
-        # TODO smart column ordering to ensure always valid by time we get to associations
-        save_if_new
-
-        images = get_each_assoc#current_value.split(LoaderBase::multi_assoc_delim)
-
-        images.each do |image|
-          puts "Add Image #{image}"
-          img_path, alt_text = image.split(LoaderBase::name_value_delim)
-          
-          # moved from Prod to Variant in spree 1.x.x
-          attachment  = (SpreeHelper::version.to_f > 1) ? @load_object.master : @load_object
-          
-          image = create_image(@@image_klass, img_path, attachment, :alt => alt_text)
-          logger.debug("Product assigned an Image : #{image.inspect}")
-        end
-      
-      end
-
-      
+ 
       # Special case for ProductProperties since it can have additional value applied.
       # A list of Properties with a optional Value - supplied in form :
       #   property_name:value|property_name|property_name:value
@@ -264,7 +225,7 @@ module DataShift
         # TODO smart column ordering to ensure always valid by time we get to associations
         save_if_new
 
-        property_list = get_each_assoc#current_value.split(LoaderBase::multi_assoc_delim)
+        property_list = get_each_assoc#current_value.split(Delimiters::multi_assoc_delim)
 
         property_list.each do |pstr|
         
@@ -307,7 +268,7 @@ module DataShift
         # TODO smart column ordering to ensure always valid by time we get to associations
         save_if_new
 
-        chain_list = get_each_assoc  # potentially multiple chains in single column (delimited by LoaderBase::multi_assoc_delim)
+        chain_list = get_each_assoc  # potentially multiple chains in single column (delimited by Delimiters::multi_assoc_delim)
 
         chain_list.each do |chain|
   

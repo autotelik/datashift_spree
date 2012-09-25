@@ -24,6 +24,34 @@ RSpec.configure do |config|
     ARGV.replace []
   end
 
+  shared_context 'populate_dictionary ready for product_loader' do
+    
+    before do 
+      begin
+    
+        before_each_spree
+
+        @Image_klass.count.should == 0
+        @Product_klass.count.should == 0
+         
+
+        DataShift::MethodDictionary.clear
+      
+        # For Spree important to get instance methods too as Product delegates
+        # many important attributes to Variant (master)
+        DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+
+      rescue => e
+        puts e.inspect
+        puts e.backtrace
+        raise e
+      end
+    
+        
+      @product_loader = DataShift::SpreeHelper::ProductLoader.new
+    end
+  end
+
   include Thor::Actions 
     
   def run_in(dir )
