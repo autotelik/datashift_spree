@@ -15,7 +15,6 @@ require File.dirname(__FILE__) + '/spec_helper'
 describe 'Thor high level command line tasks' do
          
   before(:all) do
-    #DataShift::load_commands
     DataShift::SpreeHelper::load_commands
   end
   
@@ -51,7 +50,8 @@ describe 'Thor high level command line tasks' do
     x = Thread.new {
       run_in( spree_sandbox_path() ) do
         stdout = capture(:stdout){ 
-          Thor::Runner.start(["datashift:spree:products", '-i', ifixture_file('SpreeProducts.xls')]) 
+          #Thor::Runner.start(["datashift:spree:products", '-i', ifixture_file('SpreeProducts.xls')]) 
+          system("bundle exec thor datashift:spree:products -i  #{ifixture_file('SpreeProducts.xls')}")
           }
         puts stdout
       end

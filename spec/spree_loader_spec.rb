@@ -15,12 +15,14 @@ require 'product_loader'
   
 describe 'SpreeLoader' do
   
-  include_context 'populate_dictionary ready for product_loader'
   
   before(:all) do
     before_all_spree
   end
 
+  include_context 'Populate dictionary ready for Product loading'
+  
+  
   it "should process a simple .xls spreadsheet" do
 
     @Zone_klass.delete_all

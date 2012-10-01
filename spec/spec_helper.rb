@@ -24,7 +24,7 @@ RSpec.configure do |config|
     ARGV.replace []
   end
 
-  shared_context 'populate_dictionary ready for product_loader' do
+  shared_context 'Populate dictionary ready for Product loading' do
     
     before do 
       begin
@@ -41,6 +41,8 @@ RSpec.configure do |config|
         # many important attributes to Variant (master)
         DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
 
+        DataShift::MethodDictionary.build_method_details( @Product_klass )
+        
       rescue => e
         puts e.inspect
         puts e.backtrace

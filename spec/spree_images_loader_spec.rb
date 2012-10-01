@@ -16,7 +16,7 @@ require 'image_loader'
 
 describe 'SpreeImageLoading' do
    
-  include_context 'populate_dictionary ready for product_loader'
+  include_context 'Populate dictionary ready for Product loading'
         
   before(:all) do
     before_all_spree

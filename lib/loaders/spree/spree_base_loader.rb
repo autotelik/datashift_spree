@@ -52,7 +52,7 @@ module DataShift
 
       image_data.each do |image|
           
-        path, alt_text = image.split(LoaderBase::name_value_delim)
+        path, alt_text = image.split(Delimiters::name_value_delim)
    
         create_attachment(@@image_klass, path, record, :viewable, :alt => alt_text)
 

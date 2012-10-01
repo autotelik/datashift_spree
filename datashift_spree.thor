@@ -4,10 +4,9 @@
 #
 # License::   MIT - Free, OpenSource
 #
-# Details::   Gem::Specification for DataShift Spree gem.
-#
-#             Provides support for moving data between .xls (Excel/OpenOffice)
-#             Spreedsheets and CSV files specifically tailored for uploading or exporting
+# Details::   General tools related to DataShiftSpree Gem : specification, build, deploy
+# 
+#             Provides specifically tailored support for uploading or exporting
 #             Spree Products, associations and Images
 
 

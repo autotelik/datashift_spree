@@ -141,7 +141,7 @@ module DataShift
                       
           option_types.each do |ostr|
              
-            oname, value_str = ostr.split(LoaderBase::name_value_delim)
+            oname, value_str = ostr.split(Delimiters::name_value_delim)
     
             option_type = @@option_type_klass.find_by_name(oname)
 
