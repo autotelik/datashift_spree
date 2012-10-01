@@ -52,8 +52,11 @@ module DataShift
 
       image_data.each do |image|
           
+        #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
+        
         path, alt_text = image.split(Delimiters::name_value_delim)
    
+        puts "Create  attachment #{path} on ", record.inspect
         create_attachment(@@image_klass, path, record, :viewable, :alt => alt_text)
 
         logger.debug("Product assigned Image from : #{path.inspect}")
