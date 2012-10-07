@@ -1,5 +1,5 @@
 lib = File.expand_path('../lib/', __FILE__)
-puts lib
+
 $:.unshift '.' 
 $:.unshift lib unless $:.include?(lib)
 
@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Statter"]
   s.date = "2012-09-25"
-  s.description = "Comprehensive Product, Image loaders. Export any Spree models with associations"
+  s.description = "Comprehensive Excel/CSV import/export for Spree, Products,Images, any model with full associations"
   s.email = "rubygems@autotelik.co.uk"
   
   s.files = FileList["datashift_spree.thor", 
