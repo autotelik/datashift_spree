@@ -62,7 +62,7 @@ module Datashift
     end
   
 
-    desc "attach_images", "Populate Products with images from Excel/CSV\nProvide column SKU or Name\nProvide column 'attachment' containing full path to image"
+    desc "attach_images", "Populate Products with images from Excel/CSV\nProvide column SKU or Name\nColumn containing full path to image can be named 'attachment', 'images' or 'path' "
     # :dummy => dummy run without actual saving to DB
     method_option :input, :aliases => '-i', :required => true, :desc => "The 2 column import file (.xls or .csv)"
     
@@ -72,26 +72,16 @@ module Datashift
       
       require 'image_loader'
       
-      image_klazz = DataShift::SpreeHelper::get_spree_class('Image' )
-      
-      # force inclusion means add to operator list even if not present
-      options = { :force_inclusion => ['sku', 'attachment'] } if(SpreeHelper::version.to_f > 1 )
-    
       loader = DataShift::SpreeHelper::ImageLoader.new(nil, options)
     
       loader.perform_load( options[:input], options )
     end
   
     
-    #
     # => thor datashift:spree:images input=vendor/extensions/site/fixtures/images
-    # => rake datashift:spree:images input=C:\images\photos large dummy=true
     #
-    # => rake datashift:spree:images input=C:\images\taxon_icons skip_if_no_assoc=true klass=Taxon
-    #
-    desc "images", "Populate the DB with images from a directory\nwhere image names contain somewhere the Product Sku/Name"
+    desc "images", "Populate the DB with images from a directory\nThe image name, must contain the Product Sku or Name, somewhere within it."
     
-    # :dummy => dummy run without actual saving to DB
     method_option :input, :aliases => '-i', :required => true, :desc => "The input path containing images "
     
     method_option :glob, :aliases => '-g',  :desc => 'The glob to use to find files e.g. \'{*.jpg,*.gif,*.png}\' '
@@ -111,139 +101,38 @@ module Datashift
     method_option :use_like, :type => :boolean, :desc => "Use sku/name LIKE 'string%' instead of sku/name = 'string' in where clauses to find Product"
   
     def images()
-
-      require File.expand_path('config/environment.rb')
-      
-      require 'spree/image_loader'
-            
-      @verbose = options[:verbose]
-       
-      puts "Using Product Name for lookup" unless(options[:sku])
-      puts "Using SKU for lookup" if(options[:sku])
-       
-     # image_klazz = DataShift::SpreeHelper::get_spree_class('Image' )
-       
-     # attachment_klazz  = DataShift::SpreeHelper::get_spree_class('Product' )
-    #  attachment_field  = 'name'
-
-     # if(options[:sku] || SpreeHelper::version.to_f > 1)
-      #  attachment_klazz =  DataShift::SpreeHelper::get_spree_class('Variant' ) 
-     #   attachment_field = 'sku'
-     # end
-
-      image_loader = DataShift::SpreeHelper::ImageLoader.new(nil, options)
+  
+      attachment_options = options.dup
  
-      if(options[:config])
-        raise "Bad Config - Cannot find specified file #{options[:config]}" unless File.exists?(options[:config])
-        
-        image_loader.configure_from( options[:config] )
-      end
-
-      loader_config = image_loader.options
- 
-      puts "CONFIG: #{loader_config.inspect}"
-      puts "OPTIONS #{options.inspect}"
+      @attachment_path = options[:input]
       
-      @image_path = options[:input]
-      
-      unless(File.exists?(@image_path))
-        puts "ERROR: Supplied Path [#{@image_path}] not accesible"
+      unless(File.exists?(@attachment_path))
+        puts "ERROR: Supplied Path [#{@attachment_path}] not accesible"
         exit(-1)
       end
       
-      logger.info "Loading Spree images from #{@image_path}"
-
-      missing_records = []
-         
-      # try splitting up filename in various ways looking for the SKU
-      split_on = loader_config['split_file_name_on'] || options[:split_file_name_on]
-             
-      image_cache = DataShift::ImageLoading::get_files(@image_path, options)
+      require File.expand_path('config/environment.rb')
       
-      puts "Found #{image_cache.size} image files - splitting names on delimiter : #{split_on}"
-         
-      image_cache.each do |image_name|
-
-        image_base_name = File.basename(image_name)
-
-        logger.info "Processing image file #{image_base_name} "
-          
-        base_name = File.basename(image_name, '.*')
-        base_name.strip!
+      require 'paperclip/attachment_loader'
             
-        record = nil
-                   
-        record = image_loader.get_record_by(attachment_klazz, attachment_field, base_name)
-         
-        # TODO move into the ImageLoading module 
-        # 
-        # try the seperate individual portions of the filename, front -> back
-        base_name.split(split_on).each do |x|
-          x = "#{options[:sku_prefix]}#{x}" if(options[:sku_prefix])
-         
-          record = image_loader.get_record_by(attachment_klazz, attachment_field, x)
-          break if record
-        end unless(record)
-            
-        # this time try sequentially and incrementally scanning
-        base_name.split(split_on).inject("") do |str, x|
-          z = (options[:sku_prefix]) ? "#{options[:sku_prefix]}#{str}#{x}": "#{str}#{x}"
-          puts z
-          record = image_loader.get_record_by(attachment_klazz, attachment_field, z)
-          break if record
-          x
-        end unless(record)
-        
-        # END TODO
-          
-        record = record.product if(record && record.respond_to?(:product))  # SKU stored on Variant but we want it's master Product
+      @verbose = options[:verbose]
+
+      # TOFOX - wont currently work for Product, need proper way to build, where clause
+      attachment_options[:attach_to_lookup_field] = options[:sku] ? :sku : :name
       
-        if(record)
-          logger.info "Found record for attachment : #{record.inspect}"
-    
-          if(options[:skip_when_assoc])
-            
-            paper_clip_name = image_base_name.gsub(Paperclip::Attachment::default_options[:restricted_characters], '_')
-            
-            exists = record.images.detect {|i| puts "Check #{paper_clip_name} matches #{i.attachment_file_name}"; i.attachment_file_name == paper_clip_name }
-            if(exists)
-              rid = record.respond_to?(:name) ? record.name : record.id
-              puts "Skipping Image #{image_name} already loaded for #{rid}"
-              logger.info "Skipping - Image #{image_name} already loaded for #{attachment_klazz}"
-              next 
-            end
-          end
-        else
-          missing_records << image_name
-        end
+      puts "Using #{attachment_options[:attach_to_lookup_field]} for lookup" 
           
-        next if(options[:dummy]) # Don't actually create/upload to DB if we are doing dummy run
-
-        # Check if Image must have an associated record
-        if(record || (record.nil? && options[:process_when_no_assoc]))
-          image_loader.reset()
-          
-          logger.info("Adding Image #{image_name} to Product #{record.name}")
-          image_loader.create_image(image_klazz, image_name, record)
-          puts "Added Image #{File.basename(image_name)} to Product #{record.sku} : #{record.name}" if(@verbose)
-        end
-
-      end
-
-      unless missing_records.empty?
-        FileUtils.mkdir_p('MissingRecords') unless File.directory?('MissingRecords')
+      image_klass = DataShift::SpreeHelper::get_spree_class('Image' )
+      raise "Cannot find Attachment Class" unless image_klass
         
-        puts "WARNING : #{missing_records.size} of #{image_cache.size} images could not be attached to a Product"
-        puts 'For your convenience a copy of images with MISSING Products will be saved to :  ./MissingRecords'
-        missing_records.each do |i|
-          puts "Copying #{i} to MissingRecords folder" if(options[:verbose])
-          FileUtils.cp( i, 'MissingRecords')  unless(options[:dummy] == 'true')
-        end
-      else
-        puts "All images (#{image_cache.size}) were succesfully attached to a Product"
-      end
+      attachment_options[:attach_to_klass] = SpreeHelper::product_attachment_klazz# Pass in real Ruby class not string class name
+      attachment_options[:attach_to_field] = 'images'
+         
+      loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, nil, attachment_options)
+   
+      logger.info "Loading attachments from #{@attachment_path}"
 
-      puts "Dummy Run Complete- if happy run without -d" if(options[:dummy])
+      loader.process_from_filesystem(@attachment_path, attachment_options)
    
     end
    
