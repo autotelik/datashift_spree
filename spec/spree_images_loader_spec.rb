@@ -34,7 +34,7 @@ describe 'SpreeImageLoading' do
    
     @Image_klass.count.should == 3
     
-    @Image_klass.all.each_with_index {|i, x| puts "SPEC CHECK IMAGE #{x}", i.inspect }
+    #@Image_klass.all.each_with_index {|i, x| puts "SPEC CHECK IMAGE #{x}", i.inspect }
         
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
     

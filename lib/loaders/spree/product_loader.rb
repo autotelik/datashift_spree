@@ -6,6 +6,7 @@
 # Details::   Specific over-rides/additions to support Spree Products
 #
 require 'spree_base_loader'
+require 'spree_helper'
 
 module DataShift
 

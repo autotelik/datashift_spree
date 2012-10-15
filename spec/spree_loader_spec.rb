@@ -79,10 +79,7 @@ describe 'SpreeLoader' do
     @product_loader.loaded_count.should == @Product_klass.count
 
     p = @Product_klass.first
-    
-    puts p.inspect
-    puts p.master.inspect
-    
+     
     p.sku.should == "SIMPLE_001"
     p.price.should == 345.78
     p.name.should == "Simple Product for AR Loader"

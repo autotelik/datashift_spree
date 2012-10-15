@@ -12,6 +12,8 @@
 
 # Note, not DataShift, case sensitive, create namespace for command line : datashift
 
+require 'datashift_spree'
+
 module Datashift
       
   class Spree < Thor     
@@ -36,6 +38,7 @@ module Datashift
       require 'product_loader'
 
       loader = DataShift::SpreeHelper::ProductLoader.new
+      
 
       # YAML configuration file to drive defaults etc
 

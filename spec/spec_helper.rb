@@ -10,7 +10,6 @@
 # we have some  AR models to test against. Create an in memory database from scratch.
 #
 require 'active_record'
-require 'thor/actions'
 require 'bundler'
 require 'stringio'
 
@@ -19,11 +18,30 @@ require 'datashift_spree'
 
 require 'spree_helper'
 
+$:.unshift '.'  # 1.9.3 quite strict, '.' must be in load path for relative paths to work from here
+    
 RSpec.configure do |config|
   config.before do
     ARGV.replace []
   end
 
+  def before_all_spree 
+  
+    puts "Before all Spree - boot spree rails app - version #{DataShift::SpreeHelper::version}"
+    
+    # We are not a Spree project, so we implement a spree application of our own
+    if(DataShift::SpreeHelper::is_namespace_version )
+      spree_boot
+    else
+      boot('test_spree_standalone')             # key to YAML db e.g  test_memory, test_mysql
+    end
+        
+    puts "Testing Spree standalone - version #{DataShift::SpreeHelper::version}"
+
+    set_spree_class_helpers
+    
+  end
+  
   shared_context 'Populate dictionary ready for Product loading' do
     
     before do 
@@ -32,8 +50,7 @@ RSpec.configure do |config|
         before_each_spree
 
         @Image_klass.count.should == 0
-        @Product_klass.count.should == 0
-         
+        @Product_klass.count.should == 0    
 
         DataShift::MethodDictionary.clear
       
@@ -48,13 +65,11 @@ RSpec.configure do |config|
         puts e.backtrace
         raise e
       end
-    
         
       @product_loader = DataShift::SpreeHelper::ProductLoader.new
     end
   end
 
-  include Thor::Actions 
     
   def run_in(dir )
     puts "RSpec .. running test in path [#{dir}]"
@@ -140,20 +155,7 @@ RSpec.configure do |config|
     File.join(File.dirname(__FILE__), 'sandbox')
   end
       
-  def before_all_spree 
-  
-    # We are not a Spree project, so we implement a spree application of our own
-    if(DataShift::SpreeHelper::is_namespace_version )
-      spree_boot
-    else
-      boot('test_spree_standalone')             # key to YAML db e.g  test_memory, test_mysql
-    end
-        
-    puts "Testing Spree standalone - version #{DataShift::SpreeHelper::version}"
 
-    set_spree_class_helpers
-    
-  end
   
   def before_each_spree
       
@@ -239,10 +241,13 @@ RSpec.configure do |config|
         
     run_in(spree_sandbox_app_path) {
        
+       puts "db_connect in #{Dir.pwd}"
+       
       db_connect
           
       begin
         require 'config/environment.rb'
+         puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
       rescue => e
         #somethign in deface seems to blow up suddenly on 1.1
         puts "Warning - Potential issue initializing Spree sandbox:"
@@ -253,11 +258,9 @@ RSpec.configure do |config|
       set_logger( 'spree_sandbox.log' )
         
     }
-        
+     
     @dslog.info "Booted Spree using version #{DataShift::SpreeHelper::version}"
   end
-  
-  include Thor::Actions 
       
   def set_spree_class_helpers
     @spree_klass_list  =  %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
