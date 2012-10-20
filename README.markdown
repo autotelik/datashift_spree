@@ -2,7 +2,7 @@
 
 Specific loaders and command line tasks for Spree E-Commerce.
 
-Wiki here : **https://github.com/autotelik/datashift/wiki**
+Wiki here : **https://github.com/autotelik/datashift_spree/wiki**
 
 ### Features
 
@@ -21,35 +21,39 @@ Many example Spreadsheets/CSV files in spec/fixtures, fully documented with comm
 
 ## Installation
 
-Add gem 'datashift' to your Gemfile/bundle, or install the latest gem as usual :
 
-    gem install datashift
+Add to bundle :
 
-To use :
+    gem 'datashift_spree'
 
-    gem 'datashift'
-    require 'datashift'
+Create a high level .thor file - e.g mysite.thor - in your applications root directory 
 
-
-To use the Thor command line applications :
-
-    Create a high level .thor file - e.g mysite.thor - in your applications root directory 
-
-Edit the file and add the following to pull in the thor commands :
 
 ```ruby
-    require 'thor'
-    require 'datashift'
-
-    DataShift::load_commands
+require 'datashift_spree'
+DataShift::SpreeHelper::load_commands
 ```
+
 To check the available tasks run
 
     bundle exc thor list datashift
 
 To get usage information use thor help <command>, for example
 
-    bundle exec thor help datashift:generate:excel
+    bundle exec thor help datashift:spree:products
+
+```ruby
+Usage:
+  thor datashift:spree:products -i, --input=INPUT
+
+Options:
+  -i, --input=INPUT              # The import file (.xls or .csv)
+  -s, [--sku-prefix=SKU_PREFIX]  # Prefix to add to each SKU before saving Product
+  -v, [--verbose]                # Verbose logging
+  -c, [--config=CONFIG]          # Configuration file containg defaults or over rides in YAML
+
+Populate Spree Product/Variant data from .xls (Excel) or CSV file
+```
 
 
 ## License
@@ -58,7 +62,7 @@ Copyright:: (c) Autotelik Media Ltd 2012
 
 Author ::   Tom Statter
 
-Date ::     Dec 2012
+Date ::     Oct 2012
 
 The MIT License
 
