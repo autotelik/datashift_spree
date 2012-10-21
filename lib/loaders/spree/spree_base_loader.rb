@@ -57,8 +57,12 @@ module DataShift
         path, alt_text = image.split(Delimiters::name_value_delim)
    
         puts "Create  attachment #{path} on ", record.inspect
-        create_attachment(@@image_klass, path, record, :viewable, :alt => alt_text)
-
+        # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
+        attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
+        
+        record.images << attachment
+        record.save
+        
         logger.debug("Product assigned Image from : #{path.inspect}")
       end
       

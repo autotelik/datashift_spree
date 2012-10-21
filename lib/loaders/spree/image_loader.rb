@@ -29,9 +29,9 @@ module DataShift
     #
     class ImageLoader < SpreeBaseLoader
   
-      def initialize(options = {})
+      def initialize(image = nil, options = {})
         
-        super( DataShift::SpreeHelper::get_spree_class('Image'), nil, options )
+        super( DataShift::SpreeHelper::get_spree_class('Image'), image, options )
          
         unless(MethodDictionary.for?(@@product_klass))
           MethodDictionary.find_operators( @@product_klass )
@@ -76,7 +76,7 @@ module DataShift
            
         operator = @current_method_detail.operator
         
-        if(current_value && acceptable_path_headers.include?(operator) )
+        if(current_value && ImageLoader::acceptable_path_headers.include?(operator) )
          
           add_images( @load_object ) if(@load_object)
           
