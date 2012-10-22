@@ -33,9 +33,7 @@ describe 'SpreeImageLoading' do
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
    
     @Image_klass.count.should == 3
-    
-    #@Image_klass.all.each_with_index {|i, x| puts "SPEC CHECK IMAGE #{x}", i.inspect }
-        
+   
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
     
     p.name.should == "Demo Product for AR Loader"
@@ -61,11 +59,10 @@ describe 'SpreeImageLoading' do
     @Product_klass.all.each {|p| p.images.should have_exactly(1).items }
      
     @Image_klass.count.should == 3
-
   end
   
   
-  it "should assign Images to preloaded Products by SKU via Excel", :fail => true  do
+  it "should assign Images to preloaded Products by SKU via Excel"  do
     
     DataShift::MethodDictionary.find_operators( @Image_klass )
     
@@ -76,8 +73,8 @@ describe 'SpreeImageLoading' do
     @Image_klass.count.should == 0
          
     @Product_klass.find_by_name("Demo third row in future").images.should have_exactly(0).items
-     
-    loader = DataShift::SpreeHelper::ImageLoader.new
+      
+    loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
     
     loader.perform_load( ifixture_file('SpreeImagesBySku.xls'), {} )
    
@@ -92,7 +89,7 @@ describe 'SpreeImageLoading' do
     # fixtures/images/DEMO_003_ror_mug.jpeg
   end
   
-  it "should assign Images to preloaded Products by Name via Excel "  do
+  it "should assign Images to preloaded Products by Name via Excel", :fail => true  do
     
     @Product_klass.count.should == 0
     
@@ -104,11 +101,14 @@ describe 'SpreeImageLoading' do
      
     p.images.should have_exactly(0).items
      
-    loader = DataShift::SpreeHelper::ImageLoader.new
+    loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
     
     loader.perform_load( ifixture_file('SpreeImagesByName.xls'), {} )
    
     @Image_klass.all.size.should == 4
+
+            
+    @Image_klass.all.each_with_index {|i, x| puts "SPEC CHECK IMAGE #{x}", i.inspect }
     
     {'Demo Product for AR Loader' => 2, 'Demo Excel Load via Jruby' => 1, 'Demo third row in future' => 1}.each do |n, count|
       @Product_klass.where(:name => n).first.images.should have_exactly(count).items

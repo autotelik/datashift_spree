@@ -9,16 +9,6 @@ require 'loader_base'
 module DataShift
 
   module SpreeHelper
-    
-    # Version Helper - find the right class to attach Product images to
-      
-    def self.product_attachment_klazz
-      @product_attachment_klazz  ||= if(DataShift::SpreeHelper::version.to_f > 1.0 )
-        DataShift::SpreeHelper::get_spree_class('Variant' )
-      else
-        DataShift::SpreeHelper::get_spree_class('Product' )
-      end
-    end
       
     # Very specific Image Loading for existing Products in Spree. 
     #

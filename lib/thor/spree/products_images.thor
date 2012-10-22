@@ -14,6 +14,8 @@
 
 require 'datashift_spree'
 
+require 'spree_helper'
+
 module Datashift
       
   class Spree < Thor     
@@ -39,7 +41,6 @@ module Datashift
 
       loader = DataShift::SpreeHelper::ProductLoader.new
       
-
       # YAML configuration file to drive defaults etc
 
       if(options[:config])
@@ -99,7 +100,7 @@ module Datashift
     
     method_option :verbose, :aliases => '-v', :type => :boolean, :desc => "Verbose logging"
     method_option :config, :aliases => '-c',  :type => :string, :desc => "Configuration file for Image Loader in YAML"
-    method_option :split_file_name_on,  :type => :string, :desc => "delimiter to progressivley split filename for Prod lookup", :default => '_'
+    method_option :split_file_name_on,  :type => :string, :desc => "delimiter to progressivley split filename for Prod lookup", :default => ' '
     method_option :case_sensitive, :type => :boolean, :desc => "Use case sensitive where clause to find Product"
     method_option :use_like, :type => :boolean, :desc => "Use sku/name LIKE 'string%' instead of sku/name = 'string' in where clauses to find Product"
   
@@ -121,14 +122,14 @@ module Datashift
       @verbose = options[:verbose]
 
       # TOFOX - wont currently work for Product, need proper way to build, where clause
-      attachment_options[:attach_to_lookup_field] = options[:sku] ? :sku : :name
+      attachment_options[:attach_to_find_by_field] = options[:sku] ? :sku : :name
       
-      puts "Using #{attachment_options[:attach_to_lookup_field]} for lookup" 
+      puts "Using #{attachment_options[:attach_to_find_by_field]} for lookup" 
           
       image_klass = DataShift::SpreeHelper::get_spree_class('Image' )
       raise "Cannot find Attachment Class" unless image_klass
         
-      attachment_options[:attach_to_klass] = SpreeHelper::product_attachment_klazz# Pass in real Ruby class not string class name
+      attachment_options[:attach_to_klass] = DataShift::SpreeHelper::product_attachment_klazz# Pass in real Ruby class not string class name
       attachment_options[:attach_to_field] = 'images'
          
       loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, nil, attachment_options)

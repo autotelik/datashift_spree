@@ -45,12 +45,13 @@ module DataShift
     # => path_1:alt|path_2:alt|path_3:alt
     #
     def add_images( record )
-      # TODO smart column ordering to ensure always valid by time we get to associations
-      save_if_new
+  
+      #save_if_new
 
-      image_data = get_each_assoc
-
-      image_data.each do |image|
+      # different versions have moved images around from Prod to Variant
+      owner = DataShift::SpreeHelper::get_image_owner(record)
+                
+      get_each_assoc.each do |image|
           
         #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
         
@@ -59,12 +60,13 @@ module DataShift
         puts "Create  attachment #{path} on ", record.inspect
         # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
         attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
-        
-        record.images << attachment
-        record.save
-        
+                
+        owner.images << attachment
+     
         logger.debug("Product assigned Image from : #{path.inspect}")
       end
+      
+      record.save
       
     end
   end
