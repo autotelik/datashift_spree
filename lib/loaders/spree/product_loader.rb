@@ -17,19 +17,22 @@ module DataShift
       # depending on version get_product_class should return us right class, namespaced or not
 
       def initialize(product = nil, options = {})
-        super( DataShift::SpreeHelper::get_product_class(), product, :instance_methods => true  )
+        
+        opts = {:instance_methods => true}.merge( options )
+        
+        super( DataShift::SpreeHelper::get_product_class(), true, product, opts)
      
         raise "Failed to create Product for loading" unless @load_object
-        
-        logger.debug "PRODUCT #{@load_object.inspect} MASTER: #{@load_object.master.inspect}"
       end
 
       def perform_load( file_name, opts = {} )
         options = opts.dup
-        
-         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
-        options[:force_inclusion] = options[:force_inclusion] ? ['images'] : [*options[:force_inclusion]] << 'images'
-    
+         
+        # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
+        if(DataShift::SpreeHelper::version.to_f > 1 )
+          options[:force_inclusion] = options[:force_inclusion] ? ([ *options[:force_inclusion]] + 'images') : ['images']
+        end
+
         super(file_name, options)
       end
 
@@ -91,7 +94,7 @@ module DataShift
               end
             end
             
-          # Can only set count on hand on Product if no Variants exist, else model throws
+            # Can only set count on hand on Product if no Variants exist, else model throws
             
           elsif(@load_object.variants.size == 0) 
             if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
@@ -310,7 +313,7 @@ module DataShift
           logger.debug("Product assigned to Taxons : #{unique_list.collect(&:name).inspect}")
           
           @load_object.taxons << unique_list unless(unique_list.empty?)
-         # puts @load_object.taxons.inspect
+          # puts @load_object.taxons.inspect
           
         end
 

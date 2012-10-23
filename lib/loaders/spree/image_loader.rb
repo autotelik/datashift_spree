@@ -4,7 +4,6 @@
 # License::   MIT. Free, Open Source.
 #
 require 'loader_base'
-#require 'paperclip/attachment_loader'
 
 module DataShift
 
@@ -21,7 +20,7 @@ module DataShift
   
       def initialize(image = nil, options = {})
         
-        super( DataShift::SpreeHelper::get_spree_class('Image'), image, options )
+        super( DataShift::SpreeHelper::get_spree_class('Image'), true, image, options )
          
         unless(MethodDictionary.for?(@@product_klass))
           MethodDictionary.find_operators( @@product_klass )

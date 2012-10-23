@@ -14,8 +14,6 @@ require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
   
 describe 'SpreeMethodMapping' do
 
-
-
     
   before(:all) do
     before_all_spree
@@ -26,13 +24,13 @@ describe 'SpreeMethodMapping' do
     before_each_spree
       
     DataShift::MethodDictionary.clear
-    DataShift::MethodDictionary.find_operators( @Product_klass )
-    #MethodDictionary.build_method_details( @Product_klass )
   end
 
   
   it "should populate operators for a Spree Product" do
   
+    DataShift::MethodDictionary.find_operators( @Product_klass )
+     
     DataShift::MethodDictionary.has_many.should_not be_empty
     DataShift::MethodDictionary.belongs_to.should_not be_empty
     DataShift::MethodDictionary.assignments.should_not be_empty
@@ -61,6 +59,8 @@ describe 'SpreeMethodMapping' do
 
   it "should find method details correctly for different forms of a column name" do
 
+    DataShift::MethodDictionary.find_operators( @Product_klass )
+     
     DataShift::MethodDictionary.build_method_details( @Product_klass )
         
     ["available On", 'available_on', "Available On", "AVAILABLE_ON"].each do |format|
@@ -83,6 +83,8 @@ describe 'SpreeMethodMapping' do
 
   it "should populate method details correctly for has_many forms of association name" do
 
+    DataShift::MethodDictionary.find_operators( @Product_klass )
+    
     DataShift::MethodDictionary.has_many[@Product_klass].should include('product_option_types')
 
     DataShift::MethodDictionary.build_method_details( @Product_klass )
@@ -120,6 +122,7 @@ describe 'SpreeMethodMapping' do
     method.operator.should == 'sku'
   end
 
+
   it "should enable assignment via operators for none columns on #{@Product_klass}" do
 
     DataShift::MethodDictionary.find_operators( @Product_klass, :reload => true, :instance_methods => true )
@@ -140,17 +143,21 @@ describe 'SpreeMethodMapping' do
     count_on_hand.assign( klazz_object, 5 )
     klazz_object.count_on_hand.should == 5
 
-    method = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'sku' )
-    method.should_not be_nil
+    ["sku", "SKU", 'Sku'].each do |f|
+      method = DataShift::MethodDictionary.find_method_detail( @Product_klass, f )
+      method.should_not be_nil
 
-    method.operator.should == 'sku'
+      method.operator.should == 'sku'
 
-    method.assign( klazz_object, 'TEST_SK 001')
-    klazz_object.sku.should == 'TEST_SK 001'
+      method.assign( klazz_object, 'TEST_SK 001')
+      klazz_object.sku.should == 'TEST_SK 001'
+    end
 
   end
 
   it "should enable assignment to has_many association on new object" do
+ 
+    DataShift::MethodDictionary.find_operators( @Product_klass )
  
     DataShift::MethodDictionary.build_method_details( @Product_klass )
         
@@ -218,5 +225,99 @@ describe 'SpreeMethodMapping' do
 
   end
 
+  it "should leave nil entries when no method_detail found for inbound headers" do
+    
+    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+ 
+    DataShift::MethodDictionary.build_method_details(@Product_klass)
+    
+    headers = ['BLAH', 'Weight', :rubbish,  :variants]
+    
+    method_mapper = DataShift::MethodMapper.new
+     
+    method_details = method_mapper.map_inbound_headers_to_methods( @Product_klass, headers )
+    
+    method_details.compact.should have_exactly(2).items
+    
+    method_details.should have_exactly(4).items
+    
+    method_details[0].should be_nil
+    method_details[2].should be_nil
+    
+  end
+  
+  it "should add 'null' type method details for :force_inclusion items when no method_detail found" do
+    
+    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+ 
+    DataShift::MethodDictionary.build_method_details(@Product_klass)
+    
+    headers = ['BLAH', 'Weight', :rubbish,  :variants]
+    
+    method_mapper = DataShift::MethodMapper.new
+    
+    options = { :force_inclusion => ['blah', :rubbish] }
+   
+    method_details = method_mapper.map_inbound_headers_to_methods( @Product_klass, headers, options )
+    
+    method_details[0].name.should == 'BLAH'
+    method_details[0].operator.should == 'BLAH'
+    method_details[0].col_type.should be_nil
+      
+    method_details.compact.should have_exactly(4).items
+    
+    method_details.should have_exactly(4).items
+  end
+    
+  it "should ignore :force_inclusion items if they are genuine columns" do
+    
+    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+ 
+    DataShift::MethodDictionary.build_method_details(@Product_klass)
+    
+    headers = ['VARIANTS', 'BLAH_SHOULD_BE_NULL_MD', 'Weight', :rubbish_should_be_nil]
+    
+    method_mapper = DataShift::MethodMapper.new
+     
+    options = { :force_inclusion => ['blah_SHOULD_be_null_MD', 'weight', :variants] }
+   
+    method_details = method_mapper.map_inbound_headers_to_methods( @Product_klass, headers, options )
+    
+    method_details.compact.should have_exactly(3).items
+    
+    method_details.should have_exactly(4).items
+    
+    method_details[0].name.should == 'VARIANTS' 
+    method_details[0].operator.should == 'variants'
+    method_details[0].operator_type.should == :has_many
+    
+    method_details[1].name.should == 'BLAH_SHOULD_BE_NULL_MD' 
+    method_details[1].operator_type.should == :assignment
+    method_details[1].col_type.should be_nil
+    
+  end
+  
+  
+  it "should find all method_details for instance methods based on inbound headers" do
+    
+    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+ 
+    DataShift::MethodDictionary.build_method_details(@Product_klass)
+    
+    headers = ['SKU', 'Sku', :cost_price, 'PRICE', :junk, 'Weight']
+    expected = ['sku', 'sku', 'cost_price', 'price', 'weight']
+        
+    method_mapper = DataShift::MethodMapper.new
+     
+    method_details = method_mapper.map_inbound_headers_to_methods( @Product_klass, headers )
+    
+    method_details.should have_exactly(6).items
+    
+    method_details.compact.should have_exactly(5).items
+    
+    method_details.compact.collect(&:operator).should == expected
+    
+  end
+  
   
 end
