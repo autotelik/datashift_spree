@@ -18,8 +18,10 @@ logs
 logs/**
 public
 public/**
+
 spec/logs
 spec/fixtures/results
+/spec/MissingAttachmentRecords
 /spec/tmp/*
 /spec/sandbox
 

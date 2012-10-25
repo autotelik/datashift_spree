@@ -14,6 +14,8 @@
 
 require 'datashift_spree'
 
+require 'spree_helper'
+
 module Datashift
       
   class Spree < Thor     
@@ -39,7 +41,6 @@ module Datashift
 
       loader = DataShift::SpreeHelper::ProductLoader.new
       
-
       # YAML configuration file to drive defaults etc
 
       if(options[:config])
@@ -58,9 +59,6 @@ module Datashift
 
       options = {:mandatory => ['sku', 'name', 'price']}
     
-      # In >= 1.1.0 Image moved to master Variant from Product
-      options[:force_inclusion] = ['images'] if(DataShift::SpreeHelper::version.to_f > 1 )
-      
       loader.perform_load(input, options)
     end
   
@@ -83,14 +81,18 @@ module Datashift
     
     # => thor datashift:spree:images input=vendor/extensions/site/fixtures/images
     #
-    desc "images", "Populate the DB with images from a directory\nThe image name, must contain the Product Sku or Name, somewhere within it."
+    desc "images", "Populate the DB with images from a directory
+    The image name, must contain the Product Sku somewhere within it.
+
+    N.B Currently only lookup on SKU available - more flexability coming soon"
     
     method_option :input, :aliases => '-i', :required => true, :desc => "The input path containing images "
     
     method_option :glob, :aliases => '-g',  :desc => 'The glob to use to find files e.g. \'{*.jpg,*.gif,*.png}\' '
     method_option :recursive, :aliases => '-r', :type => :boolean, :desc => "Scan sub directories of input for images"
-     
-    method_option :sku, :aliases => '-s', :desc => "Lookup Product based on image name starting with sku"
+    
+    method_option :find_by_field, :desc => "TODO - Find Variant/Product based on any field"
+        
     method_option :sku_prefix, :aliases => '-p', :desc => "SKU prefix to add to each image name before attempting Product lookup"
     method_option :dummy, :aliases => '-d', :type => :boolean, :desc => "Dummy run, do not actually save Image or Product"
     
@@ -99,14 +101,13 @@ module Datashift
     
     method_option :verbose, :aliases => '-v', :type => :boolean, :desc => "Verbose logging"
     method_option :config, :aliases => '-c',  :type => :string, :desc => "Configuration file for Image Loader in YAML"
-    method_option :split_file_name_on,  :type => :string, :desc => "delimiter to progressivley split filename for Prod lookup", :default => '_'
+    
+    method_option :split_file_name_on,  :type => :string, :desc => "delimiter to progressivley split filename for Prod lookup", :default => "_"
     method_option :case_sensitive, :type => :boolean, :desc => "Use case sensitive where clause to find Product"
     method_option :use_like, :type => :boolean, :desc => "Use sku/name LIKE 'string%' instead of sku/name = 'string' in where clauses to find Product"
   
     def images()
-  
-      attachment_options = options.dup
- 
+   
       @attachment_path = options[:input]
       
       unless(File.exists?(@attachment_path))
@@ -117,25 +118,37 @@ module Datashift
       require File.expand_path('config/environment.rb')
       
       require 'paperclip/attachment_loader'
-            
-      @verbose = options[:verbose]
-
-      # TOFOX - wont currently work for Product, need proper way to build, where clause
-      attachment_options[:attach_to_lookup_field] = options[:sku] ? :sku : :name
-      
-      puts "Using #{attachment_options[:attach_to_lookup_field]} for lookup" 
-          
+               
       image_klass = DataShift::SpreeHelper::get_spree_class('Image' )
-      raise "Cannot find Attachment Class" unless image_klass
-        
-      attachment_options[:attach_to_klass] = SpreeHelper::product_attachment_klazz# Pass in real Ruby class not string class name
-      attachment_options[:attach_to_field] = 'images'
-         
-      loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, nil, attachment_options)
    
+      raise "Cannot find suitable Paperclip Attachment Class" unless image_klass
+       
+      loader_options = { :verbose => true }
+       
+      owner_klass = DataShift::SpreeHelper::product_attachment_klazz 
+    
+      puts "CLASS CLASS [#{owner_klass}] [#{owner_klass.class}]"
+      loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
+    
+      # WTF  ... this works in the specs but thor gives me
+      # products_images.thor:131:in `images': uninitialized constant Thor::Sandbox::Datashift::Spree::Variant (NameError)
+      # loader_options[:attach_to_find_by_field] = (owner_klass. == Spree::Variant) ? :sku : :name
+    
+      # so for now just sku lookup available .... TOFIX - name wont currently work for Variant and sku won't work for Product
+      # so need  way to build a where clause or add scopes to Variant/Product 
+      
+      loader_options[:attach_to_find_by_field] = :sku
+           
+      loader_options[:attach_to_field] = 'images'
+         
+      loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, true, nil, loader_options)
+
       logger.info "Loading attachments from #{@attachment_path}"
 
-      loader.process_from_filesystem(@attachment_path, attachment_options)
+      attach_options = options.dup
+      attach_options[:add_prefix] = options[:sku_prefix]
+      
+      loader.process_from_filesystem(@attachment_path, options.dup)
    
     end
    

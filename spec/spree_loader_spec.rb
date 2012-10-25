@@ -27,7 +27,7 @@ describe 'SpreeLoader' do
 
     @Zone_klass.delete_all
 
-    loader = DataShift::ExcelLoader.new(@Zone_klass)
+    loader = DataShift::ExcelLoader.new(@Zone_klass, true)
     
     loader.perform_load( ifixture_file('SpreeZoneExample.xls') )
 

@@ -33,9 +33,7 @@ describe 'SpreeImageLoading' do
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
    
     @Image_klass.count.should == 3
-    
-    #@Image_klass.all.each_with_index {|i, x| puts "SPEC CHECK IMAGE #{x}", i.inspect }
-        
+   
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
     
     p.name.should == "Demo Product for AR Loader"
@@ -61,11 +59,10 @@ describe 'SpreeImageLoading' do
     @Product_klass.all.each {|p| p.images.should have_exactly(1).items }
      
     @Image_klass.count.should == 3
-
   end
   
   
-  it "should assign Images to preloaded Products by SKU via Excel", :fail => true  do
+  it "should assign Images to preloaded Products by SKU via Excel"  do
     
     DataShift::MethodDictionary.find_operators( @Image_klass )
     
@@ -76,8 +73,8 @@ describe 'SpreeImageLoading' do
     @Image_klass.count.should == 0
          
     @Product_klass.find_by_name("Demo third row in future").images.should have_exactly(0).items
-     
-    loader = DataShift::SpreeHelper::ImageLoader.new
+      
+    loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
     
     loader.perform_load( ifixture_file('SpreeImagesBySku.xls'), {} )
    
@@ -92,7 +89,7 @@ describe 'SpreeImageLoading' do
     # fixtures/images/DEMO_003_ror_mug.jpeg
   end
   
-  it "should assign Images to preloaded Products by Name via Excel "  do
+  it "should assign Images to preloaded Products by Name via Excel" do
     
     @Product_klass.count.should == 0
     
@@ -104,7 +101,7 @@ describe 'SpreeImageLoading' do
      
     p.images.should have_exactly(0).items
      
-    loader = DataShift::SpreeHelper::ImageLoader.new
+    loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
     
     loader.perform_load( ifixture_file('SpreeImagesByName.xls'), {} )
    
@@ -119,34 +116,76 @@ describe 'SpreeImageLoading' do
     # fixtures/images/DEMO_003_ror_mug.jpeg
   end
   
-  it "should be able to set alternative text" do
+  it "should be able to set alternative text within images column" do
    
     options = {:mandatory => ['sku', 'name', 'price']}
     
     @product_loader.perform_load( ifixture_file('SpreeProductsWithMultipleImages.xls'), options )
-         
+       
+    @Product_klass.count.should == 2
     @Image_klass.count.should == 5
-    
-    product = @Product_klass.where(:name => "Demo Product for AR Loader").first
-    
-    p = DataShift::SpreeHelper::get_image_owner(product)
+     
+    p = DataShift::SpreeHelper::get_image_owner( @Product_klass.find_by_name("Demo Product 001") )
     
     p.sku.should == 'MULTI_001'
     p.images.should have_exactly(3).items
     
-    # attr_accessible :alt, :attachment, :position, :viewable_type, :viewable_id
-    p.images[1].alt.should == 'more random alt text'
+    p.images[0].alt.should == ''
+    p.images[1].alt.should == 'alt text for multi 001'
          
-    product = @Product_klass.where(:name => "Demo Excel Load via Jruby").first
-    
-    p = DataShift::SpreeHelper::get_image_owner(product)
+    p = DataShift::SpreeHelper::get_image_owner( @Product_klass.find_by_name("Demo Product 002") )
     
     p.sku.should == 'MULTI_002'
     p.images.should have_exactly(2).items
-    
-    # attr_accessible :alt, :attachment, :position, :viewable_type, :viewable_id
-    p.images[1].alt.should == 'some random alt text'
+
+    p.images[0].alt.should == 'some random alt text for 002'
+    p.images[1].alt.should == '323X428 ror bag'
 
   end
   
+  
+  it "should assign Images to preloaded Products from filesystem on SKU", :fail => true  do
+    
+    # first load some products with SKUs that match the image names
+    @Product_klass.count.should == 0
+    
+    @product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
+    
+    @Product_klass.count.should == 3
+    @Image_klass.all.size.should == 0
+    
+    # now the test - find files, chew up name, find product, create image, attach 
+                     
+    image_klass = DataShift::SpreeHelper::get_spree_class('Image' )
+   
+    raise "Cannot find Attachment Class" unless image_klass
+        
+    loader_options = { :verbose => true }
+
+    owner_klass = DataShift::SpreeHelper::product_attachment_klazz
+    
+    if(DataShift::SpreeHelper::version.to_f > 1.0 )
+      owner_klass.should == Spree::Variant
+    else
+      owner_klass.should == Spree::Product
+    end
+    
+    loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
+    
+    # TOFIX - name wont currently work for Variant and sku won't work for Product
+    # so need  way to build a where clause or add scopes to Variant/Product 
+    loader_options[:attach_to_find_by_field] = (owner_klass == Spree::Variant) ? :sku : :name
+    
+    loader_options[:attach_to_field] = 'images'
+         
+    loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, true, nil, loader_options)
+
+    loader.attach_to_klass.should == owner_klass
+    
+    attachment_options = { :split_file_name_on => '_' }
+    
+    loader.process_from_filesystem( File.join(fixtures_path, 'images'), attachment_options)
+     
+    @Image_klass.count.should == 3
+  end
 end

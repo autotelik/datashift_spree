@@ -82,17 +82,23 @@ module DataShift
       end
     end
     
+
+  end
+
+  def self.require_datashift_spree
+    
     require_libs = %w{ loaders helpers }
     require_libs.each do |base|
       Dir[File.join(library_path, base, '**/*.rb')].each do |rb|
         unless File.directory? rb
-         # require rb
+          puts rb
+          require rb
         end
       end
     end
 
   end
-
+  
   # Load all the datashift rake tasks and make them available throughout app
   def self.load_tasks
     # Long parameter lists so ensure rake -T produces nice wide output

@@ -26,7 +26,7 @@ describe 'SpreeLoader' do
   # Operation and results should be identical when loading multiple associations
   # if using either single column embedded syntax, or one column per entry.
 
-  it "should load Products and multiple Taxons from single column", :taxons => true, :fail => true do
+  it "should load Products and multiple Taxons from single column", :taxons => true do
     test_taxon_creation( 'SpreeProducts.xls' )
   end
 

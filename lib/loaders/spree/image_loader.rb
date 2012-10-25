@@ -4,21 +4,10 @@
 # License::   MIT. Free, Open Source.
 #
 require 'loader_base'
-#require 'paperclip/attachment_loader'
 
 module DataShift
 
   module SpreeHelper
-    
-    # Version Helper - find the right class to attach Product images to
-      
-    def self.product_attachment_klazz
-      @product_attachment_klazz  ||= if(DataShift::SpreeHelper::version.to_f > 1.0 )
-        DataShift::SpreeHelper::get_spree_class('Variant' )
-      else
-        DataShift::SpreeHelper::get_spree_class('Product' )
-      end
-    end
       
     # Very specific Image Loading for existing Products in Spree. 
     #
@@ -31,7 +20,7 @@ module DataShift
   
       def initialize(image = nil, options = {})
         
-        super( DataShift::SpreeHelper::get_spree_class('Image'), image, options )
+        super( DataShift::SpreeHelper::get_spree_class('Image'), true, image, options )
          
         unless(MethodDictionary.for?(@@product_klass))
           MethodDictionary.find_operators( @@product_klass )

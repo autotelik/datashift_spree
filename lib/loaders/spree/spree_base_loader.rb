@@ -21,9 +21,9 @@ module DataShift
 
     # depending on version get_product_class should return us right class, namespaced or not
 
-    def initialize(klass, loader_object = nil, options = {})
+    def initialize(klass, find_operators = true, loader_object = nil, options = {:instance_methods => true})
       
-      super(klass, loader_object, options  )
+      super(klass, find_operators, loader_object, options)
      
       @@image_klass ||= DataShift::SpreeHelper::get_spree_class('Image')
       @@option_type_klass ||= DataShift::SpreeHelper::get_spree_class('OptionType')
@@ -38,33 +38,37 @@ module DataShift
 
     # Special case for Images
     # 
-    # A list of entries for Images. Multiple entries delimited by Delimiters::multi_assoc_delim
+    # A list of entries for Images. 
     # 
-    # Each entry can  with a optional 'alt' value - supplied in form :
+    # Multiple entries can be delimited by Delimiters::multi_assoc_delim
+    # 
+    # Each entry can  with a optional 'alt' value, seperated from pat5h by Delimiters::name_value_delim
     #  
-    # => path_1:alt|path_2:alt|path_3:alt
+    #   Example => path_1:alt text|path_2:more alt blah blah|path_3:the alt text for this path
     #
     def add_images( record )
-      # TODO smart column ordering to ensure always valid by time we get to associations
-      save_if_new
+  
+      #save_if_new
 
-      image_data = get_each_assoc
-
-      image_data.each do |image|
+      # different versions have moved images around from Prod to Variant
+      owner = DataShift::SpreeHelper::get_image_owner(record)
+                
+      get_each_assoc.each do |image|
           
         #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
         
         path, alt_text = image.split(Delimiters::name_value_delim)
    
-        puts "Create  attachment #{path} on ", record.inspect
+        puts "DEBUG : Creating  attachment #{path} (#{alt_text})"
         # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
         attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
-        
-        record.images << attachment
-        record.save
-        
+                
+        owner.images << attachment
+     
         logger.debug("Product assigned Image from : #{path.inspect}")
       end
+      
+      record.save
       
     end
   end
