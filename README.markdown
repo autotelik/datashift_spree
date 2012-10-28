@@ -1,4 +1,4 @@
-##  DataShift 
+##  DataShift Spree
 
 Specific loaders and command line tasks for Spree E-Commerce.
 
@@ -21,16 +21,21 @@ Many example Spreadsheets/CSV files in spec/fixtures, fully documented with comm
 
 ## Installation
 
+Requires datashift.
 
 Add to bundle :
 
+    gem 'datashift'
     gem 'datashift_spree'
 
 Create a high level .thor file - e.g mysite.thor - in your applications root directory 
 
 
 ```ruby
+require 'datashift'
 require 'datashift_spree'
+
+DataShift::load_commands
 DataShift::SpreeHelper::load_commands
 ```
 
