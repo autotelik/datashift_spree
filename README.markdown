@@ -21,6 +21,7 @@ Many example Spreadsheets/CSV files in spec/fixtures, fully documented with comm
 
 ## Installation
 
+Requires datashift.
 
 Add to bundle :
 
