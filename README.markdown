@@ -43,21 +43,16 @@ To check the available tasks run
 
     bundle exc thor list datashift
 
-To get usage information use thor help <command>, for example
+New functionality and options under active development so check latest
+usage information via ```thor help <command>``` ... for example
 
     bundle exec thor help datashift:spree:products
 
 ```ruby
 Usage:
-  thor datashift:spree:products -i, --input=INPUT
+  thor help datashift:spree:products 
 
-Options:
-  -i, --input=INPUT              # The import file (.xls or .csv)
-  -s, [--sku-prefix=SKU_PREFIX]  # Prefix to add to each SKU before saving Product
-  -v, [--verbose]                # Verbose logging
-  -c, [--config=CONFIG]          # Configuration file containg defaults or over rides in YAML
-
-Populate Spree Product/Variant data from .xls (Excel) or CSV file
+   Populate Spree Product/Variant data from .xls (Excel) or CSV file
 ```
 
 

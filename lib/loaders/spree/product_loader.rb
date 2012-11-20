@@ -25,9 +25,14 @@ module DataShift
         raise "Failed to create Product for loading" unless @load_object
       end
 
+      # Options:
+      #   [:dummy]           : Perform a dummy run - attempt to load everything but then roll back
+      #
       def perform_load( file_name, opts = {} )
         options = opts.dup
          
+        #puts "Product Loader -  Load Options", options.inspect
+        
         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
         if(DataShift::SpreeHelper::version.to_f > 1 )
           options[:force_inclusion] = options[:force_inclusion] ? ([ *options[:force_inclusion]] + 'images') : ['images']

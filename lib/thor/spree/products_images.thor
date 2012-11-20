@@ -28,6 +28,7 @@ module Datashift
     method_option :sku_prefix, :aliases => '-s', :desc => "Prefix to add to each SKU before saving Product"
     method_option :verbose, :aliases => '-v', :type => :boolean, :desc => "Verbose logging"
     method_option :config, :aliases => '-c',  :type => :string, :desc => "Configuration file containg defaults or over rides in YAML"
+    method_option :dummy, :aliases => '-d', :type => :boolean, :desc => "Dummy run, do not actually save Image or Product"
     
     def products()
 
@@ -57,9 +58,10 @@ module Datashift
       
       puts "DataShift::Product starting upload from file: #{input}"
 
-      options = {:mandatory => ['sku', 'name', 'price']}
+      opts = options.dup
+      opts[:mandatory] = ['sku', 'name', 'price']
     
-      loader.perform_load(input, options)
+      loader.perform_load(input, opts)
     end
   
 
@@ -93,7 +95,7 @@ module Datashift
     
     method_option :find_by_field, :desc => "TODO - Find Variant/Product based on any field"
         
-    method_option :sku_prefix, :aliases => '-p', :desc => "SKU prefix to add to each image name before attempting Product lookup"
+    method_option :sku_prefix, :aliases => '-s', :desc => "SKU prefix to add to each image name before attempting Product lookup"
     method_option :dummy, :aliases => '-d', :type => :boolean, :desc => "Dummy run, do not actually save Image or Product"
     
     method_option :process_when_no_assoc, :aliases => '-f', :type => :boolean, :desc => "Process image even if no Product found - force loading"
@@ -127,7 +129,6 @@ module Datashift
        
       owner_klass = DataShift::SpreeHelper::product_attachment_klazz 
     
-      puts "CLASS CLASS [#{owner_klass}] [#{owner_klass.class}]"
       loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
     
       # WTF  ... this works in the specs but thor gives me
@@ -148,7 +149,9 @@ module Datashift
       attach_options = options.dup
       attach_options[:add_prefix] = options[:sku_prefix]
       
-      loader.process_from_filesystem(@attachment_path, options.dup)
+      puts "Setting prefix to [#{attach_options[:add_prefix]}]"
+       
+      loader.process_from_filesystem(@attachment_path, attach_options.dup)
    
     end
    
