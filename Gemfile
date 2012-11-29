@@ -17,6 +17,10 @@ platform :ruby do
   gem 'sqlite3'
 end
 
+group :development, :test do
+  gem "debugger"
+end
+
 # DEFINE WHICH VERSIONS WE WANT TO TEST WITH
 
 gem 'datashift'
