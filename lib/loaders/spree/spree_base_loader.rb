@@ -36,6 +36,11 @@ module DataShift
       @@variant_klass ||= DataShift::SpreeHelper::get_spree_class('Variant')
     end
 
+    
+    # Options :
+    #   :image_prefix : A common prefix to add to each path. 
+    #                   e,g to specifiy particular drive  {:image_prefix => 'C:\' }
+    #
     def perform_load( file_name, opts = {} )
       @options = opts.dup
 
@@ -65,8 +70,8 @@ module DataShift
 
         path, alt_text = image.split(Delimiters::name_value_delim)
 
-        path = @options[:image_prefix] + path
-
+        path = File.join(@options[:image_prefix], path)
+          
         puts "DEBUG : Creating  attachment #{path} (#{alt_text})"
         # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
         attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
