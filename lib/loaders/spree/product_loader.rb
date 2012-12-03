@@ -127,7 +127,7 @@ module DataShift
       #       fro example Colour : Red and Size Medium
       # Supported Syntax :
       #  '|' seperates Variants
-      #   ',' list of option values
+      #   ';' list of option values
       #  Examples : 
       #     mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
       #
