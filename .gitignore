@@ -19,6 +19,7 @@ logs/**
 public
 public/**
 
+MissingAttachmentRecords
 spec/logs
 spec/fixtures/results
 /spec/MissingAttachmentRecords
