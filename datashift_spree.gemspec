@@ -32,5 +32,7 @@ Gem::Specification.new do |s|
   s.summary = "Shift data betwen Excel/CSV and Ruby"
   
   s.add_dependency(%q<datashift>, [">= 0.10.1"])
+  
+  # should work with any version of spree so perhaps leave it to the client app to define
 end
 

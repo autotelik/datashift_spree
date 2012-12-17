@@ -26,7 +26,7 @@ module Datashift
 
     method_option :input, :aliases => '-i', :required => true, :desc => "The import file (.xls or .csv)"
     method_option :sku_prefix, :aliases => '-s', :desc => "Prefix to add to each SKU before saving Product"
-    method_option :image_prefix, :aliases => '-img', :desc => "Prefix to add to image path for importing from disk"
+    method_option :image_path_prefix, :aliases => '-p', :desc => "Prefix to add to image path for importing from disk"
     method_option :verbose, :aliases => '-v', :type => :boolean, :desc => "Verbose logging"
     method_option :config, :aliases => '-c',  :type => :string, :desc => "Configuration file containg defaults or over rides in YAML"
     method_option :dummy, :aliases => '-d', :type => :boolean, :desc => "Dummy run, do not actually save Image or Product"
@@ -53,7 +53,7 @@ module Datashift
         loader.set_default_value('available_on', Time.now.to_s(:db) )
         loader.set_default_value('cost_price', 0.0 )
         loader.set_default_value('price', 0.0 )
-        loader.set_default_value('image_prefix', '' )
+        loader.set_default_value('image_path_prefix', '' )
       end
 
       loader.set_prefix('sku', options[:sku_prefix] ) if(options[:sku_prefix])

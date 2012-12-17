@@ -8,7 +8,10 @@
 #
 #             Provides Loaders and rake tasks specifically tailored for uploading or exporting
 #             Spree Products, associations and Images
-#
+#  NOTES
+#             Some of these test adding a path prefix .. these expect to be run from the main directoyr not spec
+# =>            i.e rspec -c spec/spree_images_loader_spec.rb
+
 require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 
 require 'product_loader'
@@ -28,7 +31,7 @@ describe 'SpreeImageLoading' do
 
   it "should create Image from path in Product loading column from CSV" do
 
-    options = {:mandatory => ['sku', 'name', 'price'], :image_prefix => "spec/"}
+    options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "spec/"}
 
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
 
@@ -47,7 +50,7 @@ describe 'SpreeImageLoading' do
 
   it "should create Image from path in Product loading column from Excel" do
 
-    options = {:mandatory => ['sku', 'name', 'price'], :image_prefix => "spec/"}
+    options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "spec/"}
 
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
 
@@ -63,7 +66,7 @@ describe 'SpreeImageLoading' do
 
   it "should create Image from path with prefix in Product loading column from Excel" do
 
-    options = {:mandatory => ['sku', 'name', 'price'], :image_prefix => "#{File.expand_path(File.dirname(__FILE__))}/"}
+    options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "#{File.expand_path(File.dirname(__FILE__))}/"}
 
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
 
@@ -76,8 +79,24 @@ describe 'SpreeImageLoading' do
 
     @Image_klass.count.should == 3
   end
+  
+  
+  it "should create Images from urls in Product loading column from Excel", :fail => true do
 
+    options = {:mandatory => ['sku', 'name', 'price']}
 
+    @product_loader.perform_load( ifixture_file('SpreeProductsWithImageUrls.xls'), options )
+
+    p = @Product_klass.find_by_name("Demo Product for AR Loader")
+
+    p.name.should == "Demo Product for AR Loader"
+    p.images.should have_exactly(1).items
+
+    @Product_klass.all.each {|p| p.images.should have_exactly(1).items }
+
+    @Image_klass.count.should == 3
+  end
+  
   it "should assign Images to preloaded Products by SKU via Excel"  do
 
     DataShift::MethodDictionary.find_operators( @Image_klass )
@@ -92,7 +111,7 @@ describe 'SpreeImageLoading' do
 
     loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
 
-    loader.perform_load( ifixture_file('SpreeImagesBySku.xls'), { :image_prefix => "spec/" } )
+    loader.perform_load( ifixture_file('SpreeImagesBySku.xls'), { :image_path_prefix => "spec/" } )
 
     @Image_klass.all.size.should == 3
 
@@ -119,7 +138,7 @@ describe 'SpreeImageLoading' do
 
     loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
 
-    loader.perform_load( ifixture_file('SpreeImagesByName.xls'), { :image_prefix => "spec/" } )
+    loader.perform_load( ifixture_file('SpreeImagesByName.xls'), { :image_path_prefix => "spec/" } )
 
     @Image_klass.all.size.should == 4
 
@@ -134,7 +153,7 @@ describe 'SpreeImageLoading' do
 
   it "should be able to set alternative text within images column" do
 
-    options = {:mandatory => ['sku', 'name', 'price'], :image_prefix => "spec/"}
+    options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "spec/"}
 
     @product_loader.perform_load( ifixture_file('SpreeProductsWithMultipleImages.xls'), options )
 
@@ -160,7 +179,7 @@ describe 'SpreeImageLoading' do
   end
 
 
-  it "should assign Images to preloaded Products from filesystem on SKU", :fail => true  do
+  it "should assign Images to preloaded Products from filesystem on SKU" do
 
     # first load some products with SKUs that match the image names
     @Product_klass.count.should == 0

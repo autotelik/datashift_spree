@@ -38,8 +38,8 @@ module DataShift
 
     
     # Options :
-    #   :image_prefix : A common prefix to add to each path. 
-    #                   e,g to specifiy particular drive  {:image_prefix => 'C:\' }
+    #   :image_path_prefix : A common path to prefix before each image path
+    #                        e,g to specifiy particular drive  {:image_path_prefix => 'C:\' }
     #
     def perform_load( file_name, opts = {} )
       @options = opts.dup
@@ -51,11 +51,13 @@ module DataShift
     #
     # A list of entries for Images.
     #
-    # Multiple entries can be delimited by Delimiters::multi_assoc_delim
+    # Multiple image items can be delimited by Delimiters::multi_assoc_delim
     #
-    # Each entry can  with a optional 'alt' value, seperated from pat5h by Delimiters::name_value_delim
+    # Each item can  contain optional attributes for the Image class within {}. 
+    # 
+    # For example to supply the optional 'alt' text, or position for an image
     #
-    #   Example => path_1:alt text|path_2:more alt blah blah|path_3:the alt text for this path
+    #   Example => path_1{:alt => text}|path_2{:alt => more alt blah blah, :position => 5}|path_3{:alt => the alt text for this path}
     #
     def add_images( record )
 
@@ -68,14 +70,71 @@ module DataShift
 
         #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
 
-        path, alt_text = image.split(Delimiters::name_value_delim)
-
-        path = File.join(@options[:image_prefix], path)
+        # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz
+       
+        @spree_uri_regexp ||= Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' )
+        if(image.match(@spree_uri_regexp))
+           
+          uri, attributes = image.split(Delimiters::attribute_list_start)
           
-        puts "DEBUG : Creating  attachment #{path} (#{alt_text})"
-        # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
-        attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
+          puts "IMAGE URI", uri.inspect, attributes.inspect
+          
+          if(attributes)
+            puts attributes.last.inspect
+            attributes = attributes.split(', ').map{|h| h1,h2 = h.split('=>'); {h1 => h2}}.reduce(:merge)
+          else
+            attributes = {} # will blow things up later if we pass nil where {} expected
+          end
+          
+          puts "EXT  #{File.extname(uri).inspect}"
+          agent = Mechanize.new
+          
+          image = begin
+            agent.get(uri)
+          rescue => e
+            puts "ERROR: Failed to fetch image from URL #{uri}", e.message
+            next
+          end
+          
+          # Expected class Mechanize::Image 
+          # better to have correct extension for paperclip ?
+          # there is also an method called image.extract_filename - noit sure of difference
+            
+          t = image.respond_to?(:filename) ? Tempfile.new(['spree_img_load', File.extname(image.filename)]) : Tempfile.new('spree_img_load')
+          
+          begin
+  
+            # TODO can we handle embedded img src e.g from Mechanize::Page::Image ?   
+            image.save('/tmp/tomtest.jpg')            
+            #image.save(t.path)
+            
+            puts "DEBUG : Creating  attachment #{t.path} (#{attributes})"
+            # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
+            attachment = create_attachment(@@image_klass, '/tmp/tomtest.jpg', nil, nil, attributes)
+            
+          rescue => e
+            puts "ERROR: Failed to process image from URL #{uri}", e.message
+            next
+       
+          ensure 
+            t.unlink
+          end
 
+        else
+          
+          path, alt_text = image.split(Delimiters::name_value_delim)
+
+          puts path, alt_text
+          
+          path = File.join(@options[:image_path_prefix], path) if(@options[:image_path_prefix])
+          
+          puts "DEBUG : Creating  attachment #{path} (#{alt_text})"
+          # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
+          attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
+        end 
+
+        puts "DEBUG : ADDING  attachment #{attachment.inspect}"
+        
         owner.images << attachment
 
         logger.debug("Product assigned Image from : #{path.inspect}")

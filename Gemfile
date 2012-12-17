@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+# This Gemfile is for TESTING really. 
+# Not sure it has any use for anyone just wanting to use this gem
+
 gem 'rspec'  # Behavior Driven Development (BDD) for Ruby
 gem 'rspec-core'  # RSpec runner and example groups.
 gem 'rspec-expectations'  # RSpec matchers for should and should_not.
@@ -23,10 +26,10 @@ end
 
 # DEFINE WHICH VERSIONS WE WANT TO TEST WITH
 
-gem 'datashift'
+gem 'datashift',  :path => "../datashift"
 
-gem 'rails', '3.2.8'
-gem 'spree', '1.1.3'
-
+gem 'rails', '3.2.9'
+gem 'spree', '1.2.2'
+gem 'mechanize'
 
 
