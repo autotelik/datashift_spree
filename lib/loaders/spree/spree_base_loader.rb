@@ -11,6 +11,8 @@ require 'csv_loader'
 require 'excel_loader'
 require 'image_loading'
 
+require 'mechanize'
+
 module DataShift
 
   class SpreeBaseLoader < LoaderBase
@@ -68,6 +70,8 @@ module DataShift
 
       get_each_assoc.each do |image|
 
+        logger.debug("Processing IMAGE from #{image.inspect}")
+        
         #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
 
         # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz
@@ -77,7 +81,7 @@ module DataShift
            
           uri, attributes = image.split(Delimiters::attribute_list_start)
           
-          puts "IMAGE URI", uri.inspect, attributes.inspect
+          logger.debug("Processing IMAGE from an URI #{uri.inspect} #{attributes.inspect}")
           
           if(attributes)
             puts attributes.last.inspect
@@ -120,11 +124,11 @@ module DataShift
             t.unlink
           end
 
-        else
+        else     
           
           path, alt_text = image.split(Delimiters::name_value_delim)
 
-          puts path, alt_text
+          logger.debug("Processing IMAGE from PATH #{path.inspect} #{alt_text.inspect}")
           
           path = File.join(@options[:image_path_prefix], path) if(@options[:image_path_prefix])
           

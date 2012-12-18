@@ -53,7 +53,6 @@ module Datashift
         loader.set_default_value('available_on', Time.now.to_s(:db) )
         loader.set_default_value('cost_price', 0.0 )
         loader.set_default_value('price', 0.0 )
-        loader.set_default_value('image_path_prefix', '' )
       end
 
       loader.set_prefix('sku', options[:sku_prefix] ) if(options[:sku_prefix])
