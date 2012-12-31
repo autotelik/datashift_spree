@@ -139,9 +139,15 @@ module DataShift
 
         puts "DEBUG : ADDING  attachment #{attachment.inspect}"
         
-        owner.images << attachment
+        begin
+          owner.images << attachment
+                    
+          logger.debug("Product assigned Image from : #{path.inspect}")
+        rescue => e
+          puts "ERROR - Failed to assign attachment to #{owner.class} #{owner.id}"
+          logger.error("Failed to assign attachment to #{owner.class} #{owner.id}")
+        end
 
-        logger.debug("Product assigned Image from : #{path.inspect}")
       end
 
       record.save

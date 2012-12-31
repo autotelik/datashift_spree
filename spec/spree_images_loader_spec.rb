@@ -4,14 +4,16 @@
 #
 # License::   MIT - Free, OpenSource
 #
-# Details::   Specification for Spree aspect of datashift gem.
+# Details::   Specification for Spree Image loading spect of datashift_spree gem.
 #
-#             Provides Loaders and rake tasks specifically tailored for uploading or exporting
-#             Spree Products, associations and Images
 #  NOTES
-#             Some of these test adding a path prefix .. these expect to be run from the main directoyr not spec
-# =>            i.e rspec -c spec/spree_images_loader_spec.rb
-
+#             Some of these test will fail if not run from within spec directory since the CSV/Excel files
+#             contain static paths to the image fixtures. You'll see an error like
+#             
+#                 Cannot process Image : Invalid Path fixtures/images/DEMO_001_ror_bag.jpeg
+#             
+#             These are marked with :passes_only_in_spec_dir => true do
+#             
 require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 
 require 'product_loader'
@@ -28,10 +30,31 @@ describe 'SpreeImageLoading' do
   before(:each) do
   end
 
+  it "should report errors in Image paths during Product loading", :errors => true do
+   report_errors 'SpreeProductsWithImages.csv'
+   #report_errors 'SpreeProductsWithImages.xls'
+  end
+    
+  def report_errors( x )
+      
+    options = {:mandatory => ['sku', 'name', 'price'] }
 
-  it "should create Image from path in Product loading column from CSV" do
+    @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
 
-    options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "spec/"}
+    @product_loader.loaded_objects.size.should == 0
+    @product_loader.failed_objects.size.should == 3
+      
+    @Image_klass.count.should == 0
+
+    p = @Product_klass.find_by_name("Demo Product for AR Loader")
+
+    p.should be_nil
+
+  end
+  
+  it "should create Image from path in Product loading column from CSV", :passes_only_in_spec_dir => true do
+
+    options = {:mandatory => ['sku', 'name', 'price'] }
 
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
 
@@ -48,9 +71,10 @@ describe 'SpreeImageLoading' do
   end
 
 
-  it "should create Image from path in Product loading column from Excel" do
+  it "should create Image from path in Product loading column from Excel" , :passes_only_in_spec_dir => true do
 
-    options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "spec/"}
+    options = {:mandatory => ['sku', 'name', 'price'] }
+        
 
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
 
@@ -124,7 +148,7 @@ describe 'SpreeImageLoading' do
     # fixtures/images/DEMO_003_ror_mug.jpeg
   end
 
-  it "should assign Images to preloaded Products by Name via Excel" do
+  it "should assign Images to preloaded Products by Name via Excel", :fail=> true do
 
     @Product_klass.count.should == 0
 

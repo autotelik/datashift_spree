@@ -20,7 +20,39 @@ require 'spree_helper'
 
 $:.unshift '.'  # 1.9.3 quite strict, '.' must be in load path for relative paths to work from here
     
+
+require 'active_record'
+
+module ActiveSupport
+  class BufferedLogger
+    
+    alias_method :add_original, :add
+   
+    def add(severity, message = nil, progname = nil, &block)
+      return if @level && @level > severity
+      message = (message || (block && block.call) || progname).to_s
+
+      level = {
+        0 => "DEBUG",
+        1 => "INFO",
+        2 => "WARN",
+        3 => "ERROR",
+        4 => "FATAL"
+      }[severity] || "U"
+
+      #message = "[%s: %s #%d] %s" % [level, Time.now.strftime("%m%d %H:%M:%S"),$$, message]
+      message = "[%s: %s] %s" % [level, Time.now.strftime("%m%d %H:%M:%S"), message]
+
+      message = "#{message}\n" unless message[-1] == ?\n
+      
+      add_original(severity, "#{message}", progname)
+      
+    end
+  end
+end
+
 RSpec.configure do |config|
+  
   config.before do
     ARGV.replace []
   end
@@ -171,15 +203,20 @@ RSpec.configure do |config|
     end
   end
   
+  def spec_helper_log
+    @spec_helper_log ||= ""
+  end
+  
   def set_logger( name = 'datashift_spree_spec.log')
     
     require 'logger'
-    logdir = File.dirname(__FILE__) + '/logs'
-    FileUtils.mkdir_p(logdir) unless File.exists?(logdir)
-    ActiveRecord::Base.logger = Logger.new( File.join(logdir, name) )
-
-    # Anyway to direct one logger to another ????? ... Logger.new(STDOUT)
+    @spec_helper_logdir = File.dirname(__FILE__) + '/logs'
+    FileUtils.mkdir_p(@spec_helper_logdir) unless File.exists?(@spec_helper_logdir)
+    @spec_helper_log = File.join(@spec_helper_logdir, name)
     
+    ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new( @spec_helper_log )
+
+    # Anyway to direct one logger to another ????? ... Logger.new(STDOUT) 
     @dslog = ActiveRecord::Base.logger
   end
    
@@ -241,13 +278,13 @@ RSpec.configure do |config|
         
     run_in(spree_sandbox_app_path) {
        
-       puts "db_connect in #{Dir.pwd}"
+      puts "Running db_connect from #{Dir.pwd}"
        
       db_connect
           
       begin
         require 'config/environment.rb'
-         puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
+        puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
       rescue => e
         #somethign in deface seems to blow up suddenly on 1.1
         puts "Warning - Potential issue initializing Spree sandbox:"
