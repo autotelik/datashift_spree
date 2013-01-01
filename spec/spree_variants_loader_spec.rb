@@ -127,7 +127,7 @@ describe 'Spree Variants Loader' do
     @Variant_klass.last.price.should == 50.34
     @Variant_klass.last.count_on_hand.should == 18
 
-    @product_loader.failed_objects.size.should == 0
+    @product_loader.failed_count.should == 0
   end
 
   # Composite Variant Syntax is option_type_A_name:value;option_type_B_name:value

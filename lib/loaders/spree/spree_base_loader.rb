@@ -48,7 +48,7 @@ module DataShift
 
       super(file_name, @options)
     end
-
+  
     # Special case for Images
     #
     # A list of entries for Images.
@@ -71,59 +71,69 @@ module DataShift
       get_each_assoc.each do |image|
 
         logger.debug("Processing IMAGE from #{image.inspect}")
-        
+             
         #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
 
         # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz
        
         @spree_uri_regexp ||= Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' )
+        
         if(image.match(@spree_uri_regexp))
            
           uri, attributes = image.split(Delimiters::attribute_list_start)
           
+          uri.strip!
+          
           logger.debug("Processing IMAGE from an URI #{uri.inspect} #{attributes.inspect}")
           
           if(attributes)
-            puts attributes.last.inspect
-            attributes = attributes.split(', ').map{|h| h1,h2 = h.split('=>'); {h1 => h2}}.reduce(:merge)
+            #TODO move to ColumnPacker unpack ?
+            attributes = attributes.split(', ').map{|h| h1,h2 = h.split('=>'); {h1.strip! => h2.strip!}}.reduce(:merge)
           else
             attributes = {} # will blow things up later if we pass nil where {} expected
           end
           
-          puts "EXT  #{File.extname(uri).inspect}"
           agent = Mechanize.new
           
           image = begin
             agent.get(uri)
           rescue => e
             puts "ERROR: Failed to fetch image from URL #{uri}", e.message
-            next
+            raise DataShift::BadUri.new("Failed to fetch image from URL #{uri}")
           end
-          
+  
           # Expected class Mechanize::Image 
-          # better to have correct extension for paperclip ?
-          # there is also an method called image.extract_filename - noit sure of difference
-            
-          t = image.respond_to?(:filename) ? Tempfile.new(['spree_img_load', File.extname(image.filename)]) : Tempfile.new('spree_img_load')
+  
+          # there is also an method called image.extract_filename - not sure of difference
+          extname = image.respond_to?(:filename) ? File.extname(image.filename) : File.extname(uri)
+          base = image.respond_to?(:filename) ? File.basename(image.filename, '.*') : File.basename(uri, '.*')
           
-          puts "DEBUG : Saving URL data to temp file #{t.path}"
-          
+          @current_image_temp_file = Tempfile.new([base, extname], :encoding => 'ascii-8bit')
+                    
           begin
   
-            # TODO can we handle embedded img src e.g from Mechanize::Page::Image ?   
-            #image.save('/tmp/tomtest.jpg')            
-            image.save(t.path)
+            # TODO can we handle embedded img src e.g from Mechanize::Page::Image ?      
+
+            # If I call image.save(@current_image_temp_file.path) then it creates a new file with a .1 extension
+            # so the real temp file data is empty and paperclip chokes
+            # so this is a copy from the Mechanize::Image save method.  don't like it much, very brittle, but what to do ...
+            until image.body_io.eof? do
+              @current_image_temp_file.write image.body_io.read 16384
+            end           
             
-            puts "DEBUG : Creating  attachment #{t.path} (#{attributes})"
+            @current_image_temp_file.rewind
+
             # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
-            attachment = create_attachment(@@image_klass, t.path, nil, nil, attributes)
+            attachment = create_attachment(@@image_klass, @current_image_temp_file.path, nil, nil, attributes)
             
           rescue => e
             puts "ERROR: Failed to process image from URL #{uri}", e.message
-            next
+            logger.error("Failed to create Image from URL #{uri}")
+            raise DataShift::DataProcessingError.new("Failed to create Image from URL #{uri}")
        
           ensure 
-            t.unlink
+            @current_image_temp_file.close
+            @current_image_temp_file.unlink
           end
 
         else     
@@ -133,14 +143,11 @@ module DataShift
           logger.debug("Processing IMAGE from PATH #{path.inspect} #{alt_text.inspect}")
           
           path = File.join(@options[:image_path_prefix], path) if(@options[:image_path_prefix])
-          
-          puts "DEBUG : Creating  attachment #{path} (#{alt_text})"
+
           # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
           attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
         end 
 
-        puts "DEBUG : ADDING  attachment #{attachment.inspect}"
-        
         begin
           owner.images << attachment
                     

@@ -293,7 +293,7 @@ module DataShift
 
           parent_taxonomy = @@taxonomy_klass.find_or_create_by_name(parent_name)
 
-          raise "Could not find or create Taxonomy #{parent_name}" unless parent_taxonomy
+          raise DataShift::DataProcessingError.new("Could not find or create Taxonomy #{parent_name}") unless parent_taxonomy
 
           parent = parent_taxonomy.root
 

@@ -105,8 +105,8 @@ describe 'SpreeImageLoading' do
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
 
     @product_loader.reporter.processed_object_count.should == 3
-    @product_loader.loaded_count.should == 0
-    @product_loader.failed_count.should == 3
+    @product_loader.loaded_count.should == 3
+    @product_loader.failed_count.should == 0
     
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
 
@@ -119,7 +119,7 @@ describe 'SpreeImageLoading' do
   end
   
   
-  it "should create Images from urls in Product loading column from Excel", :urls => true do
+  it "should create Images from urls in Product loading column from Excel" do
 
     options = {:mandatory => ['sku', 'name', 'price']}
 
@@ -134,20 +134,21 @@ describe 'SpreeImageLoading' do
     p.name.should == "Demo Product for AR Loader"
     p.images.should have_exactly(1).items
          
-    puts p.images[0].inspect
     
-    i = p.images[0]
-    
+    #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/DEMO_001_ror_bag.jpeg
+    #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/spree.png 
     #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/DEMO_004_ror_ringer.jpeg
-    #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/spree.png {:alt => 'second one should have text'}
     #{:alt => 'third text and position', :position => 4}
  
-    i.attachment_content_type.should == "image/jpeg"
-
-    i.attachment_file_name.should == "DEMO_001_ror_bag.jpeg"
-
-
-    @Product_klass.all.each {|p| p.images.should have_exactly(1).items }
+    expected = [["image/jpeg", "DEMO_001_ror_bag"], ["image/png", 'spree'], ["image/jpeg", 'DEMO_004_ror_ringer']]
+    
+    @Product_klass.all.each_with_index do |p, idx| 
+      p.images.should have_exactly(1).items 
+      i = p.images[0]
+      
+      i.attachment_content_type.should == expected[idx][0]
+      i.attachment_file_name.should include expected[idx][1]
+    end
 
     @Image_klass.count.should == 3
   end
