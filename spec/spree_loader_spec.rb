@@ -73,8 +73,8 @@ describe 'SpreeLoader' do
     @Product_klass.active.size.should == 2
     @Product_klass.available.size.should == 2
 
-    @product_loader.failed_objects.size.should == 0
-    @product_loader.loaded_objects.size.should == 3
+    @product_loader.failed_count.should == 0
+    @product_loader.loaded_count.should == 3
 
     @product_loader.loaded_count.should == @Product_klass.count
 
@@ -128,8 +128,8 @@ describe 'SpreeLoader' do
     
     @Product_klass.count.should == 3
 
-    @product_loader.failed_objects.size.should == 0
-    @product_loader.loaded_objects.size.should == 3
+    @product_loader.failed_count.should == 0
+    @product_loader.loaded_count.should == 3
     
     p = @Product_klass.first
     

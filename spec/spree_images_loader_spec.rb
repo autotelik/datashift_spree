@@ -41,8 +41,10 @@ describe 'SpreeImageLoading' do
 
     @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
 
-    @product_loader.loaded_objects.size.should == 0
-    @product_loader.failed_objects.size.should == 3
+    @product_loader.reporter.processed_object_count.should == 3
+    
+    @product_loader.loaded_count.should == 0
+    @product_loader.failed_count.should == 3
       
     @Image_klass.count.should == 0
 
