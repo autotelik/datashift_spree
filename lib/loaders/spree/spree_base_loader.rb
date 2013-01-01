@@ -106,15 +106,17 @@ module DataShift
             
           t = image.respond_to?(:filename) ? Tempfile.new(['spree_img_load', File.extname(image.filename)]) : Tempfile.new('spree_img_load')
           
+          puts "DEBUG : Saving URL data to temp file #{t.path}"
+          
           begin
   
             # TODO can we handle embedded img src e.g from Mechanize::Page::Image ?   
-            image.save('/tmp/tomtest.jpg')            
-            #image.save(t.path)
+            #image.save('/tmp/tomtest.jpg')            
+            image.save(t.path)
             
             puts "DEBUG : Creating  attachment #{t.path} (#{attributes})"
             # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
-            attachment = create_attachment(@@image_klass, '/tmp/tomtest.jpg', nil, nil, attributes)
+            attachment = create_attachment(@@image_klass, t.path, nil, nil, attributes)
             
           rescue => e
             puts "ERROR: Failed to process image from URL #{uri}", e.message
