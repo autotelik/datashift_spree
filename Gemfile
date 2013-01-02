@@ -3,6 +3,16 @@ source 'https://rubygems.org'
 # This Gemfile is for TESTING really. 
 # Not sure it has any use for anyone just wanting to use this gem
 
+# DEFINE VERSIONS YOU WANT TO TEST AGAINST HERE
+
+gem 'datashift',  :path => "../datashift"
+
+gem 'rails', '3.2.9'
+gem 'spree', '1.2.2'
+gem 'mechanize'
+
+# STATIC GEMS
+
 gem 'rspec'  # Behavior Driven Development (BDD) for Ruby
 gem 'rspec-core'  # RSpec runner and example groups.
 gem 'rspec-expectations'  # RSpec matchers for should and should_not.
@@ -18,18 +28,7 @@ end
 
 platform :ruby do
   gem 'sqlite3'
+  group :development, :test do
+    gem "debugger"
+  end
 end
-
-group :development, :test do
-  gem "debugger"
-end
-
-# DEFINE WHICH VERSIONS WE WANT TO TEST WITH
-
-gem 'datashift',  :path => "../datashift"
-
-gem 'rails', '3.2.9'
-gem 'spree', '1.2.2'
-gem 'mechanize'
-
-

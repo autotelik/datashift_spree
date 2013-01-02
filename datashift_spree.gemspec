@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Statter"]
-  s.date = "2012-09-25"
+  s.date = Date.today.to_s
   s.description = "Comprehensive Excel/CSV import/export for Spree, Products,Images, any model with full associations"
   s.email = "rubygems@autotelik.co.uk"
   
@@ -23,15 +23,17 @@ Gem::Specification.new do |s|
     "datashift_spree.gemspec",
     'VERSION', 
     "LICENSE.txt", 
-    "{lib,spec}/**/*"].exclude("rdoc").exclude("nbproject").exclude("fixtures").exclude(".log").exclude(".contrib").to_a
+    "{lib}/**/*"].exclude("rdoc").exclude("nbproject").exclude("fixtures").exclude(".log").exclude(".contrib").to_a
+  
+  s.test_files = FileList["{spec}/*"]
   
   s.homepage = "http://github.com/autotelik/datashift_spree"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.15"
-  s.summary = "Shift data betwen Excel/CSV and Ruby"
+  s.summary = "Product and image import/export for Spree from Excel/CSV"
   
-  s.add_dependency(%q<datashift>, [">= 0.10.1"])
+  s.add_dependency(%q<datashift>, [">= 0.12.0"])
   s.add_dependency(%q<mechanize>, [">= 0"])
     
   # should work with any version of spree so perhaps leave it to the client app to define
