@@ -23,8 +23,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
 
-
-# Details::   Active Record Loader
+# Details:: Spree Product and Image Loader from .xls or CSV
 # 
 # To pull DataShift commands into your main Spree application :
 #

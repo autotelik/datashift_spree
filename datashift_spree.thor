@@ -9,7 +9,7 @@
 #
 module Datashift
       
-  class Spree < Thor  
+  class SpreeTasks < Thor  
   
     desc 'build', 'Build gem '
   
