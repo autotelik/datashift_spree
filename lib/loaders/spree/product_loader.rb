@@ -14,11 +14,16 @@ module DataShift
 
     class ProductLoader < SpreeBaseLoader
 
-      # depending on version get_product_class should return us right class, namespaced or not
-
+      # Options
+      #  
+      #  :reload           : Force load of the method dictionary for object_class even if already loaded
+      #  :verbose          : Verboise logging and to STDOUT
+      #
       def initialize(product = nil, options = {})
 
         opts = {:instance_methods => true}.merge( options )
+
+        # depending on version get_product_class should return us right class, namespaced or not
 
         super( DataShift::SpreeHelper::get_product_class(), true, product, opts)
 
@@ -120,10 +125,10 @@ module DataShift
       # Special case for OptionTypes as it's two stage process
       # First add the possible option_types to Product, then we are able
       # to define Variants on those options values.
-      #  To defiene a Variant :
-      #  1) define at least one OptionType on Product, for example Size
-      #  2) Provide a value for at least one of these OptionType
-      #  3) A composite Variant can be created by supplyiung a vlaue for more than one OptionType
+      # So to defiene a Variant :
+      #   1) define at least one OptionType on Product, for example Size
+      #   2) Provide a value for at least one of these OptionType
+      #   3) A composite Variant can be created by supplying a value for more than one OptionType
       #       fro example Colour : Red and Size Medium
       # Supported Syntax :
       #  '|' seperates Variants
@@ -134,15 +139,18 @@ module DataShift
       #     mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
       #
       def add_options
-
+      
         # TODO smart column ordering to ensure always valid by time we get to associations
         save_if_new
 
         # example : mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
 
-        variants = get_each_assoc#current_value.split( Delimiters::multi_assoc_delim )
+        variants = get_each_assoc
 
-        # 1) mime_type:jpeg;print_type:black_white  2) mime_type:jpeg  3) mime_type:png, PDF;print_type:colour
+        # example line becomes :  
+        #   1) mime_type:jpeg;print_type:black_white  
+        #   2) mime_type:jpeg  
+        #   3) mime_type:png, PDF;print_type:colour
 
         variants.each do |per_variant|
 
@@ -166,7 +174,7 @@ module DataShift
               end
               puts "Created missing OptionType #{option_type.inspect}"
             end
-
+                      
             # OptionTypes must be specified first on Product to enable Variants to be created
             # TODO - is include? very inefficient ??
             @load_object.option_types << option_type unless @load_object.option_types.include?(option_type)
@@ -185,30 +193,39 @@ module DataShift
           # Now create set of Variants, some of which maybe composites
           # Find the longest set of OVs to use as base for combining with the rest
           sorted_map = optiontype_vlist_map.sort_by { |k,v| v.size }.reverse
-
-          # ovalues = 'pdf','jpeg','png'
-          option_type, ovalues = sorted_map.shift
+       
+          # [ [mime, ['pdf', 'jpeg', 'gif']], [print_type, ['black_white']] ]
+          
+          lead_option_type, lead_ovalues = sorted_map.shift
+          
           # TODO .. benchmarking to find most efficient way to create these but ensure Product.variants list
           # populated .. currently need to call reload to ensure this (seems reqd for Spree 1/Rails 3, wasn't required b4
-          ovalues.each do |ovname|
+          lead_ovalues.each do |ovname|
 
             ov_list = []
 
-            unless ov = @@option_value_klass.find_by_name_and_option_type_id(ovname.strip, option_type.id)
-              ov = @@option_value_klass.create!(:name => ovname.strip, :presentation => ovname.strip.humanize)
-              ov.update_attribute(:option_type_id, option_type.id)
-            end
+            ovname.strip!
+            
+            ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(ovname, lead_option_type.id, :presentation => ovname.humanize)
 
             ov_list << ov if ov
-
-            sorted_map.each do |ot, ovlist| ovlist.each do |for_composite|
-                ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(for_composite.strip, ot.id)
+ 
+            # Process rest of array of types => values
+            sorted_map.each do |ot, ovlist| 
+                ovlist.each do |for_composite|
+                
+                for_composite.strip!
+                
+                ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(for_composite, ot.id, :presentation => for_composite.humanize)
 
                 ov_list << ov if(ov)
               end
             end
 
             unless(ov_list.empty?)
+              
+              puts "Creating Variant from OptionValue(s) #{ov_list.collect(&:name).inspect}" if(verbose)
+              
               i = @load_object.variants.size + 1
 
               # This one line seems to works for 1.1.0 - 3.2 but not 1.0.0 - 3.1 ??
@@ -218,13 +235,12 @@ module DataShift
                 variant = @@variant_klass.create( :product => @load_object, :sku => "#{@load_object.sku}_#{i}", :price => @load_object.price, :available_on => @load_object.available_on)
               end
 
-              variant.option_values << ov_list if(variant)
+              variant.option_values << ov_list if(variant)    
             end
           end
 
-          #puts "DEBUG Load Object now has Variants : #{@load_object.variants.inspect}"
           @load_object.reload unless @load_object.new_record?
-          #puts "DEBUG Load Object now has Variants : #{@load_object.variants.inspect}"
+          #puts "DEBUG Load Object now has Variants : #{@load_object.variants.inspect}" if(verbose)
         end
 
       end # each Variant

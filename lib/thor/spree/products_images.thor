@@ -41,7 +41,7 @@ module Datashift
 
       require 'product_loader'
 
-      loader = DataShift::SpreeHelper::ProductLoader.new
+      loader = DataShift::SpreeHelper::ProductLoader.new( nil, {:verbose => options[:verbose]})
 
       # YAML configuration file to drive defaults etc
 

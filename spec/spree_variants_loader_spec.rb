@@ -133,31 +133,31 @@ describe 'Spree Variants Loader' do
   # Composite Variant Syntax is option_type_A_name:value;option_type_B_name:value
   # which creates a SINGLE Variant with 2 option types
 
-  it "should create Variants with MULTIPLE option types from single column", :new => true  do
+  it "should create Variants with MULTIPLE option types from single column in CSV", :new => true  do
     @product_loader.perform_load( ifixture_file('SpreeMultiVariant.csv'), :mandatory => ['sku', 'name', 'price'] )
 
+    expected_single_column_multi_variants
+  end
+
+  it "should create Variants with MULTIPLE option types from single column in XLS", :new => true  do
+    @product_loader.perform_load( ifixture_file('SpreeMultiVariant.xls'), :mandatory => ['sku', 'name', 'price'] )
+
+    expected_single_column_multi_variants
+  end
+  
+  def expected_single_column_multi_variants
+    
     # Product 1)
     # 1 + 2) mime_type:jpeg,PDF;print_type:colour	 equivalent to (mime_type:jpeg;print_type:colour|mime_type:PDF;print_type:colour)
     # 3) mime_type:PNG
     #
-    # Product 2
-    # 4) mime_type:jpeg;print_type:black_white
-    # 5) mime_type:PNG;print_type:black_white
-    #
-    # Product 3
-    # 6 +7) mime_type:jpeg;print_type:colour,sepia;size:large
-    # 8) mime_type:jpeg;print_type:colour
-    # 9) mime_type:PNG
-    # 9 + 10) mime_type:PDF|print_type:black_white
-
     prod_count = 3
     var_count = 10
 
-    # plus 3 MASTER VARIANTS
     @Product_klass.count.should == prod_count
-    @Variant_klass.count.should == prod_count + var_count
+    @Variant_klass.count.should == prod_count + var_count     # plus 3 MASTER VARIANTS
 
-    p = @Product_klass.first
+    p = @Product_klass.all[0]
 
     p.variants_including_master.should have_exactly(4).items
     p.variants.should have_exactly(3).items
@@ -167,7 +167,33 @@ describe 'Spree Variants Loader' do
     v1 = p.variants[0]
     v1.option_values.should have_exactly(2).items
     v1.option_values.collect(&:name).sort.should == ['colour','jpeg']
+    v1.option_values.collect(&:presentation).sort.should == ['Colour','Jpeg']
 
+    # Product 2
+    # 4) mime_type:jpeg;print_type:black_white
+    # 5) mime_type:PNG;print_type:black_white
+    #
+    p = @Product_klass.all[1]
+    
+    p.variants_including_master.should have_exactly(3).items
+    p.variants.should have_exactly(2).items
+
+    p.option_types.should have_exactly(2).items # mime_type, print_type
+
+    p.option_types.collect(&:name).sort.should == ['mime_type','print_type']
+    
+    p.variants[0].option_values.collect(&:name).sort.should == ['black_white','jpeg']
+    p.variants[0].option_values.collect(&:presentation).sort.should == ['Black white','Jpeg']
+    
+    p.variants[1].option_values.collect(&:name).sort.should == ['PNG', 'black_white']
+    
+    # Product 3
+    # 6 +7) mime_type:jpeg;print_type:colour,sepia;size:large
+    # 8) mime_type:jpeg;print_type:colour
+    # 9) mime_type:PNG
+    # 9 + 10) mime_type:PDF|print_type:black_white
+
+        
   end
 
 
