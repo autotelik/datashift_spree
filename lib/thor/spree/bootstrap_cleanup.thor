@@ -9,9 +9,9 @@
 #
 # Note, not DataShift, case sensitive, create namespace for command line : datashift
 
-module Datashift
+module DatashiftSpree
         
-  class Spreeboot < Thor     
+  class Utils < Thor     
   
     include DataShift::Logging
        

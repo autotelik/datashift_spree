@@ -11,9 +11,9 @@
 
 require 'excel_exporter'
   
-module Datashift
+module DatashiftSpree
         
-    class Spreereports < Thor     
+    class Reports < Thor     
   
       include DataShift::Logging
        
