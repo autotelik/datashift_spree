@@ -26,9 +26,10 @@ module DatashiftSpree
       require File.expand_path('config/environment.rb')
 
       ActiveRecord::Base.connection.execute("TRUNCATE spree_products_taxons")
+      ActiveRecord::Base.connection.execute("TRUNCATE spree_products_promotion_rules")
       
       cleanup =  %w{ Image OptionType OptionValue 
-                    Product Property ProductGroup ProductProperty ProductOptionType 
+                    Product Property ProductProperty ProductOptionType 
                     Variant Taxonomy Taxon
       }
 
