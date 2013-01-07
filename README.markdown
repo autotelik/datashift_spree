@@ -46,11 +46,13 @@ To check the available tasks run
 New functionality and options under active development so check latest
 usage information via ```thor help <command>``` ... for example
 
-    bundle exec thor help datashift:spree:products
+```ruby
+    bundle exec thor help datashift_spree:load:products
+```
 
 ```ruby
 Usage:
-  thor help datashift:spree:products 
+  thor help productsdatashift:spree:products
 
    Populate Spree Product/Variant data from .xls (Excel) or CSV file
 ```
