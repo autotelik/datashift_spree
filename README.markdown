@@ -41,7 +41,7 @@ DataShift::SpreeHelper::load_commands
 
 To check the available tasks run
 
-    bundle exc thor list datashift
+    bundle exec thor list datashift
 
 New functionality and options under active development so check latest
 usage information via ```thor help <command>``` ... for example
