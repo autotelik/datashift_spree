@@ -39,9 +39,12 @@ DataShift::load_commands
 DataShift::SpreeHelper::load_commands
 ```
 
-To check the available tasks run
+To check the available tasks run thor list with a search term, for example
 
+```ruby
     bundle exec thor list datashift
+    bundle exec thor list datashift_spree
+```
 
 New functionality and options under active development so check latest
 usage information via ```thor help <command>``` ... for example
@@ -50,9 +53,20 @@ usage information via ```thor help <command>``` ... for example
     bundle exec thor help datashift_spree:load:products
 ```
 
+Will print out usage and latest options like ...
+
 ```ruby
 Usage:
-  thor help productsdatashift:spree:products
+  thor datashift_spree:load:products -i, --input=INPUT
+
+Options:
+  -i, --input=INPUT                            # The import file (.xls or .csv)
+  -s, [--sku-prefix=SKU_PREFIX]                # Prefix to add to each SKU before saving Product
+  -p, [--image-path-prefix=IMAGE_PATH_PREFIX]  # Prefix to add to image path for importing from disk
+  -v, [--verbose]                              # Verbose logging
+  -c, [--config=CONFIG]                        # Configuration file containg defaults or over rides in YAML
+  -d, [--dummy]                                # Dummy run, do not actually save Image or Product
+
 
    Populate Spree Product/Variant data from .xls (Excel) or CSV file
 ```
