@@ -137,10 +137,12 @@ describe 'SpreeMethodMapping' do
     # klazz_object.send( count_on_hand.operator, 2)
     count_on_hand = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'count on hand' )
 
-    count_on_hand.assign( klazz_object, 2 )
+    populator = DataShift::Populator.new
+      
+    populator.assign(count_on_hand, klazz_object, 2 )
     klazz_object.count_on_hand.should == 2
 
-    count_on_hand.assign( klazz_object, 5 )
+    populator.assign(count_on_hand, klazz_object, 5 )
     klazz_object.count_on_hand.should == 5
 
     ["sku", "SKU", 'Sku'].each do |f|
@@ -149,7 +151,7 @@ describe 'SpreeMethodMapping' do
 
       method.operator.should == 'sku'
 
-      method.assign( klazz_object, 'TEST_SK 001')
+      populator.assign(method, klazz_object, 'TEST_SK 001')
       klazz_object.sku.should == 'TEST_SK 001'
     end
 

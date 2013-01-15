@@ -98,7 +98,7 @@ RSpec.configure do |config|
         raise e
       end
         
-      @product_loader = DataShift::SpreeHelper::ProductLoader.new
+      @product_loader = DataShift::SpreeHelper::ProductLoader.new(nil, :verbose => true)
     end
   end
 

@@ -17,10 +17,11 @@ module DataShift
       # Options
       #  
       #  :reload           : Force load of the method dictionary for object_class even if already loaded
-      #  :verbose          : Verboise logging and to STDOUT
+      #  :verbose          : Verbose logging and to STDOUT
       #
       def initialize(product = nil, options = {})
 
+        # We want the delegated methods on Variant so always include instance methods
         opts = {:instance_methods => true}.merge( options )
 
         # depending on version get_product_class should return us right class, namespaced or not
@@ -43,6 +44,14 @@ module DataShift
           options[:force_inclusion] = options[:force_inclusion] ? ([ *options[:force_inclusion]] + 'images') : ['images']
         end
 
+        # In >= 1.3.0 price moved to master Variant from Product so no association called Price on Product anymore
+        # taking care of it here, means users can still simply just include a price column
+        if(DataShift::SpreeHelper::version.to_f >= 1.3 )
+          options[:force_inclusion] ? options[:force_inclusion] << 'price' : options[:force_inclusion] = ['price']
+        end
+        
+        logger.info "Product load using forced operators: [#{options[:force_inclusion]}]" if(options[:force_inclusion])
+        
         super(file_name, options)
       end
 
@@ -54,25 +63,30 @@ module DataShift
       #
       def process()
 
+        current_method_detail = @populator.current_method_detail
+        current_value         = @populator.current_value
+        
+        logger.debug "Processing value: [#{current_value}]"
+        
         # Special cases for Products, generally where a simple one stage lookup won't suffice
         # otherwise simply use default processing from base class
-        if(current_value && (@current_method_detail.operator?('variants') || @current_method_detail.operator?('option_types')) )
+        if(current_value && (current_method_detail.operator?('variants') || current_method_detail.operator?('option_types')) )
 
           add_options
 
-        elsif(@current_method_detail.operator?('taxons') && current_value)
+        elsif(current_method_detail.operator?('taxons') && current_value)
 
           add_taxons
 
-        elsif(@current_method_detail.operator?('product_properties') && current_value)
+        elsif(current_method_detail.operator?('product_properties') && current_value)
 
           add_properties
 
-        elsif(@current_method_detail.operator?('images') && current_value)
+        elsif(current_method_detail.operator?('images') && current_value)
 
           add_images( (SpreeHelper::version.to_f > 1) ? @load_object.master : @load_object )
 
-        elsif(current_value && (@current_method_detail.operator?('count_on_hand') || @current_method_detail.operator?('on_hand')) )
+        elsif(current_value && (current_method_detail.operator?('count_on_hand') || current_method_detail.operator?('on_hand')) )
 
 
           # Unless we can save here, in danger of count_on_hand getting wiped out.
@@ -212,7 +226,7 @@ module DataShift
  
             # Process rest of array of types => values
             sorted_map.each do |ot, ovlist| 
-                ovlist.each do |for_composite|
+              ovlist.each do |for_composite|
                 
                 for_composite.strip!
                 

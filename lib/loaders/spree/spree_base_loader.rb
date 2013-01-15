@@ -23,10 +23,12 @@ module DataShift
 
     # depending on version get_product_class should return us right class, namespaced or not
 
-    def initialize(klass, find_operators = true, loader_object = nil, options = {:instance_methods => true})
+    def initialize(klass, find_operators = true, loader_object = nil, options = {})
 
       super(klass, find_operators, loader_object, options)
 
+      logger.info "Spree Loading initialised with:\n#{options.inspect}"
+      
       @@image_klass ||= DataShift::SpreeHelper::get_spree_class('Image')
       @@option_type_klass ||= DataShift::SpreeHelper::get_spree_class('OptionType')
       @@option_value_klass ||= DataShift::SpreeHelper::get_spree_class('OptionValue')
@@ -44,6 +46,9 @@ module DataShift
     #                        e,g to specifiy particular drive  {:image_path_prefix => 'C:\' }
     #
     def perform_load( file_name, opts = {} )
+      
+      logger.info "Starting load from file [#{file_name}]"
+      
       @options = opts.dup
 
       super(file_name, @options)

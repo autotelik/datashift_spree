@@ -55,7 +55,7 @@ describe 'SpreeLoader' do
   
   # Loader should perform identically regardless of source, whether csv, .xls etc
   
-  it "should load basic Products .xls via Spree loader" do
+  it "should load basic Products .xls via Spree loader", :fail => true do
     test_basic_product('SpreeProductsSimple.xls')
   end
 
@@ -101,13 +101,13 @@ describe 'SpreeLoader' do
    
     @expected_time =  Time.now.to_s(:db) 
     
-    @product_loader.set_default_value('available_on', @expected_time)
-    @product_loader.set_default_value('cost_price', 1.0 )
-    @product_loader.set_default_value('meta_description', 'super duper meta desc.' )
-    @product_loader.set_default_value('meta_keywords', 'techno dubstep d&b' )
+    @product_loader.populator.set_default_value('available_on', @expected_time)
+    @product_loader.populator.set_default_value('cost_price', 1.0 )
+    @product_loader.populator.set_default_value('meta_description', 'super duper meta desc.' )
+    @product_loader.populator.set_default_value('meta_keywords', 'techno dubstep d&b' )
       
 
-    @product_loader.set_prefix('sku', 'SPEC_')
+    @product_loader.populator.set_prefix('sku', 'SPEC_')
       
     test_default_values
 
@@ -117,7 +117,7 @@ describe 'SpreeLoader' do
    
     @product_loader.configure_from(  ifixture_file('SpreeProductsDefaults.yml') )
     
-    @product_loader.set_prefix('sku', 'SPEC_')
+    @product_loader.populator.set_prefix('sku', 'SPEC_')
       
     test_default_values
 

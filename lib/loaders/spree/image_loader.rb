@@ -76,7 +76,6 @@ module DataShift
             @load_object = get_record_by(@@product_klass, operator, current_value)
             
           elsif( MethodDictionary::find_method_detail_if_column(@@variant_klass, operator) )
-            puts "Find VARIANT with  #{operator} == #{current_value}"
             @load_object = get_record_by(@@variant_klass, operator, current_value)
           else
             raise "No Spree class can be searched for by #{operator}"
