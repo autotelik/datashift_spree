@@ -258,13 +258,20 @@ RSpec.configure do |config|
     unless(File.exists?(spree_sandbox_app_path))
       puts "Creating new Rails sandbox for Spree : #{spree_sandbox_app_path}"
       
-      run_in(File.expand_path( "#{spree_sandbox_app_path}/..")) {
+      rails_sandbox_root = File.expand_path("#{spree_sandbox_app_path}/..")
+         
+      run_in(rails_sandbox_root)  do
         system('rails new sandbox')
-      }
+        
+        system('spree install sandbox -A')      
+      end
       
       run_in(spree_sandbox_app_path) {
-        system('spree install')      
-      
+        
+         system('bundle install')   
+         
+         system('rake db:migrate')   
+         
         # add in User model if new 1.2 version which splits out Auth from spree core
         if(DataShift::SpreeHelper::version.to_f >= 1.2)
           append_file('Gemfile', "gem 'spree_auth_devise', :git => \"git://github.com/spree/spree_auth_devise\"" )

@@ -50,9 +50,9 @@ module DatashiftSpree
 
         loader.configure_from( options[:config] )
       else
-        loader.set_default_value('available_on', Time.now.to_s(:db) )
-        loader.set_default_value('cost_price', 0.0 )
-        loader.set_default_value('price', 0.0 )
+        loader.populator.set_default_value('available_on', Time.now.to_s(:db) )
+        loader.populator.set_default_value('cost_price', 0.0 )
+        loader.populator.set_default_value('price', 0.0 )
       end
 
       loader.set_prefix('sku', options[:sku_prefix] ) if(options[:sku_prefix])

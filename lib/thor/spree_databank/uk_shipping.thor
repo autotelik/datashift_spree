@@ -18,27 +18,35 @@ module DatashiftSpree
     
     class UkShipping < Thor
    
-      require File.expand_path('config/environment.rb')
-      
       #############################
       # Zone Setup for Royal Mail 
       #   http://www.royalmail.com
       #############################
-      usage =<<-EOS
-Setup Royal Mail Zones, Shipping Categories and Methods
+    
+      @@usage =<<-EOS
+Setup Spree with Royal Mail Zones, Shipping Categories and Methods
 
-Available Calculators are:
-\t#{Spree::ShippingMethod.calculators.sort_by(&:name).join("\n\t")}
+Shipping methoid requires a CalculatorType 
 
+To list currently Available Calculators run with --list
       EOS
-
-      desc "royal_mail", usage                    
+  
+      desc "royal_mail", @@usage                    
              
       method_option :commit, :aliases => '-c', :type => :boolean, :required => false, :desc => "Commit changes permanently"
       method_option :calc, :required => false, :default =>  'Spree::Calculator::FlatRate', :desc => "Calculators"
-  
+      method_option :list, :required => false, :desc => "List available Calculators and exit"
+   
       def royal_mail 
-             
+        require File.expand_path('config/environment.rb')
+   
+        if options[:list]
+          puts "Available Calculators are:"
+          puts "\t#{Spree::ShippingMethod.calculators.sort_by(&:name).join("\n\t")}"
+
+          puts "\nSpecify with --calc"
+          exit(0)
+        end
         # Royal Mail is the ShippingMethod (actual service used to send the product) with 3 applicable Zones.
         #
         # [UK 1st, EU, INT]
@@ -202,7 +210,9 @@ Available Calculators are:
       method_option :commit, :aliases => '-c', :type => :boolean, :required => false, :desc => "Commit changes permanently"
    
       def counties
-                
+             
+        require File.expand_path('config/environment.rb')
+        
         names, abbrs = [],[]
 
         names << 'Avon'

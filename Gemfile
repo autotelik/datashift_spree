@@ -7,8 +7,8 @@ source 'https://rubygems.org'
 
 gem 'datashift',  :path => "../datashift"
 
-gem 'rails', '3.2.9'
-gem 'spree', '1.2.2'
+gem 'rails', '3.2.11'
+gem 'spree', '1.3.1'
 gem 'mechanize'
 
 # STATIC GEMS

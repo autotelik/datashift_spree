@@ -71,6 +71,20 @@ Options:
    Populate Spree Product/Variant data from .xls (Excel) or CSV file
 ```
 
+## Testing
+
+You can define the version of Spree to test against in the Gemfile then run
+
+```ruby 
+    bundle install
+```
+
+When changing versions best to regenerate the sandbox :
+
+    rm -rf sandbox
+ 
+The next time you run rspec the sandbox will be regenerated using the latest versions of Rails/Spree specified in your Gemfile
+
 
 ## License
 
