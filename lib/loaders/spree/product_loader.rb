@@ -40,16 +40,18 @@ module DataShift
         #puts "Product Loader -  Load Options", options.inspect
 
         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
-        if(DataShift::SpreeHelper::version.to_f > 1 )
-          options[:force_inclusion] = options[:force_inclusion] ? ([ *options[:force_inclusion]] + 'images') : ['images']
-        end
-
+        
+        # Non Product/database fields we can still  process
+        @we_can_process_these_anyway =  ['images',  "variant_price", "variant_sku"]
+          
         # In >= 1.3.0 price moved to master Variant from Product so no association called Price on Product anymore
         # taking care of it here, means users can still simply just include a price column
-        if(DataShift::SpreeHelper::version.to_f >= 1.3 )
-          options[:force_inclusion] ? options[:force_inclusion] << 'price' : options[:force_inclusion] = ['price']
+        @we_can_process_these_anyway << 'price' if(DataShift::SpreeHelper::version.to_f >= 1.3 )
+      
+        if(DataShift::SpreeHelper::version.to_f > 1 )
+          options[:force_inclusion] = options[:force_inclusion] ? ([ *options[:force_inclusion]] + @we_can_process_these_anyway) : @we_can_process_these_anyway
         end
-        
+
         logger.info "Product load using forced operators: [#{options[:force_inclusion]}]" if(options[:force_inclusion])
         
         super(file_name, options)
@@ -86,6 +88,49 @@ module DataShift
 
           add_images( (SpreeHelper::version.to_f > 1) ? @load_object.master : @load_object )
 
+        elsif(current_method_detail.operator?('variant_price') && current_value)
+
+          if(@load_object.variants.size > 0)
+
+            if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
+
+              # Check if we processed Option Types and assign  per option
+              values = current_value.to_s.split(Delimiters::multi_assoc_delim)
+
+              if(@load_object.variants.size == values.size)
+                @load_object.variants.each_with_index {|v, i| v.price = values[i].to_f }
+                @load_object.save
+              else
+                puts "WARNING: Price entries did not match number of Variants - None Set"
+              end
+            end
+
+          else
+            super
+          end
+          
+        elsif(current_method_detail.operator?('variant_sku') && current_value)
+
+          puts "SKU SKU SKU"
+          if(@load_object.variants.size > 0)
+
+            if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
+
+              # Check if we processed Option Types and assign  per option
+              values = current_value.to_s.split(Delimiters::multi_assoc_delim)
+
+              if(@load_object.variants.size == values.size)
+                @load_object.variants.each_with_index {|v, i| v.sku = values[i].to_s; puts v.sku }
+                @load_object.save
+              else
+                puts "WARNING: SKU entries did not match number of Variants - None Set"
+              end
+            end
+
+          else
+            super
+          end
+          
         elsif(current_value && (current_method_detail.operator?('count_on_hand') || current_method_detail.operator?('on_hand')) )
 
 
