@@ -17,6 +17,8 @@ module DatashiftSpree
        
     desc "cleanup", "Remove Spree Product/Variant data from DB"
     
+    method_option :taxons, :aliases => '-t', :type => :boolean, :desc => "WARNING : deletes whole Taxonomy tree"
+
     def cleanup()
 
       require File.expand_path('config/environment.rb')
@@ -30,9 +32,11 @@ module DatashiftSpree
       
       cleanup =  %w{ Image OptionType OptionValue 
                     Product Property ProductProperty ProductOptionType 
-                    Variant Taxonomy Taxon
+                    Variant
       }
 
+      cleanup += ["Taxonomy", "Taxon"] if(options[:taxons])
+      
       cleanup.each do |k|
         klass = DataShift::SpreeHelper::get_spree_class(k)
         if(klass)
