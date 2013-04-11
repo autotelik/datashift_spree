@@ -288,11 +288,11 @@ module DataShift
               i = @load_object.variants.size + 1
 
               # This one line seems to works for 1.1.0 - 3.2 but not 1.0.0 - 3.1 ??
-              if(SpreeHelper::version.to_f >= 1.1)
-                variant = @load_object.variants.create( :sku => "#{@load_object.sku}_#{i}", :price => @load_object.price)
-              else
-                variant = @@variant_klass.create( :product => @load_object, :sku => "#{@load_object.sku}_#{i}", :price => @load_object.price, :available_on => @load_object.available_on)
-              end
+							if(SpreeHelper::version.to_f >= 1.1)
+							  variant = @load_object.variants.create( :sku => "#{@load_object.sku}_#{i}", :price => @load_object.price, :weight => @load_object.weight, :height => @load_object.height, :width => @load_object.width, :depth => @load_object.depth)
+							else
+							  variant = @@variant_klass.create( :product => @load_object, :sku => "#{@load_object.sku}_#{i}", :price => @load_object.price)
+							end
 
               variant.option_values << ov_list if(variant)    
             end
