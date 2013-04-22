@@ -4,7 +4,7 @@ $:.unshift '.'
 $:.unshift lib unless $:.include?(lib)
 
 require 'rake'
-  
+require 'date'
 require 'datashift_spree'
 
 Gem::Specification.new do |s|
