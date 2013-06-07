@@ -5,12 +5,18 @@ source 'https://rubygems.org'
 
 # DEFINE VERSIONS YOU WANT TO TEST AGAINST HERE
 
-group :development, :test do
 
-  gem 'datashift',  :path => "../datashift"
+  if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
+puts "LOADING DATASHIFT"
+    gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
+  else
+    gem 'datashift'
+  end
 
-  gem 'rails', '3.2.12'
-  gem 'spree', :git => 'git://github.com/spree/spree.git', :branch => '1-3-stable'
+  gem 'rails', '3.2.13'
+
+  gem 'spree', github: 'spree/spree', branch: '2-0-stable'
+  gem 'spree_auth_devise', github: 'spree/spree_auth_devise', branch: '2-0-stable'
 
   gem 'mechanize'
 
@@ -33,4 +39,4 @@ group :development, :test do
     gem 'sqlite3'
     gem "debugger"
   end
-end
+
