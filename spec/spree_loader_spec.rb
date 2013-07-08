@@ -59,7 +59,7 @@ describe 'SpreeLoader' do
     test_basic_product('SpreeProductsSimple.xls')
   end
 
-  it "should load basic Products from .csv via Spree loader" do
+  it "should load basic Products from .csv via Spree loader"  do
     test_basic_product('SpreeProductsSimple.csv')
   end
 
@@ -89,11 +89,17 @@ describe 'SpreeLoader' do
     p.option_types.should have_exactly(1).items
     
     p.has_variants?.should be false
-    p.master.count_on_hand.should == 12
+    
+    if(DataShift::SpreeHelper::version.to_f < 2  )
+      p.master.count_on_hand.should == 12
+      DataShift::SpreeHelper::version < "1.1.3" ?  p.count_on_hand.should == 12 : p.count_on_hand.should == 0
+      
+       @Product_klass.last.master.count_on_hand.should == 23
+    else
+      puts p.master.stock_items.first.count_on_hand.should == 12
+    end
      
-    DataShift::SpreeHelper::version < "1.1.3" ?  p.count_on_hand.should == 12 : p.count_on_hand.should == 0
    
-    @Product_klass.last.master.count_on_hand.should == 23
   end
 
   

@@ -7,7 +7,6 @@ source 'https://rubygems.org'
 
 
   if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
-puts "LOADING DATASHIFT"
     gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
   else
     gem 'datashift'
