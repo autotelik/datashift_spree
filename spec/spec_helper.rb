@@ -23,8 +23,16 @@ $:.unshift '.'  # 1.9.3 quite strict, '.' must be in load path for relative path
 
 require 'active_record'
 
+
+puts Gem.loaded_specs['active_support'].inspect
+
+puts Gem.loaded_specs['rails'].version.version.inspect
+
+ActiveSupport::Logger
+
 module ActiveSupport
-  class BufferedLogger
+  #class BufferedLogger
+  class Logger
     
     alias_method :add_original, :add
    

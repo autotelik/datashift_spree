@@ -4,6 +4,13 @@ Specific loaders and command line tasks for Spree E-Commerce.
 
 Wiki here : **https://github.com/autotelik/datashift_spree/wiki**
 
+### Versions
+
+The loaders have been tested with 0.11, 1.3 and 2.2
+
+The specs have been designed to use an internal Spree sandbox so it is 
+very easy to change the Spree version and run the specs. See Testing section below.
+
 ### Features
 
 Import and Export Spree models through .xls or CSV  files, including
@@ -94,6 +101,7 @@ If changing Spree versions, it's best to force a rebuild of a clean sandbox, and
     cd spec
     rm -rf sandbox
     rm -rf Gemfile.lock
+```
 
 Change Gemfile versions and run
 
