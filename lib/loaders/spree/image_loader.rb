@@ -3,7 +3,8 @@
 # Date ::     Jan 2011
 # License::   MIT. Free, Open Source.
 #
-require 'loader_base'
+require 'spree_base_loader'
+require 'spree_helper'
 
 module DataShift
 
