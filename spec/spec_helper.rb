@@ -13,20 +13,19 @@ require 'active_record'
 require 'bundler'
 require 'stringio'
 
-require 'datashift'
-require 'datashift_spree'
-
-require 'spree_helper'
 
 $:.unshift '.'  # 1.9.3 quite strict, '.' must be in load path for relative paths to work from here
     
+datashift_spec_base = File.expand_path( File.join(File.dirname(__FILE__), '..') )
 
-require 'active_record'
+require File.join(datashift_spec_base, 'lib/datashift_spree')   
+
+require 'sandbox_helper'
 
 
-puts Gem.loaded_specs['active_support'].inspect
+puts "Running tests with ActiveSupport verions : #{Gem.loaded_specs['active_support'].inspect}"
 
-puts Gem.loaded_specs['rails'].version.version.inspect
+puts "Running tests with Rails verions : #{Gem.loaded_specs['rails'].version.version.inspect}"
 
 ActiveSupport::Logger
 
@@ -58,6 +57,17 @@ module ActiveSupport
     end
   end
 end
+
+  def run_in(dir )
+    puts "RSpec .. running test in path [#{dir}]"
+    original_dir = Dir.pwd
+    begin
+      Dir.chdir dir
+      yield
+    ensure
+      Dir.chdir original_dir
+    end
+  end
 
 RSpec.configure do |config|
   
@@ -110,17 +120,6 @@ RSpec.configure do |config|
     end
   end
 
-    
-  def run_in(dir )
-    puts "RSpec .. running test in path [#{dir}]"
-    original_dir = Dir.pwd
-    begin
-      Dir.chdir dir
-      yield
-    ensure
-      Dir.chdir original_dir
-    end
-  end
   
   def capture(stream)
     begin
@@ -189,14 +188,7 @@ RSpec.configure do |config|
       exit e.status_code
     end
   end
-  
-  # SPREE
-  def spree_sandbox_path
-    File.join(File.dirname(__FILE__), 'sandbox')
-  end
-      
-
-  
+    
   def before_each_spree
       
     # Reset main tables - TODO should really purge properly, or roll back a transaction      
@@ -222,7 +214,7 @@ RSpec.configure do |config|
     FileUtils.mkdir_p(@spec_helper_logdir) unless File.exists?(@spec_helper_logdir)
     @spec_helper_log = File.join(@spec_helper_logdir, name)
     
-    ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new( @spec_helper_log )
+    ActiveRecord::Base.logger = ActiveSupport::Logger.new( @spec_helper_log )
 
     # Anyway to direct one logger to another ????? ... Logger.new(STDOUT) 
     @dslog = ActiveRecord::Base.logger
@@ -235,7 +227,7 @@ RSpec.configure do |config|
 
     configuration = {}
     
-    database_yml_path = File.join(spree_sandbox_path, 'config', 'database.yml')
+    database_yml_path = File.join(DataShift::SpreeHelper::spree_sandbox_path, 'config', 'database.yml')
     
     configuration[:database_configuration] = YAML::load( ERB.new( IO.read(database_yml_path) ).result )
     db = configuration[:database_configuration][ env ]
@@ -250,8 +242,10 @@ RSpec.configure do |config|
     puts "Connected to DB"
   end
   
-  # Datashift is usually included and tasks pulled in by a parent/host application.
-  # So here we are hacking our way around the fact that datashift is not a Rails/Spree app/engine
+  # Datashift is NOT a Rails engine. It can be used in any Ruby project,
+  # pulled in by a parent/host application via standard Gemfile
+  # 
+  # Here we have to hack our way around the fact that datashift is not a Rails/Spree app/engine
   # so that we can ** run our specs ** directly in datashift library
   # i.e without ever having to install datashift in a host application
   #
@@ -261,33 +255,12 @@ RSpec.configure do |config|
     
   def spree_boot()
     
-    spree_sandbox_app_path = spree_sandbox_path
+    spree_sandbox_app_path = DataShift::SpreeHelper::spree_sandbox_path
         
     unless(File.exists?(spree_sandbox_app_path))
-      puts "Creating new Rails sandbox for Spree : #{spree_sandbox_app_path}"
-      
-      rails_sandbox_root = File.expand_path("#{spree_sandbox_app_path}/..")
-         
-      run_in(rails_sandbox_root)  do
-        system('rails new sandbox')
-        
-        system('spree install sandbox -A')      
-      end
-      
-      run_in(spree_sandbox_app_path) {
-        
-         system('bundle install')   
-         
-         system('rake db:migrate')   
-         
-        # add in User model if new 1.2 version which splits out Auth from spree core
-        if(DataShift::SpreeHelper::version.to_f >= 1.2)
-          append_file('Gemfile', "gem 'spree_auth_devise', :git => \"git://github.com/spree/spree_auth_devise\"" )
-          
-          system('bundle install')   
-        end
-      }
+      puts "Creating new Rails sandbox for Spree : #{spree_sandbox_app_path}" 
     end
+
   
     puts "Using Rails sandbox for Spree : #{spree_sandbox_app_path}"
         
@@ -296,9 +269,11 @@ RSpec.configure do |config|
       puts "Running db_connect from #{Dir.pwd}"
        
       db_connect
-          
+        
+      require 'spree'
+      
       begin
-        require 'config/environment.rb'
+        load 'config/environment.rb'
         puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
       rescue => e
         #somethign in deface seems to blow up suddenly on 1.1
