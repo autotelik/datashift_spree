@@ -32,6 +32,7 @@
 #     DataShift::SpreeHelper::load_commands
 #
 require 'rbconfig'
+require 'datashift'
 
 module DataShift
 

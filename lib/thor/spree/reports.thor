@@ -8,8 +8,6 @@
 # bundle exec thor datashift:spreeboot:cleanup
 #
 # Note, not DataShift, case sensitive, create namespace for command line : datashift
-
-require 'excel_exporter'
   
 module DatashiftSpree
         
@@ -24,6 +22,8 @@ module DatashiftSpree
         require 'spree_helper'
         require 'csv_exporter'
         require 'image_loader'
+        require 'exporters/excel_exporter'
+        require 'exporters/csv_exporter'
 
         require File.expand_path('config/environment.rb')
 
