@@ -42,7 +42,7 @@ describe 'Spree Variants Loader' do
   # Operation and results should be identical when loading multiple associations
   # if using either single column embedded syntax, or one column per entry.
 
-  it "should load Products and create Variants from single column" do
+  it "should load Products and create Variants from single column", :fail => true do
     test_variants_creation('SpreeProducts.xls')
   end
 

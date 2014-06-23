@@ -8,6 +8,14 @@ source 'https://rubygems.org'
 
 gem 'rails', '4.0.5'
 
+
+#if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
+#gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
+#else
+gem 'datashift', "0.15.0"
+#end
+
+
 # we want to test both JRuby and non JRuby especially for Excel
 
 platform :jruby do
@@ -66,14 +74,6 @@ gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git
 
 # gem 'spree_auth_devise'
 # #gem 'spree_auth_devise', github: 'spree/spree_auth_devise', branch: '2-0-stable'
-
-
-#if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
-#gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
-#else
-gem 'datashift', "0.14.0"
-#end
-
 
 gem 'mechanize'
 

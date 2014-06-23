@@ -157,6 +157,32 @@ describe 'SpreeMethodMapping' do
 
   end
 
+  
+  it "should enable assignment to belongs_to association on Product", :fail =>true do
+
+    DataShift::MethodDictionary.find_operators( @Product_klass )
+    
+    DataShift::MethodDictionary.build_method_details( @Product_klass )
+        
+    method_detail = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'shipping_category' )
+
+    expect(method_detail.operator).to eq 'shipping_category'
+
+    expect(method_detail.operator_class_name).to eq 'Spree::ShippingCategory'
+    expect(method_detail.operator_class).to be_a(Class)
+    expect(method_detail.operator_class).to eq Spree::ShippingCategory
+    
+    
+    method_detail = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'tax_category' )
+
+    expect(method_detail.operator).to eq 'tax_category'
+
+    expect(method_detail.operator_class_name).to eq 'Spree::TaxCategory'
+    expect(method_detail.operator_class).to be_a(Class)
+    expect(method_detail.operator_class).to eq Spree::TaxCategory
+  end
+    
+
   it "should enable assignment to has_many association on new object" do
  
     DataShift::MethodDictionary.find_operators( @Product_klass )

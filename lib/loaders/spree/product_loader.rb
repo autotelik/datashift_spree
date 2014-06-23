@@ -35,6 +35,9 @@ module DataShift
       #   [:dummy]           : Perform a dummy run - attempt to load everything but then roll back
       #
       def perform_load( file_name, opts = {} )
+        
+        logger.info "Product load from File [#{file_name}]"
+            
         options = opts.dup
 
         #puts "Product Loader -  Load Options", options.inspect
@@ -111,7 +114,6 @@ module DataShift
           
         elsif(current_method_detail.operator?('variant_sku') && current_value)
 
-          puts "SKU SKU SKU"
           if(@load_object.variants.size > 0)
 
             if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
@@ -120,7 +122,7 @@ module DataShift
               values = current_value.to_s.split(Delimiters::multi_assoc_delim)
 
               if(@load_object.variants.size == values.size)
-                @load_object.variants.each_with_index {|v, i| v.sku = values[i].to_s; puts v.sku }
+                @load_object.variants.each_with_index {|v, i| v.sku = values[i].to_s }
                 @load_object.save
               else
                 puts "WARNING: SKU entries did not match number of Variants - None Set"
@@ -200,8 +202,12 @@ module DataShift
       def add_options
       
         # TODO smart column ordering to ensure always valid by time we get to associations
-        save_if_new
-
+        begin
+          save_if_new
+        rescue => e
+          
+          raise DataShifSpree::ProductLoadError.new("Cannot add OptionTypes/Variants - No parent Product")
+        end
         # example : mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
 
         variants = get_each_assoc
@@ -283,7 +289,7 @@ module DataShift
 
             unless(ov_list.empty?)
               
-              puts "Creating Variant from OptionValue(s) #{ov_list.collect(&:name).inspect}" if(verbose)
+              logger.info("Creating Variant from OptionValue(s) #{ov_list.collect(&:name).inspect}")
               
               i = @load_object.variants.size + 1
 
@@ -382,8 +388,8 @@ module DataShift
                 puts "Not found or created so now what ?"
               end
             rescue => e
-              puts e.inspect
-              puts "ERROR : Cannot assign Taxon ['#{taxon}'] to Product ['#{load_object.name}']"
+              logger.error(e.inspect)
+              logger.error "Cannot assign Taxon ['#{taxon}'] to Product ['#{load_object.name}']"
               next
             end
 
