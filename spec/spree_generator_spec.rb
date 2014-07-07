@@ -37,53 +37,53 @@ describe 'SpreeGenerator' do
 
   it "should export any Spree model to .xls spreedsheet" do
 
-    expect = result_file('taxonomy_export_spec.xls')
+    expected = result_file('taxonomy_export_spec.xls')
 
-    excel = DataShift::ExcelGenerator.new(expect)
+    excel = DataShift::ExcelGenerator.new(expected)
 
     excel.generate(@Taxonomy_klass)
 
-    File.exists?(expect).should be_true
+    expect(File.exists?(expected)).to eq true
     
-    puts "You can check results manually in file #{expect}"
+    puts "You can check results manually in file #{expected}"
     
-    expect = result_file('taxon_export_spec.xls')
+    expected = result_file('taxon_export_spec.xls')
 
-    excel.filename = expect
+    excel.filename = expected
 
     excel.generate(@Taxon_klass)
 
-    File.exists?(expect).should be_true
+    expect(File.exists?(expected)).to eq true
     
-    puts "You can check results manually in file #{expect}"
+    puts "You can check results manually in file #{expected}"
     
   end
 
   it "should export Spree Product and all associations to .xls spreedsheet" do
 
-    expect = result_file('product_and_assoc_export_spec.xls')
+    expected = result_file('product_and_assoc_export_spec.xls')
 
-    excel = DataShift::ExcelGenerator.new(expect)
+    excel = DataShift::ExcelGenerator.new(expected)
       
     excel.generate_with_associations(@Product_klass)
 
-    File.exists?(expect).should be_true
+    expect(File.exists?(expected)).to eq true
 
-    puts "You can check results manually in file #{expect}"
+    puts "You can check results manually in file #{expected}"
     
   end
     
   it "should be able to exclude single associations from template" do
 
-    expect = result_file('product_and_assoc_export_spec.xls')
+    expected = result_file('product_and_assoc_export_spec.xls')
 
-    excel = DataShift::ExcelGenerator.new(expect)
+    excel = DataShift::ExcelGenerator.new(expected)
       
     excel.generate_with_associations(@Product_klass, :exclude => :has_many)
 
-    File.exists?(expect).should be_true
+    expect(File.exists?(expected)).to eq true
 
-    puts "You can check results manually in file #{expect}"
+    puts "You can check results manually in file #{expected}"
     
   end
   

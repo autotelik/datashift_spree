@@ -8,15 +8,15 @@ Wiki here : **https://github.com/autotelik/datashift_spree/wiki**
 
 The loaders have been tested with 0.11, 1.3 and 2.2
 
-The specs have been designed to use an internal Spree sandbox so it is 
-very easy to change the Spree version and run the specs. See Testing section below.
+The specs have been designed to use an internal Spree sandbox so it's 
+easy to change the Spree version and re-run the specs. See Testing section below.
 
 ### Features
 
 Import and Export Spree models through .xls or CSV  files, including
 all associations and setting configurable defaults or over rides.
 
-High level rake and thor command line tasks for import/export provided.
+High level thor command line tasks for import/export provided.
 
 Specific loaders and command line tasks provided out the box for **Spree E-Commerce**, 
 enabling import/export of Product data including creating Variants with different

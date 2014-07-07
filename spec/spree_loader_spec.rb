@@ -65,7 +65,7 @@ describe 'SpreeLoader' do
 
   def test_basic_product( source )
     
-    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
+    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price', 'shipping_category'] )
 
     @Product_klass.count.should == 3
     

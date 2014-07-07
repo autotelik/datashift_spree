@@ -4,13 +4,21 @@
 # License::   Free, Open Source.
 #
 
-module DataShifSpree
+module DataShift
 
-  class ProductLoadError < DataShift::DataShiftException
-    def initialize( msg )
-      super( msg )
+  module SpreeHelper
+
+    class ProductLoadError < DataShift::DataShiftException
+      def initialize( msg )
+        super( msg )
+      end
     end
+  
+    class ImageLoadError < DataShift::DataShiftException
+      def initialize( msg )
+        super( msg )
+      end
+    end
+    
   end
-  
-  
 end

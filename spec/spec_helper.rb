@@ -27,50 +27,19 @@ puts "Running tests with ActiveSupport verions : #{Gem.loaded_specs['active_supp
 
 puts "Running tests with Rails verions : #{Gem.loaded_specs['rails'].version.version.inspect}"
 
-ActiveSupport::Logger
-
-module ActiveSupport
-  #class BufferedLogger
-  class Logger
-    
-    alias_method :add_original, :add
-   
-    def add(severity, message = nil, progname = nil, &block)
-      return if @level && @level > severity
-      message = (message || (block && block.call) || progname).to_s
-
-      level = {
-        0 => "DEBUG",
-        1 => "INFO",
-        2 => "WARN",
-        3 => "ERROR",
-        4 => "FATAL"
-      }[severity] || "U"
-
-      #message = "[%s: %s #%d] %s" % [level, Time.now.strftime("%m%d %H:%M:%S"),$$, message]
-      message = "[%s: %s] %s" % [level, Time.now.strftime("%m%d %H:%M:%S"), message]
-
-      message = "#{message}\n" unless message[-1] == ?\n
-      
-      add_original(severity, "#{message}", progname)
-      
-    end
+def run_in(dir )
+  puts "RSpec .. running test in path [#{dir}]"
+  original_dir = Dir.pwd
+  begin
+    Dir.chdir dir
+    yield
+  ensure
+    Dir.chdir original_dir
   end
 end
 
-  def run_in(dir )
-    puts "RSpec .. running test in path [#{dir}]"
-    original_dir = Dir.pwd
-    begin
-      Dir.chdir dir
-      yield
-    ensure
-      Dir.chdir original_dir
-    end
-  end
-
 RSpec.configure do |config|
-  
+     
   config.before do
     ARGV.replace []
   end
@@ -99,8 +68,8 @@ RSpec.configure do |config|
     
         before_each_spree
 
-        @Image_klass.count.should == 0
-        @Product_klass.count.should == 0    
+        expect(@Image_klass.count).to eq 0
+        expect(@Product_klass.count).to eq 0    
 
         DataShift::MethodDictionary.clear
       
@@ -172,7 +141,6 @@ RSpec.configure do |config|
   end
   
 
-  
   def spree_fixture( source)
     ifixture_file(source)
   end
@@ -203,22 +171,16 @@ RSpec.configure do |config|
     end
   end
   
-  def spec_helper_log
-    @spec_helper_log ||= ""
-  end
+
   
   def set_logger( name = 'datashift_spree_spec.log')
     
     require 'logger'
-    @spec_helper_logdir = File.dirname(__FILE__) + '/logs'
-    FileUtils.mkdir_p(@spec_helper_logdir) unless File.exists?(@spec_helper_logdir)
-    @spec_helper_log = File.join(@spec_helper_logdir, name)
-    
-    ActiveRecord::Base.logger = ActiveSupport::Logger.new( @spec_helper_log )
-
-    # Anyway to direct one logger to another ????? ... Logger.new(STDOUT) 
-    @dslog = ActiveRecord::Base.logger
+    logdir = File.join(File.dirname(__FILE__), 'log')
+    FileUtils.mkdir_p(logdir) unless File.exists?(logdir)
+    ActiveRecord::Base.logger = Logger.new( File.join(logdir, name) )
   end
+  
    
   def db_connect( env = 'development' )
     # Some active record stuff seems to rely on the RAILS_ENV being set ?
@@ -234,11 +196,13 @@ RSpec.configure do |config|
 
     puts "Setting DB Config:", db.inspect
     ActiveRecord::Base.configurations = db   
+
+    set_logger
     
     puts "Connecting to DB"
     
     ActiveRecord::Base.establish_connection( db )
-
+          
     puts "Connected to DB"
   end
   
@@ -281,12 +245,9 @@ RSpec.configure do |config|
         puts e.backtrace
         puts "#{e.inspect}"
       end
-        
-      set_logger( 'spree_sandbox.log' )
-        
     }
      
-    @dslog.info "Booted Spree using version #{DataShift::SpreeHelper::version}"
+    puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
   end
       
   def set_spree_class_helpers
