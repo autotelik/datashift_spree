@@ -9,20 +9,44 @@
 #
 require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 
-require 'thor'
-require 'thor/group'
-require 'thor/runner'
 
-describe 'Spree Digitals Loader' do
+describe 'Datshift Spree Thor tasks' do
 
   before(:all) do
     @spree_sandbox_app_path = DataShift::SpreeHelper::spree_sandbox_path 
+    
+    require 'thor'    
+    require 'thor/runner'
+    
+    load  File.join(rspec_spree_thor_path, 'digitals.thor')
+    
   end
 
 
   before(:each) do
   end
 
+  
+  it "should bulk attach digitals to a Product" do
+
+    cmd = ["bulk",  '--field', 'sku']
+      
+    # which boils down to
+    # 
+    # Variant.find_by_sku('sku_001').digitals << Spree::Digital.new( File.read('sku_001.mp3') )
+      
+    cmd << '--input' << File.join(fixtures_path(), 'digitals')
+     
+    puts "Running bulk attach  #{cmd}"
+    
+    rails_sandbox_root = DataShift::SpreeHelper::spree_sandbox_path
+         
+    run_in(rails_sandbox_root)  do
+      DatashiftSpree::Digitals.start( cmd)
+    end
+
+  end
+  
   # Operation and results should be identical when loading multiple associations
   # if using either single column embedded syntax, or one column per entry.
 

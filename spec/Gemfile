@@ -12,7 +12,7 @@ gem 'rails', '4.0.5'
 #if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
 #gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
 #else
-gem 'datashift', "0.15.0"
+gem 'datashift', "0.16.0"
 #end
 
 
@@ -58,6 +58,10 @@ end
 
 
 #DATASHIFT TESTING
+#
+# See https://github.com/sstephenson/execjs#readme for more supported runtimes
+gem 'therubyracer', platforms: :ruby
+
 
 gem 'spree', '2.2.2'
 
@@ -68,8 +72,6 @@ gem 'spree', '2.2.2'
 
 gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :branch => '2-2-stable'
 gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', :branch => '2-2-stable'
-
-  
 
 
 # gem 'spree_auth_devise'

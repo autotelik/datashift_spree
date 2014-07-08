@@ -47,8 +47,10 @@ module DataShift
          
       run_in(rails_sandbox_root)  do
         system('rails new ' + spree_sandbox_name)     
-                   
-        system("spree install #{spree_sandbox_name}  --auto-accept") 
+      end
+      
+      run_in(path)  do
+        system("spree install --auto-accept") 
       end
       
       puts "Created Spree sandbox store : #{path}"

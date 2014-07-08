@@ -25,7 +25,7 @@ module Datashift
       original_dir = Dir.pwd
       
       
-      # TOFIX - this don't work ... but works if run straight afdter the task
+      # TOFIX - this don't work ... but works if run straight after the task
       # maybe the env not right using system ?
       begin
         Dir.chdir DataShift::SpreeHelper::spree_sandbox_path

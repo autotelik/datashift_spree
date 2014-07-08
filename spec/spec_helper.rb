@@ -105,6 +105,10 @@ RSpec.configure do |config|
 
   alias :silence :capture  
   
+  def rspec_spree_thor_path
+    @spec_thor_path ||= File.join( File.dirname(__FILE__), '..', 'lib', 'thor', 'spree')
+  end
+  
   def fixtures_path()
     File.expand_path(File.dirname(__FILE__) + '/fixtures')
   end
@@ -223,6 +227,26 @@ RSpec.configure do |config|
         
     unless(File.exists?(spree_sandbox_app_path))
       puts "Creating new Rails sandbox for Spree : #{spree_sandbox_app_path}" 
+
+      require 'sandbox_helper'
+     
+      DataShift::SpreeHelper::build_sandbox
+      
+       original_dir = Dir.pwd
+      
+      
+      # TOFIX - this don't work ... but works if run straight after the task
+      # maybe the env not right using system ?
+      begin
+        Dir.chdir DataShift::SpreeHelper::spree_sandbox_path
+        puts "Running bundle install"
+        system('bundle install')   
+        
+        puts "Running rake db:migrate"
+        system('bundle exec rake db:migrate')     
+      ensure
+        Dir.chdir original_dir
+      end
     end
 
   
@@ -237,6 +261,7 @@ RSpec.configure do |config|
       require 'spree'
       
       begin
+        puts "Booting Spree #{DataShift::SpreeHelper::version} in sandbox"
         load 'config/environment.rb'
         puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
       rescue => e
