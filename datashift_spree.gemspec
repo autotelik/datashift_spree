@@ -1,16 +1,11 @@
-lib = File.expand_path('../lib/', __FILE__)
-
-$:.unshift '.' 
-$:.unshift lib unless $:.include?(lib)
-
 require 'rake'
-require 'date'
-require 'datashift_spree'
+
+
 
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
-  s.name = DataShift::SpreeHelper::gem_name
-  s.version = DataShift::SpreeHelper::gem_version
+  s.name = 'datashift_spree'#Helper::gem_name
+  s.version = '0.6.0'
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Statter"]
