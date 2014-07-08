@@ -9,7 +9,6 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Statter"]
-  s.date = Date.today.to_s
   s.description = "Comprehensive Excel/CSV import/export for Spree, Products,Images, any model with full associations"
   s.email = "rubygems@autotelik.co.uk"
   
