@@ -24,7 +24,8 @@ spec/logs
 spec/fixtures/results
 /spec/MissingAttachmentRecords
 /spec/tmp/*
-/spec/sandbox
+/spec/rspec_spree_sandbox
+/spec/rspec_spree_sandbox/*
 
 nbproject
 Thumbs.db
