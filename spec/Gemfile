@@ -25,7 +25,7 @@ end
 
 platform :ruby do
   gem 'sqlite3'
-  gem "debugger"
+  #gem "debugger"
 end
 
 # FROM SANDBOX GEMFILE

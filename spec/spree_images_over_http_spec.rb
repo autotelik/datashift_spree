@@ -44,7 +44,8 @@ describe 'SpreeImageLoading' do
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
 
     p.name.should == "Demo Product for AR Loader"
-    p.images.should have_exactly(1).items
+    
+    expect(p.images.size).to eq 1
          
     
     #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/DEMO_001_ror_bag.jpeg
@@ -55,14 +56,14 @@ describe 'SpreeImageLoading' do
     expected = [["image/jpeg", "DEMO_001_ror_bag"], ["image/png", 'spree'], ["image/jpeg", 'DEMO_004_ror_ringer']]
     
     @Product_klass.all.each_with_index do |p, idx| 
-      p.images.should have_exactly(1).items 
+      expect(p.images.size).tp eq 1
       i = p.images[0]
       
       i.attachment_content_type.should == expected[idx][0]
       i.attachment_file_name.should include expected[idx][1]
     end
 
-    @Image_klass.count.should == 3
+    expect(@Image_klass.count).to eq 3
   end
   
   it "should handle large datasets from urls in Product loading" do

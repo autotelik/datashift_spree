@@ -14,6 +14,8 @@
 
 require 'datashift_spree'
 
+
+
 require 'spree_helper'
 
 module DatashiftSpree 
@@ -44,6 +46,8 @@ EOS
     method_option :split_file_name_on,  :type => :string, :desc => "delimiter to progressivley split filename for lookup", :default => ' '
 
     def bulk()
+
+      DataShift::load_commands
 
       # TODO - We're assuming run from a rails app/top level dir...
       # ...can we make this more robust ? e.g what about when using active record but not in Rails app,
