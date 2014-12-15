@@ -4,6 +4,7 @@
 # License::   MIT. Free, Open Source.
 #
 require 'loader_base'
+require 'spree_base_loader'
 #require 'paperclip/attachment_loader'
 
 module DataShift
