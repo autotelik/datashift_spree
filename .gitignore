@@ -14,6 +14,7 @@ Gemfile.lock
 *.pid
 *.tmproj
 *.sw?
+.idea
 logs
 logs/**
 public
