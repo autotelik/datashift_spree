@@ -198,9 +198,6 @@ RSpec.configure do |config|
     configuration[:database_configuration] = YAML::load( ERB.new( IO.read(database_yml_path) ).result )
     db = configuration[:database_configuration][ env ]
 
-    puts "Setting DB Config:", db.inspect
-    ActiveRecord::Base.configurations = db   
-
     set_logger
     
     puts "Connecting to DB"

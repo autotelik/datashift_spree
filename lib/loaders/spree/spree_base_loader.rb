@@ -28,7 +28,9 @@ module DataShift
       super(klass, find_operators, loader_object, options)
 
       logger.info "Spree Loading initialised with:\n#{options.inspect}"
-      
+
+      #TODO - ditch this backward compatability now and just go with namespaced ?
+      #
       @@image_klass ||= DataShift::SpreeHelper::get_spree_class('Image')
       @@option_type_klass ||= DataShift::SpreeHelper::get_spree_class('OptionType')
       @@option_value_klass ||= DataShift::SpreeHelper::get_spree_class('OptionValue')

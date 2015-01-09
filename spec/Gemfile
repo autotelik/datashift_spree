@@ -6,13 +6,13 @@ source 'https://rubygems.org'
 # DEFINE VERSIONS YOU WANT TO TEST AGAINST HERE
 # THIS SHOULD BASICALLY REPLICATE WHAT IS IN THE SANDBOX GEMFILE
 
-gem 'rails', '4.0.5'
-
+#gem 'rails', '4.0.5'
+gem 'rails', '4.1.8'
 
 #if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
 #gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
 #else
-gem 'datashift', "0.16.0"
+gem 'datashift', :path => "/home/rubyuser/SoftwareDev/git/datashift"
 #end
 
 
@@ -63,19 +63,17 @@ end
 gem 'therubyracer', platforms: :ruby
 
 
-gem 'spree', '2.2.2'
-
-# N.B Spree will update the sandbox Gemfile with additional Spree gems 
-# e,g User model and Authorisation 
-# For rspec you  may need to add them in here or you'll get missing Spree constants  
+# N.B Spree will update the sandbox Gemfile with additional Spree gems
+# e,g User model and Authorisation
+# For rspec you  may need to add them in here or you'll get missing Spree constants
 #TODO - update  sandbox code so it automatically adds Spree gems in here
 
-gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :branch => '2-2-stable'
-gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', :branch => '2-2-stable'
+spree_version = '2-3-stable'
 
-
-# gem 'spree_auth_devise'
-# #gem 'spree_auth_devise', github: 'spree/spree_auth_devise', branch: '2-0-stable'
+gem 'spree', github: 'spree/spree', branch: spree_version
+gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :branch => spree_version
+gem 'spree_bootstrap_frontend', github: '200Creative/spree_bootstrap_frontend', branch: spree_version
+gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', branch: spree_version
 
 gem 'mechanize'
 

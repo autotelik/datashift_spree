@@ -48,6 +48,8 @@ module DatashiftSpree
       if(options[:config])
         raise "Bad Config - Cannot find specified file #{options[:config]}" unless File.exists?(options[:config])
 
+        puts "DataShift::Product proccssing config from: #{options[:config]}"
+
         loader.configure_from( options[:config] )
       else
         loader.populator.set_default_value('available_on', Time.now.to_s(:db) )

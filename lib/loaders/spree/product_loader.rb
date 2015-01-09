@@ -40,8 +40,6 @@ module DataShift
             
         options = opts.dup
 
-        #puts "Product Loader -  Load Options", options.inspect
-
         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
         
         # Non Product/database fields we can still  process
@@ -139,11 +137,9 @@ module DataShift
           
         elsif(current_value && (current_method_detail.operator?('count_on_hand') || current_method_detail.operator?('on_hand')) )
 
-          # CURRENTLY BROKEN FOR Spree 2.2 - New Stock management : 
+          # Spree 2.2 - New Stock management :
           # http://guides.spreecommerce.com/developer/inventory.html
-          
-          logger.warn("NO STOCK SET - count_on_hand BROKEN - needs updating for new StockManagement in Spree >= 2.2")
-          return
+          logger.warn("Check stock settings carefully - new StockManagement in Spree >= 2.2")
 
           # Unless we can save here, in danger of count_on_hand getting wiped out.
           # If we set (on_hand or count_on_hand) on an unsaved object, during next subsequent save
@@ -153,7 +149,6 @@ module DataShift
           # TODO smart column ordering to ensure always valid - if we always make it very last column might not get wiped ?
           #
           save_if_new
-
 
           # Spree has some stock management stuff going on, so dont usually assign to column vut use
           # on_hand and on_hand=
@@ -167,7 +162,7 @@ module DataShift
               values = current_value.to_s.split(Delimiters::multi_assoc_delim)
 
               if(@load_object.variants.size == values.size)
-                @load_object.variants.each_with_index {|v, i| v.on_hand = values[i].to_i }
+                @load_object.variants.each_with_index {|v, i| v.stock_items.first.count_on_hand = values[i].to_i }
                 @load_object.save
               else
                 puts "WARNING: Count on hand entries did not match number of Variants - None Set"
@@ -179,9 +174,11 @@ module DataShift
           elsif(@load_object.variants.size == 0)
             if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
               puts "WARNING: Multiple count_on_hand values specified but no Variants/OptionTypes created"
-              load_object.on_hand = current_value.to_s.split(Delimiters::multi_assoc_delim).first.to_i
+              load_object.master.stock_items.first.count_on_hand = current_value.to_s.split(Delimiters::multi_assoc_delim).first.to_i
+              #load_object.on_hand = current_value.to_s.split(Delimiters::multi_assoc_delim).first.to_i
             else
-              load_object.on_hand = current_value.to_i
+              #load_object.on_hand = current_value.to_i
+              load_object.master.stock_items.first.count_on_hand = current_value.to_i
             end
           end
 
@@ -214,6 +211,7 @@ module DataShift
         begin
           save_if_new
         rescue => e
+          logger.error("Cannot add OptionTypes/Variants - Save Failed : #{e.inspect}")
           raise ProductLoadError.new("Cannot add OptionTypes/Variants - Save failed on parent Product")
         end
         # example : mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
@@ -284,8 +282,8 @@ module DataShift
 
             ovname.strip!
             
-            ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(ovname, lead_option_type.id, :presentation => ovname.humanize)
-
+            # Prior Rails 4 - ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(ovname, lead_option_type.id, :presentation => ovname.humanize)
+            ov = @@option_value_klass.where(:name => ovname, :option_type_id => lead_option_type.id).first_or_create(:presentation => ovname.humanize)
             ov_list << ov if ov
  
             # Process rest of array of types => values
@@ -293,8 +291,9 @@ module DataShift
               ovlist.each do |for_composite|
                 
                 for_composite.strip!
-                
-                ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(for_composite, ot.id, :presentation => for_composite.humanize)
+
+                # Prior Rails 4 - ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(for_composite, ot.id, :presentation => for_composite.humanize)
+                ov = @@option_value_klass.where(:name => ovname, :option_type_id => lead_option_type.id).first_or_create(:presentation => ovname.humanize)
 
                 ov_list << ov if(ov)
               end
@@ -338,7 +337,7 @@ module DataShift
         property_list.each do |pstr|
 
           # Special case, we know we lookup on name so operator is effectively the name to lookup
-          find_by_name, find_by_value = get_find_operator_and_rest( pstr )
+          find_by_name, find_by_value = get_operator_and_data( pstr )
 
           raise "Cannot find Property via #{find_by_name} (with value #{find_by_value})" unless(find_by_name)
 
@@ -385,7 +384,7 @@ module DataShift
 
           parent_name = name_list.shift
 
-          parent_taxonomy = @@taxonomy_klass.find_or_create_by_name(parent_name)
+          parent_taxonomy = @@taxonomy_klass.where(:name => parent_name).first_or_create
 
           raise DataShift::DataProcessingError.new("Could not find or create Taxonomy #{parent_name}") unless parent_taxonomy
 
@@ -395,10 +394,12 @@ module DataShift
           taxons = name_list.collect do |name|
 
             begin
-              taxon = @@taxon_klass.find_or_create_by_name_and_parent_id_and_taxonomy_id(name, parent && parent.id, parent_taxonomy.id)
+              taxon = @@taxon_klass.where(:name => name, :parent_id => parent.id, :taxonomy_id => parent_taxonomy.id).first_or_create
+
+              # pre Rails 4 -  taxon = @@taxon_klass.find_or_create_by_name_and_parent_id_and_taxonomy_id(name, parent && parent.id, parent_taxonomy.id)
 
               unless(taxon)
-                puts "Not found or created so now what ?"
+                logger.warn("Missing Taxon - could not find or create #{name} for parent #{parent_taxonomy.inspect}")
               end
             rescue => e
               logger.error(e.inspect)
