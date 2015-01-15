@@ -11,25 +11,17 @@
 #             
 require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 
-  
 describe 'SpreeMethodMapping' do
 
-    
-  before(:all) do
-    before_all_spree
-  end
+  include_context 'Populate dictionary ready for Product loading'
 
   before(:each) do
-   
-    before_each_spree
-      
-    DataShift::MethodDictionary.clear
   end
 
-  
+  let (:populator) { DataShift::Populator.new }
+  let (:product) { Spree::Product.new }
+
   it "should populate operators for a Spree Product" do
-  
-    DataShift::MethodDictionary.find_operators( @Product_klass )
      
     DataShift::MethodDictionary.has_many.should_not be_empty
     DataShift::MethodDictionary.belongs_to.should_not be_empty
@@ -59,10 +51,7 @@ describe 'SpreeMethodMapping' do
 
   it "should find method details correctly for different forms of a column name" do
 
-    DataShift::MethodDictionary.find_operators( @Product_klass )
-     
-    DataShift::MethodDictionary.build_method_details( @Product_klass )
-        
+
     ["available On", 'available_on', "Available On", "AVAILABLE_ON"].each do |format|
 
       method_details = DataShift::MethodDictionary.find_method_detail( @Product_klass, format )
@@ -83,12 +72,8 @@ describe 'SpreeMethodMapping' do
 
   it "should populate method details correctly for has_many forms of association name" do
 
-    DataShift::MethodDictionary.find_operators( @Product_klass )
-    
     DataShift::MethodDictionary.has_many[@Product_klass].should include('product_option_types')
 
-    DataShift::MethodDictionary.build_method_details( @Product_klass )
-        
     ["product_option_types", "product option types", 'product Option_types', "ProductOptionTypes", "Product_Option_Types"].each do |format|
       method_detail = DataShift::MethodDictionary.find_method_detail( @Product_klass, format )
 
@@ -103,10 +88,7 @@ describe 'SpreeMethodMapping' do
 
   it "should populate method details for assignment ops (delegated columns) on #{@Product_klass}" do
 
-    DataShift::MethodDictionary.find_operators( @Product_klass, :reload => true, :instance_methods => true )
 
-    DataShift::MethodDictionary.build_method_details( @Product_klass )
-        
     # Example of delegates i.e. cost_price column on Variant, delegated to Variant by Product
 
     # Spree 2 .. count_on_hand replaced by StockItems 
@@ -130,15 +112,8 @@ describe 'SpreeMethodMapping' do
   end
 
 
-  it "should enable assignment via assignment ops (delegated columns) on #{@Product_klass}", :fail => true do
 
-    DataShift::MethodDictionary.find_operators( @Product_klass, :reload => true, :instance_methods => true )
-
-    DataShift::MethodDictionary.build_method_details( @Product_klass )
-        
-    product = @Product_klass.new
-
-    product.should be_new_record
+  it "should enable assignment via assignment ops (delegated columns) on #{@Product_klass}" do
 
     # we can use method details to populate a new AR object, essentailly same as
     # klazz_object.send( count_on_hand.operator, 2)
@@ -146,8 +121,6 @@ describe 'SpreeMethodMapping' do
     # Spree 2 .. count_on_hand replaced by StockItems  
     price_md = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'cost_price' )
 
-    populator = DataShift::Populator.new
-      
     populator.prepare_and_assign(price_md, product, 2.23 )
     expect(product.cost_price).to eq 2.23
 
@@ -168,11 +141,7 @@ describe 'SpreeMethodMapping' do
   end
 
   
-  it "should enable assignment to belongs_to association on Product", :fail =>true do
-
-    DataShift::MethodDictionary.find_operators( @Product_klass )
-    
-    DataShift::MethodDictionary.build_method_details( @Product_klass )
+  it "should enable assignment to belongs_to association on Product" do
         
     method_detail = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'shipping_category' )
 
@@ -193,19 +162,16 @@ describe 'SpreeMethodMapping' do
   end
     
 
-  it "should enable assignment to has_many association on new object" do
+  it "should enable assignment to has_many association on new object", :fail => true do
  
-    DataShift::MethodDictionary.find_operators( @Product_klass )
- 
-    DataShift::MethodDictionary.build_method_details( @Product_klass )
-        
+
     method_detail = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'taxons' )
 
     expect(method_detail.operator).to eq 'taxons'
 
     upload_object = @Product_klass.new
 
-   expect( upload_object.taxons.size).to eq 0
+    expect( upload_object.taxons.size).to eq 0
 
     # NEW ASSOCIATION ASSIGNMENT
 
@@ -218,22 +184,20 @@ describe 'SpreeMethodMapping' do
     expect(upload_object.taxons.size).to eq 3
 
     # Use generic assignment on method detail - expect has_many to use << not =
-    method_detail.assign( upload_object, @Taxon_klass.new )
+    populator.prepare_and_assign(method_detail, upload_object, @Taxon_klass.new )
     expect(upload_object.taxons.size).to eq 4
 
-    method_detail.assign( upload_object, [@Taxon_klass.new, @Taxon_klass.new])
+    populator.prepare_and_assign( method_detail, upload_object, [@Taxon_klass.new, @Taxon_klass.new])
     expect(upload_object.taxons.size).to eq 6
   end
 
   it "should enable assignment to has_many association using existing objects" do
 
-    DataShift::MethodDictionary.find_operators( @Product_klass )
-
-    DataShift::MethodDictionary.build_method_details( @Product_klass )
-        
     method_detail = DataShift::MethodDictionary.find_method_detail( @Product_klass, 'product_properties' )
 
-    method_detail.operator.to eq 'product_properties'
+    expect(method_detail).to be_a DataShift::MethodDetail
+
+    expect(method_detail.operator).to eq 'product_properties'
 
     klazz_object = @Product_klass.new
 
@@ -250,15 +214,14 @@ describe 'SpreeMethodMapping' do
     expect(klazz_object.product_properties.size).to eq 3
 
     # Use generic assignment on method detail - expect has_many to use << not =
-    pp2 = @ProductProperty_klass.new
-    pp2.property = @prop1
-    method_detail.assign( klazz_object,  pp2)
+    pp2 = @ProductProperty_klass.new( :property => @prop1 )
+    populator.prepare_and_assign(method_detail, klazz_object, pp2)
     expect(klazz_object.product_properties.size).to eq 4
 
     pp3, pp4 = @ProductProperty_klass.new, @ProductProperty_klass.new
     pp3.property = @prop2
     pp4.property = @prop3
-    method_detail.assign( klazz_object, [pp3, pp4])
+    populator.prepare_and_assign(method_detail, klazz_object, [pp3, pp4])
     expect(klazz_object.product_properties.size).to eq 6
 
   end
@@ -275,9 +238,9 @@ describe 'SpreeMethodMapping' do
      
     method_details = method_mapper.map_inbound_headers_to_methods( @Product_klass, headers )
     
-    method_details.compact.should have_exactly(2).items
-    
-    method_details.should have_exactly(4).items
+    expect(method_details.compact.size).to eq 2
+
+    expect(method_details.size).to eq 4
     
     method_details[0].should be_nil
     method_details[2].should be_nil
@@ -302,9 +265,9 @@ describe 'SpreeMethodMapping' do
     expect(method_details[0].operator).to eq 'BLAH'
     method_details[0].col_type.should be_nil
       
-    method_details.compact.should have_exactly(4).items
-    
-    method_details.should have_exactly(4).items
+    expect(method_details.compact.size).to eq 4
+
+    expect(method_details.size).to eq 4
   end
     
   it "should ignore :force_inclusion items if they are genuine columns" do
@@ -321,9 +284,9 @@ describe 'SpreeMethodMapping' do
    
     method_details = method_mapper.map_inbound_headers_to_methods( @Product_klass, headers, options )
     
-    method_details.compact.should have_exactly(3).items
+    expect(method_details.compact.size).to eq 3
     
-    method_details.should have_exactly(4).items
+    expect(method_details.size).to eq 4
     
     expect(method_details[0].name).to eq 'VARIANTS' 
     expect(method_details[0].operator).to eq 'variants'
@@ -363,22 +326,19 @@ describe 'SpreeMethodMapping' do
     DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
  
     DataShift::MethodDictionary.build_method_details(@Product_klass)
-    
-    headers = ['shipping category', 'shipping_category', :shippingcategory, 'Shipping_Category', 'shippingcategory']
+
+    headers = ['shipping category', 'shipping_category', :shipping_category, 'Shipping_Category', 'shipping Category']
     expected = 'shipping_category'
         
     method_mapper = DataShift::MethodMapper.new
      
     method_details = method_mapper.map_inbound_headers_to_methods( @Product_klass, headers )
-    
-    puts method_details.inspect
-    
+
     expect(method_details.size).to eq 5
     
     expect(method_details.compact.size).to eq 5
 
     method_details.compact.collect(&:operator).each { |o| expect(o).to eq expected }
-    
   end
   
 end

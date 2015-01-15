@@ -6,15 +6,21 @@ source 'https://rubygems.org'
 # DEFINE VERSIONS YOU WANT TO TEST AGAINST HERE
 # THIS SHOULD BASICALLY REPLICATE WHAT IS IN THE SANDBOX GEMFILE
 
-#gem 'rails', '4.0.5'
 gem 'rails', '4.1.8'
+
+#DATASHIFT TESTING
+#
+# See https://github.com/sstephenson/execjs#readme for more supported runtimes
+gem 'therubyracer', platforms: :ruby
+gem 'mechanize'
+
+gem 'database_cleaner'
 
 #if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
 #gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
 #else
 gem 'datashift', :path => "/home/rubyuser/SoftwareDev/git/datashift"
 #end
-
 
 # we want to test both JRuby and non JRuby especially for Excel
 
@@ -25,7 +31,6 @@ end
 
 platform :ruby do
   gem 'sqlite3'
-  #gem "debugger"
 end
 
 # FROM SANDBOX GEMFILE
@@ -56,13 +61,6 @@ group :doc do
   gem 'sdoc', require: false
 end
 
-
-#DATASHIFT TESTING
-#
-# See https://github.com/sstephenson/execjs#readme for more supported runtimes
-gem 'therubyracer', platforms: :ruby
-
-
 # N.B Spree will update the sandbox Gemfile with additional Spree gems
 # e,g User model and Authorisation
 # For rspec you  may need to add them in here or you'll get missing Spree constants
@@ -75,7 +73,8 @@ gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :bran
 gem 'spree_bootstrap_frontend', github: '200Creative/spree_bootstrap_frontend', branch: spree_version
 gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', branch: spree_version
 
-gem 'mechanize'
+
+gem 'paperclip'
 
 # STATIC GEMS
 

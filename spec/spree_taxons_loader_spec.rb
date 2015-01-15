@@ -14,15 +14,9 @@ require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 require 'product_loader'
 
 describe 'SpreeLoader' do
-        
-  before(:all) do
-    before_all_spree
-  end
-
   
   include_context 'Populate dictionary ready for Product loading'
-
-
+  
   # Operation and results should be identical when loading multiple associations
   # if using either single column embedded syntax, or one column per entry.
 
@@ -52,10 +46,10 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.count.should == 1
     @Taxon_klass.count.should == 2
     
-    root.root.children.should have_exactly(1).items
-    root.root.children[0].name.should == 'Landscape'
+    expect(root.root.children.size).to eq 1
+    expect(root.root.children[0].name).to eq 'Landscape'
     
-    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
     
     expected_multi_column_taxons
   end
@@ -74,24 +68,24 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.all.collect(&:name).sort.should == ["Drawings", "Oils", "Paintings", "WaterColour"]
        
 
-    @Taxonomy_klass.count.should == 4
-    @Taxon_klass.count.should == 7
+    expect(@Taxonomy_klass.count).to eq 4
+    expect(@Taxon_klass.count).to eq 7
 
-    @Product_klass.count.should == 3
+    expect(@Product_klass.count).to eq 3
     
-    p = @Variant_klass.find_by_sku("DEMO_001").product
+    p = @Variant_klass.where(sku: "DEMO_001").first.product
 
-    p.taxons.should have_exactly(2).items
+    expect(p.taxons.size).to eq 2
     p.taxons.collect(&:name).sort.should == ['Paintings','WaterColour']
      
     p2 = @Variant_klass.find_by_sku("DEMO_002").product
 
-    p2.taxons.should have_exactly(4).items    
+    expect(p2.taxons.size).to eq 4
     p2.taxons.collect(&:name).sort.should == ['Nature','Oils','Paintings','Seascape']
      
     paint_parent = @Taxonomy_klass.find_by_name('Paintings')
-     
-    paint_parent.taxons.should have_exactly(4).items # 3 children + all Taxonomies have a root Taxon
+
+    expect(paint_parent.taxons.size).to eq 4 # 3 children + all Taxonomies have a root Taxon
     
     paint_parent.taxons.collect(&:name).sort.should == ['Landscape','Nature','Paintings','Seascape']
     
@@ -107,9 +101,9 @@ describe 'SpreeLoader' do
      
     tn.parent.id.should == paint_parent.root.id
     ts.parent.id.should == tn.id
-    
-    tn.children.should have_exactly(1).items
-    ts.children.should have_exactly(0).items
+
+    expect(tn.children.size).to eq 1
+    expect(ts.children.size).to eq 0
  
   end
   
@@ -121,7 +115,7 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.count.should == 0
     @Taxon_klass.count.should == 0 
     
-    @product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.xls') )
+    product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.xls') )
     
     expected_nested_multi_column_taxons
   end
@@ -134,7 +128,7 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.count.should == 0
     @Taxon_klass.count.should == 0 
     
-    @product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.csv') )
+    product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.csv') )
     
     expected_nested_multi_column_taxons
     
@@ -153,8 +147,8 @@ describe 'SpreeLoader' do
     # 2  Paintings>Nature>Seascape->Cliffs - test only the leaf node is created, rest re-used
     # 1  Drawings>Landscape>Bristol        - test a new leaf node created when parent name is same over different taxons
       
-    #puts @Taxonomy_klass.all.collect(&:name).sort.inspect
-    @Taxonomy_klass.count.should == 5 
+    puts @Taxonomy_klass.all.collect(&:name).sort.inspect
+    expect(@Taxonomy_klass.count).to eq 5
     
     @Taxonomy_klass.all.collect(&:name).sort.should == ['Drawings', 'Landscape', 'Oils', 'Paintings','WaterColour']
     
@@ -163,8 +157,8 @@ describe 'SpreeLoader' do
     taxons = @Taxon_klass.all.collect(&:name).sort
     
     #puts "#{taxons.inspect} (#{taxons.size})"
-    
-    @Taxon_klass.count.should == 12
+
+    expect(@Taxon_klass.count).to eq 12
    
     taxons.should == ['Bristol', 'Cliffs', 'Drawings', 'Landscape', 'Landscape', 'Landscape', 'Landscape', 'Nature', 'Oils', 'Paintings', 'Seascape','WaterColour']
 
@@ -177,15 +171,15 @@ describe 'SpreeLoader' do
     #                     - Cliffs
     painting_onomy = @Taxonomy_klass.find_by_name('Paintings')
 
-    painting_onomy.taxons.should have_exactly(6).items
+    expect(painting_onomy.taxons.size).to eq 6
     painting_onomy.root.child?.should be false
      
     painting = painting_onomy.root
-    
-    painting.children.should have_exactly(2).items
+
+    expect(painting.children.size).to eq 2
     painting.children.collect(&:name).sort.should == ["Landscape", "Nature"]
-    
-    painting.descendants.should have_exactly(5).items
+
+    expect(painting.descendants.size).to eq 5
     
     lscape = {}
     nature = nil
@@ -196,10 +190,10 @@ describe 'SpreeLoader' do
       if(t.name == 'Nature')
         nature = t
         i.should == 1
-        t.children.should have_exactly(2).items
+        expect(t.children.size).to eq 2
         t.children.collect(&:name).should == ["Landscape", "Seascape"]
 
-        t.descendants.should have_exactly(3).items
+        expect(t.descendants.size).to eq 3
         t.descendants.collect(&:name).sort.should == ["Cliffs", "Landscape", "Seascape"]
     
       elsif(t.name == 'Landscape')
@@ -217,47 +211,44 @@ describe 'SpreeLoader' do
     lscape[2].parent.id.should == nature.id
     
  
-    seascape = @Taxon_klass.find_by_name('Seascape') 
-    seascape.children.should have_exactly(1).items
+    seascape = @Taxon_klass.find_by_name('Seascape')
+    expect(seascape.children.size).to eq 1
     seascape.leaf?.should be false
     
 
-    cliffs = @Taxon_klass.find_by_name('Cliffs') 
-    cliffs.children.should have_exactly(0).items
+    cliffs = @Taxon_klass.find_by_name('Cliffs')
+    expect(cliffs.children.size).to eq 0
     cliffs.leaf?.should be true
 
     @Taxon_klass.find_by_name('Seascape').ancestors.collect(&:name).sort.should == ["Nature", "Paintings"]
     
     # Landscape appears multiple times, under different parents
-    @Taxon_klass.find_all_by_name('Landscape').should have_exactly(4).items
+    expect(@Taxon_klass.where( :name => 'Landscape').size).to eq 4
 
     # Check the correct Landscape used, Drawings>Landscape>Bristol
     
-    drawings = @Taxonomy_klass.find_by_name('Drawings')
-    
-    drawings.taxons.should have_exactly(3).items
+    drawings = @Taxonomy_klass.where(:name => 'Drawings').first
+
+    expect(drawings.taxons.size).to eq 3
     
     dl = drawings.taxons.find_by_name('Landscape').children
-    
-    
-    dl.should have_exactly(1).items
+
+    expect(dl.size).to eq 1
   
     b = dl.find_by_name('Bristol')
-    
-    b.children.should have_exactly(0).items
+
+    expect(b.children.size).to eq 0
     b.ancestors.collect(&:name).sort.should == ["Drawings", "Landscape"]
 
     # empty top level taxons
     ['Oils', 'Landscape'].each do |t|
       tx = @Taxonomy_klass.find_by_name(t)
-      tx.taxons.should have_exactly(1).items
+      expect(tx.taxons.size).to eq 1
       tx.root.name.should == t
-      tx.root.children.should have_exactly(0).items
+      expect(tx.root.children.size).to eq 0
       tx.root.leaf?.should be true
     end
-    
 
   end
-  
   
 end

@@ -1,0 +1,12 @@
+# YAML/Erb Template.
+
+# Format is :
+# ActiveRecordModel:
+#   datashift_defaults:
+#       key: value
+#
+Spree::User:
+  datashift_defaults: 
+   password:  'spree_rspec_123'
+   password_confirmation:  'spree_rspec_123'
+

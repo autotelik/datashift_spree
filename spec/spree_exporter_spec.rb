@@ -17,9 +17,6 @@ require 'csv_exporter'
 describe 'SpreeExporter' do
   
   before(:all) do
-
-    before_all_spree
-
     results_clear()
   end
 

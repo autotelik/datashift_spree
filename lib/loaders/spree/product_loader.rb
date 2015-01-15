@@ -85,7 +85,7 @@ module DataShift
 
           add_taxons
 
-        elsif(current_method_detail.operator?('product_properties') && current_value)
+        elsif(current_method_detail.operator?('product_properties') )
 
           add_properties
 
@@ -192,7 +192,7 @@ module DataShift
       # Special case for OptionTypes as it's two stage process
       # First add the possible option_types to Product, then we are able
       # to define Variants on those options values.
-      # So to defiene a Variant :
+      # So to define a Variant :
       #   1) define at least one OptionType on Product, for example Size
       #   2) Provide a value for at least one of these OptionType
       #   3) A composite Variant can be created by supplying a value for more than one OptionType
@@ -218,7 +218,7 @@ module DataShift
 
         variants = get_each_assoc
 
-        logger.info "add_options_variants #{variants.inspect}"
+        logger.info "Adding Options Variants #{variants.inspect}"
         
         # example line becomes :  
         #   1) mime_type:jpeg|print_type:black_white  
@@ -229,7 +229,7 @@ module DataShift
 
           option_types = per_variant.split(Delimiters::multi_facet_delim)    # => [mime_type:jpeg, print_type:black_white]
 
-          logger.info "add_options_variants #{option_types.inspect}"
+          logger.info "Checking Option Types #{option_types.inspect}"
            
           optiontype_vlist_map = {}
 
@@ -240,37 +240,39 @@ module DataShift
             option_type = @@option_type_klass.where(:name => oname).first
 
             unless option_type
-              option_type = @@option_type_klass.create( :name => oname, :presentation => oname.humanize)
+              option_type = @@option_type_klass.create(:name => oname, :presentation => oname.humanize)
               # TODO - dynamic creation should be an option
 
               unless option_type
-                puts "WARNING: OptionType #{oname} NOT found and could not create - Not set Product"
+                logger.warm("WARNING: OptionType #{oname} NOT found and could not create - Not set Product")
                 next
               end
               logger.info "Created missing OptionType #{option_type.inspect}"
-              puts "Created missing OptionType #{option_type.inspect}"
             end
                       
             # OptionTypes must be specified first on Product to enable Variants to be created
-            # TODO - is include? very inefficient ??
-            @load_object.option_types << option_type unless @load_object.option_types.include?(option_type)
+            load_object.option_types << option_type unless load_object.option_types.include?(option_type)
 
             # Can be simply list of OptionTypes, some or all without values
             next unless(value_str)
 
-            optiontype_vlist_map[option_type] = []
+            optiontype_vlist_map[option_type] ||= []
 
             # Now get the value(s) for the option e.g red,blue,green for OptType 'colour'
-            optiontype_vlist_map[option_type] = value_str.split(',')
+            optiontype_vlist_map[option_type] += value_str.split(',').flatten
+
+            logger.debug("Parsed OptionValues #{optiontype_vlist_map[option_type]} for Option_Type #{option_type.name}")
           end
 
           next if(optiontype_vlist_map.empty?) # only option types specified - no values
 
           # Now create set of Variants, some of which maybe composites
-          # Find the longest set of OVs to use as base for combining with the rest
-          sorted_map = optiontype_vlist_map.sort_by { |k,v| v.size }.reverse
-       
-          # [ [mime, ['pdf', 'jpeg', 'gif']], [print_type, ['black_white']] ]
+          # Find the longest set of OptionValues to use as base for combining with the rest
+          sorted_map = optiontype_vlist_map.sort_by { |ot, ov| ov.size }.reverse
+
+          logger.debug("Processing Options into Variants #{sorted_map.inspect}")
+
+          # {mime => ['pdf', 'jpeg', 'gif'], print_type => ['black_white']}
           
           lead_option_type, lead_ovalues = sorted_map.shift
           
@@ -281,19 +283,19 @@ module DataShift
             ov_list = []
 
             ovname.strip!
-            
-            # Prior Rails 4 - ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(ovname, lead_option_type.id, :presentation => ovname.humanize)
+
+            #TODO - not sure why I create the OptionValues here, rather than above with the OptionTypes
             ov = @@option_value_klass.where(:name => ovname, :option_type_id => lead_option_type.id).first_or_create(:presentation => ovname.humanize)
             ov_list << ov if ov
  
             # Process rest of array of types => values
             sorted_map.each do |ot, ovlist| 
-              ovlist.each do |for_composite|
-                
-                for_composite.strip!
+              ovlist.each do |ov_for_composite|
+
+                ov_for_composite.strip!
 
                 # Prior Rails 4 - ov = @@option_value_klass.find_or_create_by_name_and_option_type_id(for_composite, ot.id, :presentation => for_composite.humanize)
-                ov = @@option_value_klass.where(:name => ovname, :option_type_id => lead_option_type.id).first_or_create(:presentation => ovname.humanize)
+                ov = @@option_value_klass.where(:name => ov_for_composite, :option_type_id => ot.id).first_or_create(:presentation => ov_for_composite.humanize)
 
                 ov_list << ov if(ov)
               end
@@ -305,12 +307,7 @@ module DataShift
               
               i = @load_object.variants.size + 1
 
-              # This one line seems to works for 1.1.0 - 3.2 but not 1.0.0 - 3.1 ??
-							if(SpreeHelper::version.to_f >= 1.1)
-							  variant = @load_object.variants.create( :sku => "#{@load_object.sku}_#{i}", :price => @load_object.price, :weight => @load_object.weight, :height => @load_object.height, :width => @load_object.width, :depth => @load_object.depth)
-							else
-							  variant = @@variant_klass.create( :product => @load_object, :sku => "#{@load_object.sku}_#{i}", :price => @load_object.price)
-							end
+              variant = @load_object.variants.create( :sku => "#{load_object.sku}_#{i}", :price => load_object.price, :weight => load_object.weight, :height => load_object.height, :width => load_object.width, :depth => load_object.depth)
 
               variant.option_values << ov_list if(variant)    
             end
@@ -334,14 +331,18 @@ module DataShift
 
         property_list = get_each_assoc#current_value.split(Delimiters::multi_assoc_delim)
 
+        logger.info "WTF #{property_list.inspect}"
+
         property_list.each do |pstr|
 
           # Special case, we know we lookup on name so operator is effectively the name to lookup
           find_by_name, find_by_value = get_operator_and_data( pstr )
 
+          logger.info "WTF WTF #{find_by_name} (with value #{find_by_value})"
+
           raise "Cannot find Property via #{find_by_name} (with value #{find_by_value})" unless(find_by_name)
 
-          property = @@property_klass.find_by_name(find_by_name)
+          property = @@property_klass.where(:name => find_by_name).first
 
           unless property
             property = @@property_klass.create( :name => find_by_name, :presentation => find_by_name.humanize)
@@ -349,16 +350,12 @@ module DataShift
           end
 
           if(property)
-            if(SpreeHelper::version.to_f >= 1.1)
               # Property now protected from mass assignment
               x = @@product_property_klass.new( :value => find_by_value )
               x.property = property
               x.save
               @load_object.product_properties << x
               logger.info "Created New ProductProperty #{x.inspect}"
-            else
-              @load_object.product_properties << @@product_property_klass.create( :property => property, :value => find_by_values)
-            end
           else
             puts "WARNING: Property #{find_by_name} NOT found - Not set Product"
           end

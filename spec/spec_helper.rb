@@ -13,6 +13,9 @@ require 'active_record'
 require 'bundler'
 require 'stringio'
 
+require 'database_cleaner'
+
+require 'spree'
 
 $:.unshift '.'  # 1.9.3 quite strict, '.' must be in load path for relative paths to work from here
     
@@ -22,10 +25,9 @@ require File.join(datashift_spec_base, 'lib/datashift_spree')
 
 require 'sandbox_helper'
 
+puts "Running tests with ActiveSupport version : #{Gem.loaded_specs['active_support'].inspect}"
 
-puts "Running tests with ActiveSupport verions : #{Gem.loaded_specs['active_support'].inspect}"
-
-puts "Running tests with Rails verions : #{Gem.loaded_specs['rails'].version.version.inspect}"
+puts "Running tests with Rails version : #{Gem.loaded_specs['rails'].version.version.inspect}"
 
 def run_in(dir )
   puts "RSpec .. running test in path [#{dir}]"
@@ -44,52 +46,70 @@ RSpec.configure do |config|
     ARGV.replace []
   end
 
-  def before_all_spree 
-  
-    puts "Before all Spree - boot spree rails app - version #{DataShift::SpreeHelper::version}"
-    
+  config.before(:suite) do
+    puts "Booting spree rails app - version #{DataShift::SpreeHelper::version}"
+
     # We are not a Spree project, so we implement a spree application of our own
     if(DataShift::SpreeHelper::is_namespace_version )
       spree_boot
     else
       boot('test_spree_standalone')             # key to YAML db e.g  test_memory, test_mysql
     end
-        
+
     puts "Testing Spree standalone - version #{DataShift::SpreeHelper::version}"
+  end
+
+  config.before(:each) do
 
     set_spree_class_helpers
-    
-  end
-  
-  shared_context 'Populate dictionary ready for Product loading' do
-    
-    before do 
-      begin
-    
-        before_each_spree
 
-        expect(@Image_klass.count).to eq 0
-        expect(@Product_klass.count).to eq 0    
+    DatabaseCleaner.strategy = :transaction
+
+    DatabaseCleaner.start
+  end
+
+  config.after(:each) do
+    DatabaseCleaner.clean
+  end
+
+shared_context 'Populate dictionary ready for Product loading' do
+
+    set_spree_class_helpers
+
+    let(:product_klass) { DataShift::SpreeHelper::get_product_class }
+
+    let(:product_loader) { DataShift::SpreeHelper::ProductLoader.new(nil, :verbose => true) }
+
+    # %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
+
+    let(:image_klass) {  DataShift::SpreeHelper::get_spree_class 'Image' }
+
+    @Product_klass = DataShift::SpreeHelper::get_product_class
+
+    #spree_klass_list.each do |k|
+    #  instance_variable_set("@#{k}_klass", DataShift::SpreeHelper::get_spree_class(k))
+    #end
+
+    before do
+      begin
 
         DataShift::MethodDictionary.clear
-      
+
         # For Spree important to get instance methods too as Product delegates
         # many important attributes to Variant (master)
-        DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+        DataShift::MethodDictionary.find_operators( product_klass, :instance_methods => true )
 
-        DataShift::MethodDictionary.build_method_details( @Product_klass )
-        
+        DataShift::MethodDictionary.build_method_details( product_klass )
+
       rescue => e
         puts e.inspect
         puts e.backtrace
         raise e
       end
-        
-      @product_loader = DataShift::SpreeHelper::ProductLoader.new(nil, :verbose => true)
     end
   end
 
-  
+
   def capture(stream)
     begin
       stream = stream.to_s
@@ -162,19 +182,8 @@ RSpec.configure do |config|
   end
     
   def before_each_spree
-      
-    # Reset main tables - TODO should really purge properly, or roll back a transaction      
-    @Product_klass.delete_all
-    
-    @spree_klass_list.each do |k| z = DataShift::SpreeHelper::get_spree_class(k); 
-      if(z.nil?)
-        puts "WARNING: Failed to find expected Spree CLASS #{k}" 
-      else
-        DataShift::SpreeHelper::get_spree_class(k).delete_all 
-      end
-    end
+    # replaced by proper database cleaner
   end
-  
 
   
   def set_logger( name = 'datashift_spree_spec.log')

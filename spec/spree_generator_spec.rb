@@ -16,7 +16,6 @@ require 'excel_generator'
 describe 'SpreeGenerator' do
 
   before(:all) do
-    before_all_spree
   end
 
   before do

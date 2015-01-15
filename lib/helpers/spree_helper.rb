@@ -43,11 +43,7 @@ module DataShift
     end
       
     def self.get_product_class
-      if(is_namespace_version())
-        Object.const_get('Spree').const_get('Product')
-      else
-        Object.const_get('Product')
-      end
+      get_spree_class 'Product'
     end
     
     # Return the right CLASS to attach Product images to

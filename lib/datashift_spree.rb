@@ -123,6 +123,7 @@ module DataShift
 end
 
 DataShift::SpreeHelper::require_libraries
+DataShift::SpreeHelper::require_datashift_spree
 
 require 'datashift_spree/exceptions'
 

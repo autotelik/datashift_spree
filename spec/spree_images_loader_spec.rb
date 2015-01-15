@@ -23,9 +23,9 @@ describe 'SpreeImageLoading' do
 
   include_context 'Populate dictionary ready for Product loading'
 
-  before(:all) do
-    before_all_spree
-  end
+  let (:populator)        { DataShift::Populator.new }
+  let (:product)          { Spree::Product.new }
+  let (:product_loader)   { DataShift::SpreeHelper::ProductLoader.new }
 
   before(:each) do
   end
@@ -39,12 +39,12 @@ describe 'SpreeImageLoading' do
       
     options = {:mandatory => ['sku', 'name', 'price'] }
 
-    @product_loader.perform_load( ifixture_file(x), options )
+    product_loader.perform_load( ifixture_file(x), options )
 
-    @product_loader.reporter.processed_object_count.should == 3
+    product_loader.reporter.processed_object_count.should == 3
     
-    @product_loader.loaded_count.should == 0
-    @product_loader.failed_count.should == 3
+    product_loader.loaded_count.should == 0
+    product_loader.failed_count.should == 3
       
     @Product_klass.count.should == 0
     @Image_klass.count.should == 0
@@ -59,10 +59,10 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price'] }
 
-    @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
+    product_loader.perform_load( ifixture_file('SpreeProductsWithImages.csv'), options )
 
-    @product_loader.loaded_count.should == 3
-    @product_loader.failed_count.should == 0
+    product_loader.loaded_count.should == 3
+    product_loader.failed_count.should == 0
     
     @Image_klass.count.should == 3
 
@@ -81,10 +81,10 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price'] }
         
-    @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
+    product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
 
-    @product_loader.loaded_count.should == 3
-    @product_loader.failed_count.should == 0
+    product_loader.loaded_count.should == 3
+    product_loader.failed_count.should == 0
     
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
 
@@ -102,11 +102,11 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "#{File.expand_path(File.dirname(__FILE__))}/"}
 
-    @product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
+    product_loader.perform_load( ifixture_file('SpreeProductsWithImages.xls'), options )
 
-    @product_loader.reporter.processed_object_count.should == 3
-    @product_loader.loaded_count.should == 3
-    @product_loader.failed_count.should == 0
+    product_loader.reporter.processed_object_count.should == 3
+    product_loader.loaded_count.should == 3
+    product_loader.failed_count.should == 0
     
     p = @Product_klass.find_by_name("Demo Product for AR Loader")
 
@@ -119,39 +119,7 @@ describe 'SpreeImageLoading' do
   end
   
   
-  it "should create Images from urls in Product loading column from Excel" do
 
-    options = {:mandatory => ['sku', 'name', 'price']}
-
-    @product_loader.perform_load( ifixture_file('SpreeProductsWithImageUrls.xls'), options )
-
-    @product_loader.reporter.processed_object_count.should == 3
-    @product_loader.loaded_count.should == 3
-    @product_loader.failed_count.should == 0
-    
-    p = @Product_klass.find_by_name("Demo Product for AR Loader")
-
-    p.name.should == "Demo Product for AR Loader"
-    expect(p.images.size).to eq 1
-         
-    
-    #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/DEMO_001_ror_bag.jpeg
-    #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/spree.png 
-    #https://raw.github.com/autotelik/datashift_spree/master/spec/fixtures/images/DEMO_004_ror_ringer.jpeg
-    #{:alt => 'third text and position', :position => 4}
- 
-    expected = [["image/jpeg", "DEMO_001_ror_bag"], ["image/png", 'spree'], ["image/jpeg", 'DEMO_004_ror_ringer']]
-    
-    @Product_klass.all.each_with_index do |p, idx| 
-      expect(p.images.size).to eq 1
-      i = p.images[0]
-      
-      i.attachment_content_type.should == expected[idx][0]
-      i.attachment_file_name.should include expected[idx][1]
-    end
-
-    expect(@Image_klass.count).to eq 3
-  end
   
   it "should assign Images to preloaded Products by SKU via Excel"  do
 
@@ -159,7 +127,7 @@ describe 'SpreeImageLoading' do
 
     @Product_klass.count.should == 0
 
-    @product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
+    product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
 
     @Image_klass.count.should == 0
 
@@ -192,7 +160,7 @@ describe 'SpreeImageLoading' do
 
     @Product_klass.count.should == 0
 
-    @product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
+    product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
 
     @Image_klass.all.size.should == 0
 
@@ -219,7 +187,7 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "#{File.expand_path(File.dirname(__FILE__))}/"}
 
-    @product_loader.perform_load( ifixture_file('SpreeProductsWithMultipleImages.xls'), options )
+    product_loader.perform_load( ifixture_file('SpreeProductsWithMultipleImages.xls'), options )
 
     expect(@Product_klass.count).to eq 2
     expect(@Image_klass.count).to eq  5
@@ -250,7 +218,7 @@ describe 'SpreeImageLoading' do
     # first load some products with SKUs that match the image names
     @Product_klass.count.should == 0
 
-    @product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
+    product_loader.perform_load( ifixture_file('SpreeProducts.xls'))
 
     @Product_klass.count.should == 3
     @Image_klass.all.size.should == 0

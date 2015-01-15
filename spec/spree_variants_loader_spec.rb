@@ -15,11 +15,10 @@ require 'product_loader'
 
 describe 'Spree Variants Loader' do
 
-  before(:all) do
-    before_all_spree
-  end
-
   include_context 'Populate dictionary ready for Product loading'
+
+  let (:product_loader) { DataShift::SpreeHelper::ProductLoader.new }
+  let (:product) { Spree::Product.new }
 
   before(:each) do
 
@@ -61,7 +60,7 @@ describe 'Spree Variants Loader' do
     @Product_klass.count.should == 0
     @Variant_klass.count.should == 0
 
-    @product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
 
     expected_multi_column_variants
   end
@@ -131,20 +130,20 @@ describe 'Spree Variants Loader' do
     # TOFIX - update for Spree 2 - not sure how count_on_hand has morphed into stock_items
     #@Variant_klass.last.count_on_hand.should == 18
 
-    @product_loader.failed_count.should == 0
+    product_loader.failed_count.should == 0
   end
 
   # Composite Variant Syntax is option_type_A_name:value;option_type_B_name:value
   # which creates a SINGLE Variant with 2 option types
 
-  it "should create Variants with MULTIPLE option types from single column in CSV", :fail => true  do
-    @product_loader.perform_load( ifixture_file('SpreeMultiVariant.csv'), :mandatory => ['sku', 'name', 'price'] )
+  it "should create Variants with MULTIPLE option types from single column in CSV", :fails => true  do
+    product_loader.perform_load( ifixture_file('SpreeMultiVariant.csv'), :mandatory => ['sku', 'name', 'price'] )
 
     expected_single_column_multi_variants
   end
 
   it "should create Variants with MULTIPLE option types from single column in XLS", :fail => true  do
-    @product_loader.perform_load( ifixture_file('SpreeMultiVariant.xls'), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.perform_load( ifixture_file('SpreeMultiVariant.xls'), :mandatory => ['sku', 'name', 'price'] )
 
     expected_single_column_multi_variants
   end
@@ -152,26 +151,28 @@ describe 'Spree Variants Loader' do
   def expected_single_column_multi_variants
     
     # Product 1)
-    # 1 + 2) mime_type:jpeg,PDF;print_type:colour	 equivalent to (mime_type:jpeg;print_type:colour|mime_type:PDF;print_type:colour)
+    # 1 + 2) mime_type:jpeg,PDF ; print_type:colour	 equivalent to (mime_type:jpeg;print_type:colour|mime_type:PDF;print_type:colour)
     # 3) mime_type:PNG
     #
     prod_count = 3
     var_count = 10
 
     expect(@Product_klass.count).to eq prod_count
-    @Variant_klass.count.should == prod_count + var_count     # plus 3 MASTER VARIANTS
+    expect(@Variant_klass.count).to eq prod_count + var_count     # plus 3 MASTER VARIANTS
 
-    p = @Product_klass.all[0]
+    p = @Product_klass.where(name: 'Demo Product for AR Loader').first
 
     expect(p.variants_including_master.size).to eq 4
     expect(p.variants.size).to eq 3 
 
     expect(p.option_types.size).to eq 2  # mime_type, print_type
+    expect(p.option_types.collect(&:name).sort).to eq ['mime_type','print_type']
 
     v1 = p.variants[0]
-    expect(v1.option_values.size).to eq 2 
-    v1.option_values.collect(&:name).sort.should == ['colour','jpeg']
-    v1.option_values.collect(&:presentation).sort.should == ['Colour','Jpeg']
+    expect(v1.option_values.size).to eq 2
+
+    expect(v1.option_values.collect(&:name).sort).to eq ['colour','jpeg']
+    expect(v1.option_values.collect(&:presentation).sort).to eq ['Colour','Jpeg']
 
     # Product 2
     # 4) mime_type:jpeg;print_type:black_white
@@ -184,12 +185,12 @@ describe 'Spree Variants Loader' do
 
     expect( p.option_types.size).to eq 2  # mime_type, print_type
 
-    p.option_types.collect(&:name).sort.should == ['mime_type','print_type']
+    expect(p.option_types.collect(&:name).sort).to eq ['mime_type','print_type']
+
+    expect(p.variants[0].option_values.collect(&:name).sort).to eq ['black_white','jpeg']
+    expect(p.variants[0].option_values.collect(&:presentation).sort).to eq ['Black white','Jpeg']
     
-    p.variants[0].option_values.collect(&:name).sort.should == ['black_white','jpeg']
-    p.variants[0].option_values.collect(&:presentation).sort.should == ['Black white','Jpeg']
-    
-    p.variants[1].option_values.collect(&:name).sort.should == ['PNG', 'black_white']
+    expect(p.variants[1].option_values.collect(&:name).sort).to eq ['PNG', 'black_white']
     
     # Product 3
     # 6 +7) mime_type:jpeg;print_type:colour,sepia;size:large
