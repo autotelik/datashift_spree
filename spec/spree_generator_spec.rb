@@ -25,7 +25,7 @@ describe 'SpreeGenerator' do
     # Create some test data
     root = @Taxonomy_klass.create( :name => 'Paintings' )
     
-    if(DataShift::SpreeHelper::version.to_f > 1 )
+    if(DataShift::SpreeEcom::version.to_f > 1 )
       root.taxons.create( :name => 'Landscape' )
       root.taxons.create( :name => 'Sea' )
     else

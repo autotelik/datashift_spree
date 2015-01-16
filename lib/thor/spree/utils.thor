@@ -23,7 +23,7 @@ module DatashiftSpree
 
       require File.expand_path('config/environment.rb')
 
-      require 'spree_helper'
+      require 'spree_ecom'
 
       require File.expand_path('config/environment.rb')
 
@@ -38,7 +38,7 @@ module DatashiftSpree
       cleanup += ["Taxonomy", "Taxon"] if(options[:taxons])
       
       cleanup.each do |k|
-        klass = DataShift::SpreeHelper::get_spree_class(k)
+        klass = DataShift::SpreeEcom::get_spree_class(k)
         if(klass)
           puts "Clearing model #{klass}"
           begin

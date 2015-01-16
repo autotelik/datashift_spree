@@ -6,15 +6,13 @@
 # Details::   Helper for creating testing sandbox
 #
 
-puts File.expand_path("#{File.dirname(__FILE__)}/../lib")
-
 $:.unshift File.expand_path("#{File.dirname(__FILE__)}/../lib")
 
-require 'helpers/spree_helper'
+require 'spree_ecom'
 
 module DataShift
 
-  module SpreeHelper
+  module SpreeEcom
     
     def self.run_in(dir)
       puts "Running cmd in [#{dir}]"
@@ -37,7 +35,7 @@ module DataShift
       
     def self.build_sandbox
       
-      path = DataShift::SpreeHelper::spree_sandbox_path
+      path = DataShift::SpreeEcom::spree_sandbox_path
       
       puts "Creating new Rails sandbox for Spree : #{path}"
       
@@ -69,7 +67,7 @@ module DataShift
       
       # Might need to add in User model if new 1.2 version which splits out Auth from spree core
       #
-      #if(DataShift::SpreeHelper::version.to_f >= 1.2 || DataShift::SpreeHelper::version.to_f < 2 )
+      #if(DataShift::SpreeEcom::version.to_f >= 1.2 || DataShift::SpreeEcom::version.to_f < 2 )
       #  File.open('Gemfile', 'a') { |f| f << "gem 'spree_auth_devise', :git => \"git://github.com/spree/spree_auth_devise\"\n" }
       #  end
             
@@ -79,7 +77,7 @@ module DataShift
 require 'datashift'
 require 'datashift_spree'
 
-DataShift::SpreeHelper::load_commands
+DataShift::SpreeEcom::load_commands
 DataShift::load_commands
         EOS
         f << thor_code

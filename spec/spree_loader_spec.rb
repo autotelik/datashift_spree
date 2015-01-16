@@ -84,9 +84,9 @@ describe 'SpreeLoader' do
     
     p.has_variants?.should be false
     
-    if(DataShift::SpreeHelper::version.to_f < 2  )
+    if(DataShift::SpreeEcom::version.to_f < 2  )
       p.master.count_on_hand.should == 12
-      DataShift::SpreeHelper::version < "1.1.3" ?  p.count_on_hand.should == 12 : p.count_on_hand.should == 0
+      DataShift::SpreeEcom::version < "1.1.3" ?  p.count_on_hand.should == 12 : p.count_on_hand.should == 0
       
       @Product_klass.last.master.count_on_hand.should == 23
     else

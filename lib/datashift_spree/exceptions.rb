@@ -6,7 +6,7 @@
 
 module DataShift
 
-  module SpreeHelper
+  module SpreeEcom
 
     class ProductLoadError < DataShift::DataShiftException
       def initialize( msg )

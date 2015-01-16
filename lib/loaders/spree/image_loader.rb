@@ -9,7 +9,7 @@ require 'spree_base_loader'
 
 module DataShift
 
-  module SpreeHelper
+  module SpreeEcom
       
     # Very specific Image Loading for existing Products in Spree. 
     #
@@ -22,7 +22,7 @@ module DataShift
   
       def initialize(image = nil, options = {})
         
-        super( DataShift::SpreeHelper::get_spree_class('Image'), image, options )
+        super( DataShift::SpreeEcom::get_spree_class('Image'), image, options )
          
         unless(MethodDictionary.for?(@@product_klass))
           MethodDictionary.find_operators( @@product_klass )
@@ -34,7 +34,7 @@ module DataShift
           MethodDictionary.build_method_details( @@variant_klass )
         end
     
-        puts "Attachment Class is #{SpreeHelper::product_attachment_klazz}" if(@verbose)
+        puts "Attachment Class is #{SpreeEcom::product_attachment_klazz}" if(@verbose)
       end
       
       # Load object not an Image - need to look it up via Name or SKU

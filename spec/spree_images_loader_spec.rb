@@ -25,16 +25,19 @@ describe 'SpreeImageLoading' do
 
   let (:populator)        { DataShift::Populator.new }
   let (:product)          { Spree::Product.new }
-  let (:product_loader)   { DataShift::SpreeHelper::ProductLoader.new }
+  let (:product_loader)   { DataShift::SpreeEcom::ProductLoader.new }
 
   before(:each) do
   end
 
-  it "should report errors in Image paths during Product loading" do
+  it "should report errors in Image paths during CSV Product loading", :fail => true do
     report_errors_tests 'SpreeProductsWithBadImages.csv'
+  end
+
+  it "should report errors in Image paths during Excel Product loading" do
     report_errors_tests 'SpreeProductsWithBadImages.xls'
   end
-    
+
   def report_errors_tests( x )
       
     options = {:mandatory => ['sku', 'name', 'price'] }
@@ -141,7 +144,7 @@ describe 'SpreeImageLoading' do
       expect(v.images.size).to eq 0
     end
     
-    loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
+    loader = DataShift::SpreeEcom::ImageLoader.new(nil, {})
 
     loader.perform_load( ifixture_file('SpreeImagesBySku.xls'), {:image_path_prefix => "#{File.expand_path(File.dirname(__FILE__))}/"} )
 
@@ -168,7 +171,7 @@ describe 'SpreeImageLoading' do
 
     expect(p.images.size).to eq 0
 
-    loader = DataShift::SpreeHelper::ImageLoader.new(nil, {})
+    loader = DataShift::SpreeEcom::ImageLoader.new(nil, {})
 
     loader.perform_load( ifixture_file('SpreeImagesByName.xls'), {:image_path_prefix => "#{File.expand_path(File.dirname(__FILE__))}/"} )
 
@@ -183,7 +186,7 @@ describe 'SpreeImageLoading' do
     # fixtures/images/DEMO_003_ror_mug.jpeg
   end
 
-  it "should be able to set alternative text within images column", :fail=> true  do
+  it "should be able to set alternative text within images column"  do
 
     options = {:mandatory => ['sku', 'name', 'price'], :image_path_prefix => "#{File.expand_path(File.dirname(__FILE__))}/"}
 
@@ -192,7 +195,7 @@ describe 'SpreeImageLoading' do
     expect(@Product_klass.count).to eq 2
     expect(@Image_klass.count).to eq  5
 
-    p = DataShift::SpreeHelper::get_image_owner( @Product_klass.find_by_name("Demo Product 001") )
+    p = DataShift::SpreeEcom::get_image_owner( @Product_klass.find_by_name("Demo Product 001") )
 
     p.sku.should == 'MULTI_001'
     expect(p.images.size).to eq 3
@@ -200,7 +203,7 @@ describe 'SpreeImageLoading' do
     p.images[0].alt.should == ''
     p.images[1].alt.should == 'alt text for multi 001'
 
-    p = DataShift::SpreeHelper::get_image_owner( @Product_klass.find_by_name("Demo Product 002") )
+    p = DataShift::SpreeEcom::get_image_owner( @Product_klass.find_by_name("Demo Product 002") )
 
     p.sku.should == 'MULTI_002'
     expect(p.images.size).to eq 2
@@ -225,15 +228,15 @@ describe 'SpreeImageLoading' do
 
     # now the test - find files, chew up name, find product, create image, attach
 
-    image_klass = DataShift::SpreeHelper::get_spree_class('Image' )
+    image_klass = DataShift::SpreeEcom::get_spree_class('Image' )
 
     raise "Cannot find Attachment Class" unless image_klass
 
     loader_options = { :verbose => true }
 
-    owner_klass = DataShift::SpreeHelper::product_attachment_klazz
+    owner_klass = DataShift::SpreeEcom::product_attachment_klazz
 
-    if(DataShift::SpreeHelper::version.to_f > 1.0 )
+    if(DataShift::SpreeEcom::version.to_f > 1.0 )
       owner_klass.should == Spree::Variant
     else
       owner_klass.should == Spree::Product
@@ -247,7 +250,7 @@ describe 'SpreeImageLoading' do
 
     loader_options[:attach_to_field] = 'images'
 
-    loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, true, nil, loader_options)
+    loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, nil, loader_options)
 
     loader.attach_to_klass.should == owner_klass
 

@@ -6,11 +6,11 @@
 # Details::   Specific over-rides/additions to support Spree Products
 #
 require 'spree_base_loader'
-require 'spree_helper'
+require 'spree_ecom'
 
 module DataShift
 
-  module SpreeHelper
+  module SpreeEcom
 
     class ProductLoader < SpreeBaseLoader
 
@@ -22,11 +22,11 @@ module DataShift
       def initialize(product = nil, options = {})
 
         # We want the delegated methods on Variant so always include instance methods
-        opts = {:instance_methods => true}.merge( options )
+        opts = {:find_operators => true, :instance_methods => true}.merge( options )
 
         # depending on version get_product_class should return us right class, namespaced or not
 
-        super( DataShift::SpreeHelper::get_product_class(), true, product, opts)
+        super( DataShift::SpreeEcom::get_product_class, product, opts)
 
         raise "Failed to create Product for loading" unless @load_object
       end
@@ -47,9 +47,9 @@ module DataShift
           
         # In >= 1.3.0 price moved to master Variant from Product so no association called Price on Product anymore
         # taking care of it here, means users can still simply just include a price column
-        @we_can_process_these_anyway << 'price' if(DataShift::SpreeHelper::version.to_f >= 1.3 )
+        @we_can_process_these_anyway << 'price' if(DataShift::SpreeEcom::version.to_f >= 1.3 )
       
-        if(DataShift::SpreeHelper::version.to_f > 1 )
+        if(DataShift::SpreeEcom::version.to_f > 1 )
           options[:force_inclusion] = options[:force_inclusion] ? ([ *options[:force_inclusion]] + @we_can_process_these_anyway) : @we_can_process_these_anyway
         end
 
@@ -91,7 +91,7 @@ module DataShift
 
         elsif(current_method_detail.operator?('images') && current_value)
 
-          add_images( (SpreeHelper::version.to_f > 1) ? @load_object.master : @load_object )
+          add_images( load_object.master )
 
         elsif(current_method_detail.operator?('variant_price') && current_value)
 

@@ -26,7 +26,7 @@ require 'spree_core'
     
 module DataShift
     
-  module SpreeHelper
+  module SpreeEcom
         
     def self.root
       Gem.loaded_specs['spree_core'] ? Gem.loaded_specs['spree_core'].full_gem_path  : ""
@@ -50,10 +50,10 @@ module DataShift
     # for the callers version of Spree
       
     def self.product_attachment_klazz
-      @product_attachment_klazz  ||= if(DataShift::SpreeHelper::version.to_f > 1.0 )
-        DataShift::SpreeHelper::get_spree_class('Variant' )
+      @product_attachment_klazz  ||= if(DataShift::SpreeEcom::version.to_f > 1.0 )
+        DataShift::SpreeEcom::get_spree_class('Variant' )
       else
-        DataShift::SpreeHelper::get_spree_class('Product' )
+        DataShift::SpreeEcom::get_spree_class('Product' )
       end
     end
     
@@ -61,7 +61,7 @@ module DataShift
     # for the callers version of Spree
     
     def self.get_image_owner(record)
-      if(SpreeHelper::version.to_f > 1) 
+      if(SpreeEcom::version.to_f > 1)
        record.is_a?(get_product_class) ? record.master : record     # owner is VARIANT
       else
         record.is_a?(get_product_class) ? record : record.product   # owner is PRODUCT
@@ -73,7 +73,7 @@ module DataShift
     end
     
     def self.is_namespace_version
-      SpreeHelper::version.to_f >= 1
+      SpreeEcom::version.to_f >= 1
     end
   
     def self.lib_root

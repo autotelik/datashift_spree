@@ -20,7 +20,7 @@ module Datashift
       require 'datashift'
       require 'sandbox_helper'
      
-      DataShift::SpreeHelper::build_sandbox
+      DataShift::SpreeEcom::build_sandbox
       
       original_dir = Dir.pwd
       
@@ -28,7 +28,7 @@ module Datashift
       # TOFIX - this don't work ... but works if run straight after the task
       # maybe the env not right using system ?
       begin
-        Dir.chdir DataShift::SpreeHelper::spree_sandbox_path
+        Dir.chdir DataShift::SpreeEcom::spree_sandbox_path
         puts "Running bundle install"
         system('bundle install')   
         

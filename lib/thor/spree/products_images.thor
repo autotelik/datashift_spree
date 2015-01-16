@@ -12,9 +12,11 @@
 
 # Note, not DataShift, case sensitive, create namespace for command line : datashift
 
+require 'spree'
+
 require 'datashift_spree'
 
-require 'spree_helper'
+require 'spree_ecom'
 
 module DatashiftSpree 
   
@@ -41,7 +43,7 @@ module DatashiftSpree
 
       require 'product_loader'
 
-      loader = DataShift::SpreeHelper::ProductLoader.new( nil, {:verbose => options[:verbose]})
+      loader = DataShift::SpreeEcom::ProductLoader.new( nil, {:verbose => options[:verbose]})
 
       # YAML configuration file to drive defaults etc
 
@@ -78,7 +80,7 @@ module DatashiftSpree
 
       require 'image_loader'
 
-      loader = DataShift::SpreeHelper::ImageLoader.new(nil, options)
+      loader = DataShift::SpreeEcom::ImageLoader.new(nil, options)
 
       loader.perform_load( options[:input], options )
     end
@@ -124,13 +126,13 @@ module DatashiftSpree
 
       require 'paperclip/attachment_loader'
 
-      image_klass = DataShift::SpreeHelper::get_spree_class('Image' )
+      image_klass = DataShift::SpreeEcom::get_spree_class('Image' )
 
       raise "Cannot find suitable Paperclip Attachment Class" unless image_klass
 
       loader_options = { :verbose => true }
 
-      owner_klass = DataShift::SpreeHelper::product_attachment_klazz
+      owner_klass = DataShift::SpreeEcom::product_attachment_klazz
 
       loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
 
@@ -145,7 +147,7 @@ module DatashiftSpree
 
       loader_options[:attach_to_field] = 'images'
 
-      loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, true, nil, loader_options)
+      loader = DataShift::Paperclip::AttachmentLoader.new(image_klass, nil, loader_options)
 
       logger.info "Loading attachments from #{@attachment_path}"
 

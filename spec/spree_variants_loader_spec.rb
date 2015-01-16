@@ -17,7 +17,7 @@ describe 'Spree Variants Loader' do
 
   include_context 'Populate dictionary ready for Product loading'
 
-  let (:product_loader) { DataShift::SpreeHelper::ProductLoader.new }
+  let (:product_loader) { DataShift::SpreeEcom::ProductLoader.new }
   let (:product) { Spree::Product.new }
 
   before(:each) do

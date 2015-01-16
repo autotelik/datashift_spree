@@ -23,23 +23,24 @@ module DataShift
 
     # depending on version get_product_class should return us right class, namespaced or not
 
-    def initialize(klass, find_operators = true, loader_object = nil, options = {})
+    def initialize(klass, loader_object = nil, options = {})
 
-      super(klass, find_operators, loader_object, options)
+      super(klass, loader_object, options)
 
       logger.info "Spree Loading initialised with:\n#{options.inspect}"
 
       #TODO - ditch this backward compatability now and just go with namespaced ?
       #
-      @@image_klass ||= DataShift::SpreeHelper::get_spree_class('Image')
-      @@option_type_klass ||= DataShift::SpreeHelper::get_spree_class('OptionType')
-      @@option_value_klass ||= DataShift::SpreeHelper::get_spree_class('OptionValue')
-      @@product_klass ||= DataShift::SpreeHelper::get_spree_class('Product')
-      @@property_klass ||= DataShift::SpreeHelper::get_spree_class('Property')
-      @@product_property_klass ||= DataShift::SpreeHelper::get_spree_class('ProductProperty')
-      @@taxonomy_klass ||= DataShift::SpreeHelper::get_spree_class('Taxonomy')
-      @@taxon_klass ||= DataShift::SpreeHelper::get_spree_class('Taxon')
-      @@variant_klass ||= DataShift::SpreeHelper::get_spree_class('Variant')
+      @@image_klass ||= DataShift::SpreeEcom::get_spree_class('Image')
+      @@option_type_klass ||= DataShift::SpreeEcom::get_spree_class('OptionType')
+      @@option_value_klass ||= DataShift::SpreeEcom::get_spree_class('OptionValue')
+      @@product_klass ||= DataShift::SpreeEcom::get_spree_class('Product')
+      @@property_klass ||= DataShift::SpreeEcom::get_spree_class('Property')
+      @@product_property_klass ||= DataShift::SpreeEcom::get_spree_class('ProductProperty')
+      @@taxonomy_klass ||= DataShift::SpreeEcom::get_spree_class('Taxonomy')
+      @@taxon_klass ||= DataShift::SpreeEcom::get_spree_class('Taxon')
+      @@variant_klass ||= DataShift::SpreeEcom::get_spree_class('Variant')
+
     end
 
     
@@ -48,13 +49,12 @@ module DataShift
     #                        e,g to specifiy particular drive  {:image_path_prefix => 'C:\' }
     #
     def perform_load( file_name, opts = {} )
-      
-      logger.info "Starting load from file [#{file_name}]"
-      
-      @options = opts.dup
-
-      super(file_name, @options)
+      logger.info "SpreeBaseLoader - starting load from file [#{file_name}]"
+      super(file_name, opts)
     end
+
+    # TOFIX - why is this in the base class when it looks like tis Prod/Vars ?
+    # either move it or make it generic so the owner can be any model that supports attachments
   
     # Special case for Images
     #
@@ -73,7 +73,7 @@ module DataShift
       #save_if_new
 
       # different versions have moved images around from Prod to Variant
-      owner = DataShift::SpreeHelper::get_image_owner(record)
+      owner = DataShift::SpreeEcom::get_image_owner(record)
 
       get_each_assoc.each do |image|
 
@@ -133,13 +133,12 @@ module DataShift
             
             @current_image_temp_file.rewind
 
-            logger.info("IMAGE downloaded from URI #{uri.inspect} - creating attachment")
+            logger.info("IMAGE downloaded from URI #{uri.inspect}")
 
-            # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
-            attachment = create_attachment(@@image_klass, @current_image_temp_file.path, nil, nil, attributes)
+            attachment = create_attachment(Spree::Image, @current_image_temp_file.path, nil, nil, attributes)
             
           rescue => e
-            puts "ERROR: Failed to process image from URL #{uri}", e.message
+            logger.error(e.message)
             logger.error("Failed to create Image from URL #{uri}")
             raise DataShift::DataProcessingError.new("Failed to create Image from URL #{uri}")
        
@@ -154,10 +153,10 @@ module DataShift
 
           logger.debug("Processing IMAGE from PATH #{path.inspect} #{alt_text.inspect}")
           
-          path = File.join(@options[:image_path_prefix], path) if(@options[:image_path_prefix])
+          path = File.join(config[:image_path_prefix], path) if(config[:image_path_prefix])
 
           # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
-          attachment = create_attachment(@@image_klass, path, nil, nil, :alt => alt_text)
+          attachment = create_attachment(Spree::Image, path, nil, nil, :alt => alt_text)
         end 
 
         begin

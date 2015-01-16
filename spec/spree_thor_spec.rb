@@ -13,7 +13,7 @@ require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
 describe 'Datshift Spree Thor tasks' do
 
   before(:all) do
-    @spree_sandbox_app_path = DataShift::SpreeHelper::spree_sandbox_path 
+    @spree_sandbox_app_path = DataShift::SpreeEcom::spree_sandbox_path
     
     require 'thor'    
     require 'thor/runner'
@@ -39,7 +39,7 @@ describe 'Datshift Spree Thor tasks' do
      
     puts "Running bulk attach  #{cmd}"
     
-    rails_sandbox_root = DataShift::SpreeHelper::spree_sandbox_path
+    rails_sandbox_root = DataShift::SpreeEcom::spree_sandbox_path
          
     run_in(rails_sandbox_root)  do
       DatashiftSpree::Digitals.start( cmd)

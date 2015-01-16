@@ -47,16 +47,16 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
-    puts "Booting spree rails app - version #{DataShift::SpreeHelper::version}"
+    puts "Booting spree rails app - version #{DataShift::SpreeEcom::version}"
 
     # We are not a Spree project, so we implement a spree application of our own
-    if(DataShift::SpreeHelper::is_namespace_version )
+    if(DataShift::SpreeEcom::is_namespace_version )
       spree_boot
     else
       boot('test_spree_standalone')             # key to YAML db e.g  test_memory, test_mysql
     end
 
-    puts "Testing Spree standalone - version #{DataShift::SpreeHelper::version}"
+    puts "Testing Spree standalone - version #{DataShift::SpreeEcom::version}"
   end
 
   config.before(:each) do
@@ -76,18 +76,18 @@ shared_context 'Populate dictionary ready for Product loading' do
 
     set_spree_class_helpers
 
-    let(:product_klass) { DataShift::SpreeHelper::get_product_class }
+    let(:product_klass) { DataShift::SpreeEcom::get_product_class }
 
-    let(:product_loader) { DataShift::SpreeHelper::ProductLoader.new(nil, :verbose => true) }
+    let(:product_loader) { DataShift::SpreeEcom::ProductLoader.new(nil, :verbose => true) }
 
     # %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
 
-    let(:image_klass) {  DataShift::SpreeHelper::get_spree_class 'Image' }
+    let(:image_klass) {  DataShift::SpreeEcom::get_spree_class 'Image' }
 
-    @Product_klass = DataShift::SpreeHelper::get_product_class
+    @Product_klass = DataShift::SpreeEcom::get_product_class
 
     #spree_klass_list.each do |k|
-    #  instance_variable_set("@#{k}_klass", DataShift::SpreeHelper::get_spree_class(k))
+    #  instance_variable_set("@#{k}_klass", DataShift::SpreeEcom::get_spree_class(k))
     #end
 
     before do
@@ -202,7 +202,7 @@ shared_context 'Populate dictionary ready for Product loading' do
 
     configuration = {}
     
-    database_yml_path = File.join(DataShift::SpreeHelper::spree_sandbox_path, 'config', 'database.yml')
+    database_yml_path = File.join(DataShift::SpreeEcom::spree_sandbox_path, 'config', 'database.yml')
     
     configuration[:database_configuration] = YAML::load( ERB.new( IO.read(database_yml_path) ).result )
     db = configuration[:database_configuration][ env ]
@@ -229,14 +229,14 @@ shared_context 'Populate dictionary ready for Product loading' do
     
   def spree_boot()
     
-    spree_sandbox_app_path = DataShift::SpreeHelper::spree_sandbox_path
+    spree_sandbox_app_path = DataShift::SpreeEcom::spree_sandbox_path
         
     unless(File.exists?(spree_sandbox_app_path))
       puts "Creating new Rails sandbox for Spree : #{spree_sandbox_app_path}" 
 
       require 'sandbox_helper'
      
-      DataShift::SpreeHelper::build_sandbox
+      DataShift::SpreeEcom::build_sandbox
       
        original_dir = Dir.pwd
       
@@ -244,7 +244,7 @@ shared_context 'Populate dictionary ready for Product loading' do
       # TOFIX - this don't work ... but works if run straight after the task
       # maybe the env not right using system ?
       begin
-        Dir.chdir DataShift::SpreeHelper::spree_sandbox_path
+        Dir.chdir DataShift::SpreeEcom::spree_sandbox_path
         puts "Running bundle install"
         system('bundle install')   
         
@@ -267,9 +267,9 @@ shared_context 'Populate dictionary ready for Product loading' do
       require 'spree'
       
       begin
-        puts "Booting Spree #{DataShift::SpreeHelper::version} in sandbox"
+        puts "Booting Spree #{DataShift::SpreeEcom::version} in sandbox"
         load 'config/environment.rb'
-        puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
+        puts "Booted Spree using version #{DataShift::SpreeEcom::version}"
       rescue => e
         #somethign in deface seems to blow up suddenly on 1.1
         puts "Warning - Potential issue initializing Spree sandbox:"
@@ -278,16 +278,16 @@ shared_context 'Populate dictionary ready for Product loading' do
       end
     }
      
-    puts "Booted Spree using version #{DataShift::SpreeHelper::version}"
+    puts "Booted Spree using version #{DataShift::SpreeEcom::version}"
   end
       
   def set_spree_class_helpers
     @spree_klass_list  =  %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
     
-    @Product_klass = DataShift::SpreeHelper::get_product_class  
+    @Product_klass = DataShift::SpreeEcom::get_product_class
   
     @spree_klass_list.each do |k|
-      instance_variable_set("@#{k}_klass", DataShift::SpreeHelper::get_spree_class(k)) 
+      instance_variable_set("@#{k}_klass", DataShift::SpreeEcom::get_spree_class(k))
     end
   end
   
@@ -295,9 +295,9 @@ shared_context 'Populate dictionary ready for Product loading' do
   
     ActiveRecord::Base.clear_active_connections!() 
       
-    unless(DataShift::SpreeHelper::is_namespace_version)
+    unless(DataShift::SpreeEcom::is_namespace_version)
         
-      DataShift::SpreeHelper::load() 
+      DataShift::SpreeEcom::load()
         
       db_connect( database_env )
       @dslog.info "Booting Spree using pre 1.0.0 version"
@@ -380,8 +380,8 @@ shared_context 'Populate dictionary ready for Product loading' do
   end
   
   def self.load_models( report_errors = nil )
-    puts 'Loading Spree models from', DataShift::SpreeHelper::root
-    Dir[DataShift::SpreeHelper::root + '/app/models/**/*.rb'].each {|r|
+    puts 'Loading Spree models from', DataShift::SpreeEcom::root
+    Dir[DataShift::SpreeEcom::root + '/app/models/**/*.rb'].each {|r|
       begin
         require r if File.file?(r)
       rescue => e
@@ -391,7 +391,7 @@ shared_context 'Populate dictionary ready for Product loading' do
   end
 
   def self.migrate_up
-    ActiveRecord::Migrator.up( File.join(DataShift::SpreeHelper::root, 'db/migrate') )
+    ActiveRecord::Migrator.up( File.join(DataShift::SpreeEcom::root, 'db/migrate') )
   end
 
 end

@@ -29,16 +29,17 @@
 #
 #     require 'datashift_spree'
 #
-#     DataShift::SpreeHelper::load_commands
+#     DataShift::SpreeEcom::load_commands
 #
 require 'rbconfig'
 require 'datashift'
+require 'spree'
 
 $:.unshift '.' unless $:.include?('.')
 
 module DataShift
 
-  module SpreeHelper
+  module SpreeEcom
     
     def self.gem_version
       unless(@gem_version)
@@ -122,8 +123,8 @@ module DataShift
   end
 end
 
-DataShift::SpreeHelper::require_libraries
-DataShift::SpreeHelper::require_datashift_spree
+DataShift::SpreeEcom::require_libraries
+DataShift::SpreeEcom::require_datashift_spree
 
 require 'datashift_spree/exceptions'
 

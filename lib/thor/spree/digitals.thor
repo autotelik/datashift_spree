@@ -16,7 +16,7 @@ require 'datashift_spree'
 
 
 
-require 'spree_helper'
+require 'spree_ecom'
 
 module DatashiftSpree 
   
