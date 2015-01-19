@@ -49,8 +49,11 @@ module DataShift
 
           load_object_class.transaction do
 
+            Spree::Config[:track_inventory_levels] = false
+
             @sheet.each_with_index do |row, i|
 
+              @current_row_idx = i
               @current_row = row
 
               next if(i == header_row_index)
@@ -60,46 +63,42 @@ module DataShift
               #
               # This is rubbish but currently manually detect when actual data ends, this isn't very smart but
               # got no better idea than ending once we hit the first completely empty row
-              break if(@current_row.nil? || @current_row.compact.empty?)
+              break if(row.nil? || row.compact.empty?)
 
-              logger.info "Processing Row #{i} : #{@current_row}"
+              logger.info "Processing Row #{i} : #{row}"
 
-              # Teh spreadsheet contains some lines that don't forget to reset the object or we'll update rather than create
-              if(@current_row[2].nil? || @current_row[2].empty?)   # Financial Status
-                # process the extra Lineitems
-                process_line_items( @current_row )
-                next
+              # The spreadsheet contains some lines that don't forget to reset the object or we'll update rather than create
+              if(load_object.id && (row[2].nil? || row[2].empty?))   # Financial Status empty on LI rows
+
+                begin
+                  process_line_item( row, load_object )
+                rescue => e
+                  puts e.inspect
+                  logger.error(e.inspect)
+                  logger.warn("Failed to add LineItems for Order ID #{load_object.id} for Row #{row}")
+                end
+
+                next  # row contains NO OTHER data
+
               else
-                new_load_object
+                new_load_object   # main Order row, create new Spree::Order
               end
 
-              contains_data = false
+              @contains_data = false
 
               begin
-                # First assign any default values for columns
-                process_defaults
+                process_excel_row( row )
 
-                # TODO - Smart sorting of column processing order ....
-                # Does not currently ensure mandatory columns (for valid?) processed first but model needs saving
-                # before associations can be processed so user should ensure mandatory columns are prior to associations
+                begin
+                  logger.info("Order - Assigning User with email [#{row[1]}]")
 
-                # as part of this we also attempt to save early, for example before assigning to
-                # has_and_belongs_to associations which require the load_object has an id for the join table
+                  load_object.user = Spree.user_class.where( :email =>  @current_row[1] ).first
 
-                # Iterate over method_details, working on data out of associated Excel column
-                method_mapper.method_details.each_with_index do |method_detail, i|
+                  # make sure we also process the main Order rows, LineItem
+                  process_line_item( row, load_object )
 
-                  unless method_detail
-                    logger.warn("No method_detail found for column (#{i})")
-                    next # TODO populate unmapped with a real MethodDetail that is 'null' and create is_nil
-                  end
-                  logger.info "Processing Column #{method_detail.column_index} (#{method_detail.operator})"
-
-                  value = @current_row[method_detail.column_index]
-
-                  contains_data = true unless(value.nil? || value.to_s.empty?)
-
-                  process(method_detail, value)
+                rescue => e
+                  logger.warn("Could not assign User #{row[1]} to Order #{load_object.number}")
                 end
 
                 # This is rubbish but currently have to manually detect when actual data ends,
@@ -107,17 +106,7 @@ module DataShift
                 break unless(contains_data == true)
 
               rescue => e
-                @reporter.processed_object_count += 1
-
-                failure(@current_row, true)
-
-                if(verbose)
-                  puts "perform_excel_load failed in row [#{i}] #{@current_row} - #{e.message} :"
-                  puts e.backtrace
-                end
-
-                logger.error  "perform_excel_load failed in row [#{i}] #{@current_row} - #{e.message} :"
-                logger.error e.backtrace.join("\n")
+                process_excel_failure
 
                 # don't forget to reset the load object
                 new_load_object
@@ -126,20 +115,11 @@ module DataShift
 
               break unless(contains_data == true)
 
-              # currently here as we can only identify the end of a speadsheet by first empty row
+              # currently here as we can only identify the end of a spreadsheet by first empty row
               @reporter.processed_object_count += 1
 
               # TODO - make optional -  all or nothing or carry on and dump out the exception list at end
-
-              unless(save)
-                failure
-                logger.error "Failed to save row [#{@current_row}]"
-                logger.error load_object.errors.inspect if(load_object)
-              else
-                logger.info("Successfully SAVED Object with ID #{load_object.id} for Row #{@current_row}")
-                @reporter.add_loaded_object(@load_object)
-              end
-
+              save_and_report
             end   # all rows processed
 
             if(options[:dummy])
@@ -157,22 +137,49 @@ module DataShift
         end
       end
 
-      def process_line_items( row )
-        # for now jujst hard codign the columns 16 (quantity) and 17 (variant)
+      def process_line_item( row, order )
+        # for now just hard coding the columns 16 (quantity) and 17 (variant name), 20 (variant sku)
+        @quantity_header_idx ||= 16
+        @price_header_idx ||= 18
+        @sku_header_idx ||= 20
 
-        puts("Adding LineItems to Order - Variant #{row[17]} - Quantity #{row[16].to_i}")
+        # if by name ...
+        # by name - product = Spree::Product.where(:name => row[17]).first
+        # variant = product.master if(product)
 
-        variant = Spree::Variant.where(:name => row[17]).first
+        sku = row[@sku_header_idx]
 
-        puts("Found Variant - Variant ID #{variant.id}") if(variant)
+        variant = Spree::Variant.where(:sku => sku).first
 
-        if(row[16].to_i > 0)
-          line_item = load_object.contents.add(variant, row[16].to_i,  oad_object.currency)
-          unless line_item.valid?
-            errors.add(:base, line_item.errors.messages.values.join(" "))
-            logger.error("Unable to add LineItems to Order #{load_object.number} (#{load_object.id})")
+        unless(variant)
+          raise RecordNotFound.new("Unable to find Product with sku [#{sku}]")
+        end
+
+        logger.info("Process LineItem - Found Variant [#{variant.sku}] (#{variant.name}") if(variant)
+
+        sku = row[@sku_header_idx]
+        quantity = row[@quantity_header_idx].to_i
+        price = row[@price_header_idx].to_f
+
+        if(quantity > 0)
+
+          logger.info("Adding LineItem for #{sku} with Quantity #{quantity} to Order #{load_object.inspect}")
+
+          # idea incase we need full stock management
+          # variant.stock_items.first.adjust_count_on_hand(quantity)
+
+          line_item = Spree::LineItem.new(:variant => variant,
+                                          :quantity => quantity,
+                                          :price => row[@price_header_idx],
+                                          :order => order,
+                                          :currency => order.currency)
+
+          unless(line_item.valid?)
+            logger.error("Invalid LineItem :  #{line_item.errors.messages.inspect}")
+            logger.error("Failed - Unable to add LineItems to Order #{order.number} (#{order.id})")
           else
-            logger.info("Added LineItems to Order #{load_object.number}")
+            line_item.save
+            logger.info("Success - Added LineItems to Order #{order.number}")
           end
         end
       end
