@@ -106,7 +106,7 @@ module DataShift
                 break unless(contains_data == true)
 
               rescue => e
-                process_excel_failure
+                process_excel_failure(e)
 
                 # don't forget to reset the load object
                 new_load_object
