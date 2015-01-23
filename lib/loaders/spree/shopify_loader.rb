@@ -65,61 +65,63 @@ module DataShift
               # got no better idea than ending once we hit the first completely empty row
               break if(row.nil? || row.compact.empty?)
 
-              logger.info "Processing Row #{i} : #{row}"
+              logger.info "Processing Row #{current_row_idx} : #{row}"
 
-              # The spreadsheet contains some lines that don't forget to reset the object or we'll update rather than create
-              if(load_object.id && (row[2].nil? || row[2].empty?))   # Financial Status empty on LI rows
+              @reporter.processed_object_count += 1
+
+              # The spreadsheet contains some lines that are LineItems only for previous Order row
+              if(load_object.id && (!row[0].nil? && !row[0].empty?) && (row[2].nil? || row[2].empty?))   # Financial Status empty on LI rows
 
                 begin
                   process_line_item( row, load_object )
+
+                  @reporter.success_inbound_count += 1
+
                 rescue => e
-                  puts e.inspect
-                  logger.error(e.inspect)
-                  logger.warn("Failed to add LineItems for Order ID #{load_object.id} for Row #{row}")
+                  process_excel_failure(e, false)
                 end
 
                 next  # row contains NO OTHER data
 
               else
-                new_load_object   # main Order row, create new Spree::Order
+                new_load_object   # Main Order row, create new Spree::Order
               end
 
               @contains_data = false
 
+              # A real Order
               begin
+
                 process_excel_row( row )
 
                 begin
                   logger.info("Order - Assigning User with email [#{row[1]}]")
 
                   load_object.user = Spree.user_class.where( :email =>  @current_row[1] ).first
-
-                  # make sure we also process the main Order rows, LineItem
-                  process_line_item( row, load_object )
-
                 rescue => e
                   logger.warn("Could not assign User #{row[1]} to Order #{load_object.number}")
                 end
 
-                # This is rubbish but currently have to manually detect when actual data ends,
-                # no other way to detect when we hit the first completely empty row
-                break unless(contains_data == true)
+                save_and_report
 
               rescue => e
                 process_excel_failure(e)
-
-                # don't forget to reset the load object
-                new_load_object
                 next
               end
 
+              begin
+                # make sure we also process the main Order rows, LineItem
+                process_line_item( row, load_object )
+
+                load_object.save
+              rescue    # logged already
+                next
+              end
+
+              # This is rubbish but currently have to manually detect when actual data ends,
+              # no other way to detect when we hit the first completely empty row
               break unless(contains_data == true)
 
-              # currently here as we can only identify the end of a spreadsheet by first empty row
-              @reporter.processed_object_count += 1
-
-              # TODO - make optional -  all or nothing or carry on and dump out the exception list at end
-              save_and_report
             end   # all rows processed
 
             if(options[:dummy])
@@ -152,35 +154,48 @@ module DataShift
         variant = Spree::Variant.where(:sku => sku).first
 
         unless(variant)
-          raise RecordNotFound.new("Unable to find Product with sku [#{sku}]")
+          raise RecordNotFound.new("Failed to find Variant with sku [#{sku}] for LineItem")
         end
 
-        logger.info("Process LineItem - Found Variant [#{variant.sku}] (#{variant.name}") if(variant)
+        logger.info("Processing LineItem - Found Variant [#{variant.sku}] (#{variant.name})") if(variant)
 
         sku = row[@sku_header_idx]
         quantity = row[@quantity_header_idx].to_i
-        price = row[@price_header_idx].to_f
 
         if(quantity > 0)
+
+          price = row[@price_header_idx].to_f
 
           logger.info("Adding LineItem for #{sku} with Quantity #{quantity} to Order #{load_object.inspect}")
 
           # idea incase we need full stock management
           # variant.stock_items.first.adjust_count_on_hand(quantity)
 
-          line_item = Spree::LineItem.new(:variant => variant,
+          begin
+
+            #TODO - Not sure about stocklocation ... something better than Spree::StockLocation.first ??
+
+            Spree::Shipment.create(state: 'pending', order: order, stock_location: Spree::StockLocation.first)
+
+            line_item = Spree::LineItem.new(:variant => variant,
                                           :quantity => quantity,
-                                          :price => row[@price_header_idx],
+                                          :price => price,
                                           :order => order,
                                           :currency => order.currency)
 
-          unless(line_item.valid?)
-            logger.error("Invalid LineItem :  #{line_item.errors.messages.inspect}")
-            logger.error("Failed - Unable to add LineItems to Order #{order.number} (#{order.id})")
-          else
-            line_item.save
-            logger.info("Success - Added LineItems to Order #{order.number}")
+            unless(line_item.valid?)
+              logger.error("Invalid LineItem :  #{line_item.errors.messages.inspect}")
+            else
+              logger.info("Attempting to save new LineItem against Order #{order.number} (#{order.id})")
+              line_item.save
+              order.reload
+              logger.info("Success - Added LineItems to Order #{order.number}")
+            end
+          rescue => e
+            logger.error("Create LineItem failed for [#{sku}] Order #{order.number} (#{order.id}) - #{e.inspect}")
+            raise
           end
+
         end
       end
 
