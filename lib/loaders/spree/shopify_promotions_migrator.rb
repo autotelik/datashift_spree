@@ -113,23 +113,25 @@ module DataShift
                   calc_portion = $1.dup
                   desc_portion = $2.downcase
 
+                  rule_action = shopify_rule_action.match(desc_splitter_regex)
+
                   adjustment = if(desc_portion.include?("or above"))          # $10 off orders equal or above $25.00 - requires a Rule
-                                 WithItemTotalRule    #DONE
-                               elsif(desc_portion.include?("once per order"))  # # $36.00 off of the Picks (once per order) requires a Rule
-                                 WithOncePerOrderRuleAdjustment
+                                 WithItemTotalRule
+                               elsif(desc_portion.include?("once per order"))
+                                 # TODO Not sure this is correct - once per order may just be same WithOrderAdjustment
+                                 WithFirstOrderRuleAdjustment
                                elsif(desc_portion.include?("all orders"))      # nice n simple - no rules
                                  WithOrderAdjustment
-                               else # 10% off collections
-                                 # $36.00 off of the Picks (once per order)
-                                 WithProductRuleAdjustment                           # requires a specific Product e.g Picks or collections
+                               else
+                                 WithProductRuleAdjustment      #DONE                      # requires a specific Product e.g Picks or collections
                                end
+
+                  logger.info("Creating Adjustment of type : [#{adjustment}]")
 
                   if(calc_portion.match(rate_regex))
                     adjustment_rate = $1.to_f
 
-                    logger.info("Percentage Rate adjustment required : [#{adjustment_rate}]")
-
-                    puts "PercentageRate adjustment required [#{adjustment_rate}]"
+                    logger.info("Percentage Rate adjustment : [#{adjustment}]")
 
                     calculator = Spree::Calculator::FlatPercentItemTotal.new
                     calculator.preferred_flat_percent = adjustment_rate
@@ -139,7 +141,7 @@ module DataShift
                   elsif(calc_portion.match(dollar_amount_regex))
                     adjustment_rate = $1.to_f
 
-                    logger.info("Dollar Amount adjustment required : [#{adjustment_rate}]")
+                    logger.info("Dollar Amount adjustment : [#{adjustment_rate}]")
 
                     calculator = Spree::Calculator::FlatRate.new
                     calculator.preferred_amount =  adjustment_rate
@@ -151,8 +153,6 @@ module DataShift
                   end
 
                 end
-
-                puts load_object.inspect
 
                 save_and_report
 

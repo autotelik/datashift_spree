@@ -331,14 +331,10 @@ module DataShift
 
         property_list = get_each_assoc#current_value.split(Delimiters::multi_assoc_delim)
 
-        logger.info "WTF #{property_list.inspect}"
-
         property_list.each do |pstr|
 
           # Special case, we know we lookup on name so operator is effectively the name to lookup
           find_by_name, find_by_value = get_operator_and_data( pstr )
-
-          logger.info "WTF WTF #{find_by_name} (with value #{find_by_value})"
 
           raise "Cannot find Property via #{find_by_name} (with value #{find_by_value})" unless(find_by_name)
 

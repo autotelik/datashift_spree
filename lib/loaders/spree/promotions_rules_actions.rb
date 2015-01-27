@@ -10,9 +10,31 @@ module DataShift
 
   module SpreeEcom
 
+    # Adjustment can only be applied Once per Order
+    #     $36.00 off of the Picks (once per order)
+    #
+    class  WithFirstOrderRuleAdjustment
+
+      include DataShift::Logging
+
+      def initialize(promo, calculator, description = nil)
+
+        # $36.00 off of the Picks (once per order)
+
+        logger.info("Creating WithOncePerOrderRuleAdjustment from [#{description}]")
+
+        Spree::Promotion::Actions::CreateItemAdjustments.create!(calculator: calculator, promotion: promo)
+        # Not sure which Action required ?
+        # Spree::Promotion::Actions::CreateAdjustment.create!(calculator: calculator, promotion: promo)
+
+        Spree::Promotion::Rules::FirstOrder.create!(promotion: promo)
+      end
+
+    end
+
     # Adjust only Specific Items examples :
     #     10% off collections
-    #     $36.00 off of the Picks (once per order)
+    #     $36.00 off of the Picks
     #
     class  WithProductRuleAdjustment
 
@@ -20,29 +42,39 @@ module DataShift
 
       def initialize(promo, calculator, description)
 
-        logger.error("Creating WithProductRuleAdjustment from [#{description}]")
+        logger.info("Creating WithProductRuleAdjustment from [#{description}]")
 
         Spree::Promotion::Actions::CreateItemAdjustments.create!(calculator: calculator, promotion: promo)
 
-        # $36.00 off of the Picks (once per order)
         if(description.match(/off of the (\S+)\s+/) || description.match(/off (\S+)\s*/))
 
-          logger.info("Searching for Products matching [%#{$1}%]")
+          product_name = $1
 
-          product_ids = Spree::Product.select( :id, :name ).where(Spree::Product.arel_table[:name].matches("%#{$1}%")).all
+          products = if(product_name.include?('collections') && Spree::Product.column_names.include?('is_collection'))
+                          logger.info("Searching for Collections")
+                          Spree::Product.where(is_collection: true).all
+                        else
+                          logger.info("Searching for Products matching [%#{product_name}%]")
+                          Spree::Product.where(Spree::Product.arel_table[:name].matches("%#{product_name}%")).all
+                        end
 
-          if(product_ids.empty?)
-            logger.error("No Matching Products found for  [%#{$1}%]")
+          if(products.empty?)
+            logger.error("No Matching Products found for  [%#{product_name}%]")
           else
-            logger.info("Found Matching Products : [#{product_ids.collect(&:name)}]")
+            logger.info("Found Matching Products : [#{products.collect(&:name)}]")
 
-            ids = product_ids.each {|p| p.id }
+            ids = products.collect(&:id)
 
             logger.info("Creating Promo Rule for specific Products [#{ids.inspect}]")
 
-            rule = Spree::Promotion::Rules::Product.create!(product_ids: ids)
+            # Can't do one step - this chokes on invalid products - maybe cos of HABTM
+            # rule = Spree::Promotion::Rules::Product.create( products: products, promotion: promo))
 
-            promo.rules << rule
+            rule = Spree::Promotion::Rules::Product.create(promotion: promo)
+
+            rule.products << products
+
+            #promo.rules << rule
           end
         else
           logger.error("Failed to parse [#{description}] - No Product Rule assigned")
@@ -64,21 +96,7 @@ module DataShift
     end
 
 
-    # Adjustment can only be applied Once per Order
-
-    class  WithOncePerOrderRuleAdjustment
-
-      include DataShift::Logging
-
-      def initialize(promo, calculator, description = nil)
-
-        # $36.00 off of the Picks (once per order) requires a Rule
-        #TODO ????
-      end
-    end
-
     # Adjust whole Order but only if conditions met e.g Order over $25
-    # TOFIX DONE
     class WithItemTotalRule
 
       include DataShift::Logging
@@ -92,7 +110,7 @@ module DataShift
         if(description.match("orders (\D+) \$(\d+\.\d*)"))
 
           logger.info("Creating Promo Rule for Min Amount of [#{$2}]")
-          rule = Spree::Promotion::Rules::ItemTotal.create!(
+          rule = Spree::Promotion::Rules::ItemTotal.create(
               preferred_operator_min: 'gte',
               preferred_operator_max: 'lte',
               preferred_amount_min: $2.to_f,

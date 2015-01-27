@@ -178,7 +178,7 @@ module DatashiftSpree
     end
 
 
-    desc "report_promo_data", "Report on avilable Spree Promotion data - rules/calculators etc"
+    desc "report_promo_data", "Report on available Spree Promotion data - rules/calculators etc"
 
     def report_promo_data()
 
