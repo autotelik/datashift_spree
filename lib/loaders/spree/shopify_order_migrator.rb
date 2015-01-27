@@ -53,7 +53,7 @@ module DataShift
 
             @sheet.each_with_index do |row, i|
 
-              @current_row_idx = i
+              current_row_idx = i
               @current_row = row
 
               next if(i == header_row_index)
@@ -143,13 +143,19 @@ module DataShift
         # for now just hard coding the columns 16 (quantity) and 17 (variant name), 20 (variant sku)
         @quantity_header_idx ||= 16
         @price_header_idx ||= 18
-        @sku_header_idx ||= 20
+        @sku_header_idx ||= 20      # Lineitem:sku
+
 
         # if by name ...
         # by name - product = Spree::Product.where(:name => row[17]).first
         # variant = product.master if(product)
 
         sku = row[@sku_header_idx]
+
+        method_detail = DataShift::MethodDictionary.find_method_detail(Spree::Order, "LineItems" )
+
+        # will perform substitutions etc
+        @populator.prepare_data(method_detail, sku)
 
         variant = Spree::Variant.where(:sku => sku).first
 
@@ -159,7 +165,6 @@ module DataShift
 
         logger.info("Processing LineItem - Found Variant [#{variant.sku}] (#{variant.name})") if(variant)
 
-        sku = row[@sku_header_idx]
         quantity = row[@quantity_header_idx].to_i
 
         if(quantity > 0)
