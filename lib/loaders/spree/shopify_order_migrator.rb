@@ -23,7 +23,7 @@ module DataShift
       #
       def initialize(klass, options = {})
         # We want the delegated methods so always include instance methods
-        opts = {:instance_methods => true}.merge( options )
+        opts = {:instance_methods => true }.merge( options )
 
         super( klass, nil, opts)
 
@@ -42,11 +42,28 @@ module DataShift
 
       def perform_excel_load( file_name, options = {} )
 
+        # Spree 2 Checkout/Order states
+
+        #       go_to_state :address
+        #       go_to_state :delivery
+        #       go_to_state :payment, if: ->(order) { order.payment_required? }
+        #       go_to_state :confirm, if: ->(order) { order.confirmation_required? }
+        #       go_to_state :complete
+
+        Spree::Order.class_eval do
+          def confirmation_required?
+            false;
+          end
+
+          def payment_required?
+            false;
+          end
+        end
+
         start_excel(file_name, options)
 
         begin
           puts "Dummy Run - Changes will be rolled back" if options[:dummy]
-
           load_object_class.transaction do
 
             Spree::Config[:track_inventory_levels] = false
@@ -58,12 +75,11 @@ module DataShift
 
               next if(i == header_row_index)
 
-              # Excel num_rows seems to return all 'visible' rows, which appears to be greater than the actual data rows
-              # (TODO - write spec to process .xls with a huge number of rows)
-              #
-              # This is rubbish but currently manually detect when actual data ends, this isn't very smart but
-              # got no better idea than ending once we hit the first completely empty row
-              break if(row.nil? || row.compact.empty?)
+              # This required in some circumstances where each_with_index keeps going
+              # so need to manually detect when actual data ends, so quit once we hit the first completely empty row
+              if(row.nil? || row.compact.empty?)
+                break
+              end
 
               logger.info "Processing Row #{current_row_idx} : #{row}"
 
@@ -84,23 +100,54 @@ module DataShift
                 next  # row contains NO OTHER data
 
               else
+                finish if(load_object.id)    # Ok we have added all Line Items - now complete existing order
+
                 new_load_object   # Main Order row, create new Spree::Order
               end
 
               @contains_data = false
 
-              # A real Order
+              # A real Order row, not just LineItem
+
               begin
+                # We are loading/migrating data - ensure emails not sent
+                load_object.confirmation_delivered = true
 
                 process_excel_row( row )
 
                 begin
+                  # make sure we also process the main Order rows, LineItem
+                  process_line_item( row, load_object )
+                rescue    # logged already
+                end
+
+                save
+
+                # We are loading/migrating data - try to ensure emails not sent
+                load_object.confirmation_delivered = true
+
+                begin
                   logger.info("Order - Assigning User with email [#{row[1]}]")
 
-                  load_object.user = Spree.user_class.where( :email =>  @current_row[1] ).first
+                  load_object.next  #address
+
+                  load_object.associate_user!( Spree.user_class.where( :email =>  @current_row[1] ).first)
                 rescue => e
                   logger.warn("Could not assign User #{row[1]} to Order #{load_object.number}")
                 end
+
+                @total_idx ||= excel_headers.index('total' )
+                @shipment_total_idx ||= excel_headers.index('shipment_total' )
+                @additional_tax_total_idx ||= excel_headers.index('additional_tax_total' )
+                @payment_total_idx ||= excel_headers.index('payment_total' )
+                @promo_total_idx ||= excel_headers.index('promo_total' )
+
+                @payment_state_idx ||= excel_headers.index('payment_state' )
+
+                load_object.shipment_total = row[@shipment_total_idx].to_f
+                load_object.promo_total = row[@promo_total_idx].to_f
+                load_object.total = row[@total_idx].to_f
+
 
                 save_and_report
 
@@ -109,20 +156,15 @@ module DataShift
                 next
               end
 
-              begin
-                # make sure we also process the main Order rows, LineItem
-                process_line_item( row, load_object )
-
-                load_object.save
-              rescue    # logged already
-                next
-              end
-
               # This is rubbish but currently have to manually detect when actual data ends,
               # no other way to detect when we hit the first completely empty row
-              break unless(contains_data == true)
+              unless(contains_data == true)
+                break
+              end
 
             end   # all rows processed
+
+            finish
 
             if(options[:dummy])
               puts "Excel loading stage complete - Dummy run so Rolling Back."
@@ -139,12 +181,29 @@ module DataShift
         end
       end
 
+      def finish
+
+        return unless(load_object && load_object.id)    # Ok we have added all Line Items - now complete existing order
+
+        load_object.create_proposed_shipments
+
+        if(load_object.shipments.first)
+          load_object.shipments.first.state =  'shipped'
+          load_object.shipments.first.shipped_at = load_object.completed_at
+        end
+
+        load_object.payment_state = "paid"
+
+        load_object.state = 'complete'
+
+        load_object.save    # ok this Order done
+      end
+
       def process_line_item( row, order )
         # for now just hard coding the columns 16 (quantity) and 17 (variant name), 20 (variant sku)
         @quantity_header_idx ||= 16
         @price_header_idx ||= 18
         @sku_header_idx ||= 20      # Lineitem:sku
-
 
         # if by name ...
         # by name - product = Spree::Product.where(:name => row[17]).first
@@ -178,22 +237,23 @@ module DataShift
 
           begin
 
-            #TODO - Not sure about stocklocation ... something better than Spree::StockLocation.first ??
-
-            Spree::Shipment.create(state: 'pending', order: order, stock_location: Spree::StockLocation.first)
-
             line_item = Spree::LineItem.new(:variant => variant,
-                                          :quantity => quantity,
-                                          :price => price,
-                                          :order => order,
-                                          :currency => order.currency)
+                                            :quantity => quantity,
+                                            :price => price,
+                                            :order => order,
+                                            :currency => order.currency)
+
+
 
             unless(line_item.valid?)
               logger.error("Invalid LineItem :  #{line_item.errors.messages.inspect}")
             else
+
+
               logger.info("Attempting to save new LineItem against Order #{order.number} (#{order.id})")
               line_item.save
               order.reload
+
               logger.info("Success - Added LineItems to Order #{order.number}")
             end
           rescue => e

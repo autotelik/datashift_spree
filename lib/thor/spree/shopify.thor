@@ -121,12 +121,20 @@ module DatashiftSpree
     method_option :verbose, :aliases => '-v', :type => :boolean, :desc => "Verbose logging"
     method_option :config, :aliases => '-c',  :type => :string, :desc => "Configuration file containg defaults or over rides in YAML"
     method_option :dummy, :aliases => '-d', :type => :boolean, :desc => "Dummy run, do not actually save Image or Product"
+    method_option :delete_existing,  :type => :boolean, :desc => "WARNING - test mode delete existing Orders first"
 
     def orders()
 
       # assuming run from a rails app/top level dir...
       require File.expand_path('config/environment.rb')
 
+      if(options[:delete_existing])
+        puts "DELETING ALL ORDERS!!!!!!!"
+        sleep 1
+        Spree::Order.delete_all
+        Spree::LineItem.delete_all
+        puts "DELETED ALL ORDERS!!!!!!!"
+      end
       input = options[:input]
 
       require 'shopify_order_migrator'
