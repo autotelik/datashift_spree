@@ -126,7 +126,7 @@ describe 'SpreeImageLoading' do
   
   it "should assign Images to preloaded Products by SKU via Excel"  do
 
-    DataShift::MethodDictionary.find_operators( @Image_klass )
+    DataShift::ModelMethodsManager.find_methods( @Image_klass )
 
     @Product_klass.count.should == 0
 

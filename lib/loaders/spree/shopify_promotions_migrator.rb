@@ -50,9 +50,19 @@ module DataShift
 
           load_object_class.transaction do
 
+            # Rule seems to be (amount)(description)
             desc_splitter_regex = Regexp.new('^(\S+)\s(.*)')
+
             rate_regex = Regexp.new('(\d+)\%')
-            dollar_amount_regex = Regexp.new('\$(\d+\.\d*)')
+
+            dollar_amount_regex1 = Regexp.new('\$(\d+\.\d*)')
+            dollar_amount_regex2 = Regexp.new('\$(\d+)\s*')
+
+            #  e.g 1           : \d => number used, no usage limit
+            #  e.g 2/10        : \d/\d e.g 2/10 => number used / max usage limit
+            #  e.g 1 out of 1  : \d/ out of \d  => number used / max usage limit
+            limit_regexp1 = Regexp.new('\d\/(\d+)')
+            limit_regexp2 = Regexp.new('\d+ out of (\d+)')
 
             @sheet.each_with_index do |row, i|
 
@@ -82,16 +92,16 @@ module DataShift
 
                 load_object.code = load_object.name
 
-                shopify_usage_rule = row[2]
+                shopify_usage_rule = row[2].to_s
 
-                #  e.g 1     : \d => number used, no usage limit
-                #  e.g 2/10  : \d/\d e.g 2/10 => number used / max usage limit
+                if(shopify_usage_rule.match(limit_regexp1))
+                  load_object.usage_limit =  $1.to_f
+                  logger.info("Promo has usage - Limit Set : [#{$1}]")
 
-                used, limit = shopify_usage_rule.to_s.split(/\//)
+                elsif(shopify_usage_rule.match(limit_regexp2))
+                  load_object.usage_limit =  $1.to_f
+                  logger.info("Promo has usage - Limit Set : [#{$1}]")
 
-                if(limit)
-                  load_object.usage_limit = limit
-                  logger.info("Promo has usage - Limit Set : [#{limit}]")
                 end
 
                 # TODO - not sure any way to set used - looks like Spree calculates it from orders
@@ -122,7 +132,7 @@ module DataShift
                                elsif(desc_portion.include?("once per order"))
                                  # TODO Not sure this is correct - once per order may just be same WithOrderAdjustment
                                  WithFirstOrderRuleAdjustment
-                               elsif(desc_portion.include?("all orders"))      # nice n simple - no rules
+                               elsif(desc_portion.include?("all orders") || desc_portion == 'off')      # nice n simple - no rules/products
                                  WithOrderAdjustment
                                else
                                  WithProductRuleAdjustment      #DONE                      # requires a specific Product e.g Picks or collections
@@ -140,7 +150,7 @@ module DataShift
 
                     adjustment.new(load_object, calculator, desc_portion)
 
-                  elsif(calc_portion.match(dollar_amount_regex))
+                  elsif(calc_portion.match(dollar_amount_regex1) || calc_portion.match(dollar_amount_regex2) )
                     adjustment_rate = $1.to_f
 
                     logger.info("Dollar Amount adjustment : [#{adjustment_rate}]")
@@ -151,7 +161,7 @@ module DataShift
                     adjustment.new(load_object, calculator, desc_portion)
 
                   else
-                    logger.error("Failed to parse Shopify amount from #{calc_portion}")
+                    logger.error("Failed to parse Shopify amount from [#{calc_portion}]")
                   end
 
                 end

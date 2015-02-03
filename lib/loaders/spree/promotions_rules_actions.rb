@@ -46,9 +46,16 @@ module DataShift
 
         Spree::Promotion::Actions::CreateItemAdjustments.create!(calculator: calculator, promotion: promo)
 
-        if(description.match(/off of the (\S+)\s+/) || description.match(/off (\S+)\s*/))
+        # Examples :
+        # regexp 1 : $36.00 off of the Picks (once per order)
+        # regexp 2 : 30% off Miss Popular
+        #            10% off collections
 
-          product_name = $1
+        #
+        if(description.match(/off of the (.+) \(.*/) ||  description.match(/off (.+)/)
+        )
+
+          product_name = $1.strip
 
           products = if(product_name.include?('collections') && Spree::Product.column_names.include?('is_collection'))
                           logger.info("Searching for Collections")
@@ -75,9 +82,11 @@ module DataShift
             rule.products << products
 
             #promo.rules << rule
+
+            rule.save
           end
         else
-          logger.error("Failed to parse [#{description}] - No Product Rule assigned")
+          logger.error("WithProductRuleAdjustment Failed to parse Description [#{description}] - No Product Rule assigned to #{promo.inspect}")
         end
       end
     end
@@ -103,23 +112,29 @@ module DataShift
 
       def initialize(promo, calculator, description)
 
+        @regexp1 ||=  Regexp.new('.*orders (.+) \$(\d+\.\d+)')
+        @regexp2 ||=  Regexp.new('.*orders (.+) \$(\d+)')
+
         action = Spree::Promotion::Actions::CreateAdjustment.create!(calculator: calculator)
         promo.actions << action
 
         # $10 off orders equal or above $25.00
-        if(description.match("orders (\D+) \$(\d+\.\d*)"))
+        # xxx off orders equal or above $25.00
+        if(description.match(@regexp1) || description.match(@regexp2))
 
+          # $1 not currently used since only ever seen "equal or above" => 'gte'
           logger.info("Creating Promo Rule for Min Amount of [#{$2}]")
-          rule = Spree::Promotion::Rules::ItemTotal.create(
-              preferred_operator_min: 'gte',
-              preferred_operator_max: 'lte',
-              preferred_amount_min: $2.to_f,
-              preferred_amount_max: nil
-          )
+          rule = Spree::Promotion::Rules::ItemTotal.create( preferred_amount: $2.to_f)
+
+          # 2-1 stable only supports order greater than, not these
+              #preferred_operator_min: 'gte',
+              #preferred_operator_max: 'lte',
+              #rule.preferred_amount_min = $2.to_f
+              #rule.preferred_amount_max =  nil
 
           promo.rules << rule
         else
-          logger.error("Failed to parse Shopify Promotion rule #{description} ")
+          logger.error("WithItemTotalRule : Failed to parse Shopify description [#{description}]")
         end
       end
 

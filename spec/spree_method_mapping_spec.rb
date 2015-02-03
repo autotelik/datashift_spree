@@ -228,7 +228,7 @@ describe 'SpreeMethodMapping' do
 
   it "should leave nil entries when no method_detail found for inbound headers" do
     
-    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+    DataShift::ModelMethodsManager.find_methods( @Product_klass, :instance_methods => true )
  
     DataShift::MethodDictionary.build_method_details(@Product_klass)
     
@@ -249,7 +249,7 @@ describe 'SpreeMethodMapping' do
   
   it "should add 'null' type method details for :force_inclusion items when no method_detail found" do
     
-    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+    DataShift::ModelMethodsManager.find_methods( @Product_klass, :instance_methods => true )
  
     DataShift::MethodDictionary.build_method_details(@Product_klass)
     
@@ -272,7 +272,7 @@ describe 'SpreeMethodMapping' do
     
   it "should ignore :force_inclusion items if they are genuine columns" do
     
-    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+    DataShift::ModelMethodsManager.find_methods( @Product_klass, :instance_methods => true )
  
     DataShift::MethodDictionary.build_method_details(@Product_klass)
     
@@ -301,7 +301,7 @@ describe 'SpreeMethodMapping' do
   
   it "should find all method_details for instance methods based on inbound headers" do
     
-    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+    DataShift::ModelMethodsManager.find_methods( @Product_klass, :instance_methods => true )
  
     DataShift::MethodDictionary.build_method_details(@Product_klass)
     
@@ -323,7 +323,7 @@ describe 'SpreeMethodMapping' do
   
    it "should find all method_details for belongs_to based on inbound headers" do
     
-    DataShift::MethodDictionary.find_operators( @Product_klass, :instance_methods => true )
+    DataShift::ModelMethodsManager.find_methods( @Product_klass, :instance_methods => true )
  
     DataShift::MethodDictionary.build_method_details(@Product_klass)
 
