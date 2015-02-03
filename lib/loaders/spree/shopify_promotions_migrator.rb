@@ -80,6 +80,8 @@ module DataShift
 
                 process_excel_row( row )
 
+                load_object.code = load_object.name
+
                 shopify_usage_rule = row[2]
 
                 #  e.g 1     : \d => number used, no usage limit
