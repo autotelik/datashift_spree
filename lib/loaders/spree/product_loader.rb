@@ -150,7 +150,7 @@ module DataShift
           #
           save_if_new
 
-          # Spree has some stock management stuff going on, so dont usually assign to column vut use
+          # Spree has some stock management stuff going on, so dont usually assign to column but use
           # on_hand and on_hand=
           if(@load_object.variants.size > 0)
 
@@ -439,7 +439,7 @@ module DataShift
 
           if(stock_location)
               @@stock_movement_klass.create(:quantity => find_by_value.to_i, :stock_item => variant.stock_items.find_by_stock_location_id(stock_location.id))
-              logger.info "Created New Stock Movement with #{find_by_value} new count_on_hand to #{stock_location.inspect}"
+              logger.info "Added #{find_by_value} count_on_hand to Stock Location #{stock_location.inspect}"
           else
             puts "WARNING: Stock Location #{find_by_name} NOT found - Not set Product"
           end
