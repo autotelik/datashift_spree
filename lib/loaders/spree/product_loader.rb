@@ -162,7 +162,7 @@ module DataShift
               values = current_value.to_s.split(Delimiters::multi_assoc_delim)
 
               if(@load_object.variants.size == values.size)
-                @load_object.variants.each_with_index {|v, i| v.stock_items.first.count_on_hand = values[i].to_i }
+                @load_object.variants.each_with_index {|v, i| add_variant_stock(v, values[i].to_i) }
                 @load_object.save
               else
                 puts "WARNING: Count on hand entries did not match number of Variants - None Set"
@@ -412,6 +412,37 @@ module DataShift
 
           @load_object.taxons << unique_list unless(unique_list.empty?)
           # puts @load_object.taxons.inspect
+
+        end
+
+      end
+      
+      def add_variant_stock(variant, stock)
+
+        save_if_new
+        
+        stock_coh_list = get_each_assoc
+
+        stock_coh_list.each do |stock_coh|
+
+          # count_on_hand column MUST HAVE "stock_location_name:variant_count_on_hand" format
+          stock_location_name, variant_count_on_hand = stock_coh.split(Delimiters::name_value_delim)
+
+          raise "Cannot set count_on_hand without valid Stock Location. Use 'stock_location_name:variant_count_on_hand' format" unless(stock_location_name)
+
+          stock_location = @@stock_location_klass.where(:name => find_by_name).first
+
+          unless stock_location
+            stock_location = @@stock_location_klass.create( :name => find_by_name)
+            logger.info "Created New Stock Location #{stock_location.inspect}"
+          end
+
+          if(stock_location)
+              @@stock_movement_klass.create(:quantity => find_by_value.to_i, :stock_item => variant.stock_items.find_by_stock_location_id(stock_location.id))
+              logger.info "Created New Stock Movement with #{find_by_value} new count_on_hand to #{stock_location.inspect}"
+          else
+            puts "WARNING: Stock Location #{find_by_name} NOT found - Not set Product"
+          end
 
         end
 
