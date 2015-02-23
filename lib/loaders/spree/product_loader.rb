@@ -43,7 +43,7 @@ module DataShift
         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
         
         # Non Product/database fields we can still  process
-        @we_can_process_these_anyway =  ['images',  "variant_price", "variant_sku"]
+        @we_can_process_these_anyway =  ['images',  "variant_price", "variant_sku", "stock_items"]
           
         # In >= 1.3.0 price moved to master Variant from Product so no association called Price on Product anymore
         # taking care of it here, means users can still simply just include a price column
@@ -135,13 +135,14 @@ module DataShift
             super
           end
           
-        elsif(current_value && (current_method_detail.operator?('count_on_hand') || current_method_detail.operator?('on_hand')) )
+        #elsif(current_value && (current_method_detail.operator?('count_on_hand') || current_method_detail.operator?('on_hand')) )
+        elsif(current_value && current_method_detail.operator?('stock_items'))
+          
+          logger.info "Adding Variants Stock Items (count_on_hand)"
 
-          # TODO smart column ordering to ensure always valid - if we always make it very last column might not get wiped ?
-          #
           save_if_new
-
-          add_variant_stock
+          
+          add_variants_stock(current_value)
 
         else
           super
@@ -378,12 +379,14 @@ module DataShift
 
       end
       
-      def add_variants_stock
+      def add_variants_stock(current_value)
 
         save_if_new
 
         # do we have Variants?
         if(@load_object.variants.size > 0)
+
+          logger.info "[COUNT_ON_HAND] - number of variants to process #{@load_object.variants.size}"
 
           if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
             # Check if we've already processed Variants and assign count per variant
@@ -392,12 +395,17 @@ module DataShift
             raise "WARNING: Count on hand entries did not match number of Variants - None Set" unless (@load_object.variants.size == values.size)
           end
 
+          variants = @load_object.variants # just for readability and logic
+          logger.info "Variants: #{@load_object.variants.inspect}"
+
           stock_coh_list = get_each_assoc # we expect to get corresponding stock_location:count_on_hand for every variant
-  
-          stock_coh_list.each do |stock_coh|
+
+          stock_coh_list.each_with_index do |stock_coh, i|
   
             # count_on_hand column MUST HAVE "stock_location_name:variant_count_on_hand" format
             stock_location_name, variant_count_on_hand = stock_coh.split(Delimiters::name_value_delim)
+
+            logger.info "Setting #{variant_count_on_hand} items for stock location #{stock_location_name}..."
   
             if not stock_location_name # No Stock Location referenced, fallback to default one...
               logger.info "No Stock Location was referenced. Adding count_on_hand to default Stock Location. Use 'stock_location_name:variant_count_on_hand' format to specify prefered Stock Location"
@@ -412,7 +420,7 @@ module DataShift
             end
   
             if(stock_location)
-                @@stock_movement_klass.create(:quantity => variant_count_on_hand.to_i, :stock_item => variant.stock_items.find_by_stock_location_id(stock_location.id))
+                @@stock_movement_klass.create(:quantity => variant_count_on_hand.to_i, :stock_item => variants[i].stock_items.find_by_stock_location_id(stock_location.id))
                 logger.info "Added #{variant_count_on_hand} count_on_hand to Stock Location #{stock_location.inspect}"
             else
               puts "WARNING: Stock Location #{stock_location_name} NOT found - Can't set count_on_hand"
