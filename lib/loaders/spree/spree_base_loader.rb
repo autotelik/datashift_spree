@@ -37,6 +37,8 @@ module DataShift
       @@product_klass ||= DataShift::SpreeEcom::get_spree_class('Product')
       @@property_klass ||= DataShift::SpreeEcom::get_spree_class('Property')
       @@product_property_klass ||= DataShift::SpreeEcom::get_spree_class('ProductProperty')
+      @@stock_location_klass ||= DataShift::SpreeEcom::get_spree_class('StockLocation')
+      @@stock_movement_klass ||= DataShift::SpreeEcom::get_spree_class('StockMovement')
       @@taxonomy_klass ||= DataShift::SpreeEcom::get_spree_class('Taxonomy')
       @@taxon_klass ||= DataShift::SpreeEcom::get_spree_class('Taxon')
       @@variant_klass ||= DataShift::SpreeEcom::get_spree_class('Variant')

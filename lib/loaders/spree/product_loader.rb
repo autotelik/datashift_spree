@@ -43,7 +43,7 @@ module DataShift
         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
         
         # Non Product/database fields we can still  process
-        @we_can_process_these_anyway =  ['images',  "variant_price", "variant_sku"]
+        @we_can_process_these_anyway =  ['images',  "variant_price", "variant_sku", "stock_items"]
           
         # In >= 1.3.0 price moved to master Variant from Product so no association called Price on Product anymore
         # taking care of it here, means users can still simply just include a price column
@@ -135,52 +135,14 @@ module DataShift
             super
           end
           
-        elsif(current_value && (current_method_detail.operator?('count_on_hand') || current_method_detail.operator?('on_hand')) )
+        #elsif(current_value && (current_method_detail.operator?('count_on_hand') || current_method_detail.operator?('on_hand')) )
+        elsif(current_value && current_method_detail.operator?('stock_items'))
+          
+          logger.info "Adding Variants Stock Items (count_on_hand)"
 
-          # Spree 2.2 - New Stock management :
-          # http://guides.spreecommerce.com/developer/inventory.html
-          logger.warn("Check stock settings carefully - new StockManagement in Spree >= 2.2")
-
-          # Unless we can save here, in danger of count_on_hand getting wiped out.
-          # If we set (on_hand or count_on_hand) on an unsaved object, during next subsequent save
-          # looks like some validation code or something calls Variant.on_hand= with 0
-          # If we save first, then our values seem to stick
-
-          # TODO smart column ordering to ensure always valid - if we always make it very last column might not get wiped ?
-          #
           save_if_new
-
-          # Spree has some stock management stuff going on, so dont usually assign to column vut use
-          # on_hand and on_hand=
-          if(@load_object.variants.size > 0)
-
-            if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
-
-              #puts "DEBUG: COUNT_ON_HAND PER VARIANT",current_value.is_a?(String),
-
-              # Check if we processed Option Types and assign count per option
-              values = current_value.to_s.split(Delimiters::multi_assoc_delim)
-
-              if(@load_object.variants.size == values.size)
-                @load_object.variants.each_with_index {|v, i| v.stock_items.first.count_on_hand = values[i].to_i }
-                @load_object.save
-              else
-                puts "WARNING: Count on hand entries did not match number of Variants - None Set"
-              end
-            end
-
-            # Can only set count on hand on Product if no Variants exist, else model throws
-
-          elsif(@load_object.variants.size == 0)
-            if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
-              puts "WARNING: Multiple count_on_hand values specified but no Variants/OptionTypes created"
-              load_object.master.stock_items.first.count_on_hand = current_value.to_s.split(Delimiters::multi_assoc_delim).first.to_i
-              #load_object.on_hand = current_value.to_s.split(Delimiters::multi_assoc_delim).first.to_i
-            else
-              #load_object.on_hand = current_value.to_i
-              load_object.master.stock_items.first.count_on_hand = current_value.to_i
-            end
-          end
+          
+          add_variants_stock(current_value)
 
         else
           super
@@ -415,6 +377,85 @@ module DataShift
 
         end
 
+      end
+      
+      def add_variants_stock(current_value)
+
+        save_if_new
+
+        # do we have Variants?
+        if(@load_object.variants.size > 0)
+
+          logger.info "[COUNT_ON_HAND] - number of variants to process #{@load_object.variants.size}"
+
+          if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
+            # Check if we've already processed Variants and assign count per variant
+            values = current_value.to_s.split(Delimiters::multi_assoc_delim)
+            # variants and count_on_hand number match?
+            raise "WARNING: Count on hand entries did not match number of Variants - None Set" unless (@load_object.variants.size == values.size)
+          end
+
+          variants = @load_object.variants # just for readability and logic
+          logger.info "Variants: #{@load_object.variants.inspect}"
+
+          stock_coh_list = get_each_assoc # we expect to get corresponding stock_location:count_on_hand for every variant
+
+          stock_coh_list.each_with_index do |stock_coh, i|
+  
+            # count_on_hand column MUST HAVE "stock_location_name:variant_count_on_hand" format
+            stock_location_name, variant_count_on_hand = stock_coh.split(Delimiters::name_value_delim)
+
+            logger.info "Setting #{variant_count_on_hand} items for stock location #{stock_location_name}..."
+  
+            if not stock_location_name # No Stock Location referenced, fallback to default one...
+              logger.info "No Stock Location was referenced. Adding count_on_hand to default Stock Location. Use 'stock_location_name:variant_count_on_hand' format to specify prefered Stock Location"
+              stock_location = @@stock_location_klass.where(:default => true).first
+              raise "WARNING: Can't set count_on_hand as no Stock Location exists!" unless stock_location
+            else # go with the one specified...
+              stock_location = @@stock_location_klass.where(:name => stock_location_name).first
+              unless stock_location
+                stock_location = @@stock_location_klass.create( :name => stock_location_name)
+                logger.info "Created New Stock Location #{stock_location.inspect}"
+              end
+            end
+  
+            if(stock_location)
+                @@stock_movement_klass.create(:quantity => variant_count_on_hand.to_i, :stock_item => variants[i].stock_items.find_by_stock_location_id(stock_location.id))
+                logger.info "Added #{variant_count_on_hand} count_on_hand to Stock Location #{stock_location.inspect}"
+            else
+              puts "WARNING: Stock Location #{stock_location_name} NOT found - Can't set count_on_hand"
+            end
+  
+          end
+  
+        # ... or just single Master Product?
+        elsif(@load_object.variants.size == 0)
+          if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
+            # count_on_hand column MUST HAVE "stock_location_name:master_count_on_hand" format
+            stock_location_name, master_count_on_hand = (current_value.to_s.split(Delimiters::multi_assoc_delim).first).split(Delimiters::name_value_delim)
+            puts "WARNING: Multiple count_on_hand values specified but no Variants/OptionTypes created"
+          else
+            stock_location_name, master_count_on_hand = current_value.split(Delimiters::name_value_delim)
+          end
+          if not stock_location_name # No Stock Location referenced, fallback to default one...
+            logger.info "No Stock Location was referenced. Adding count_on_hand to default Stock Location. Use 'stock_location_name:master_count_on_hand' format to specify prefered Stock Location"
+            stock_location = @@stock_location_klass.where(:default => true).first
+            raise "WARNING: Can't set count_on_hand as no Stock Location exists!" unless stock_location
+          else # go with the one specified...
+            stock_location = @@stock_location_klass.where(:name => stock_location_name).first
+            unless stock_location
+              stock_location = @@stock_location_klass.create( :name => stock_location_name)
+              logger.info "Created New Stock Location #{stock_location.inspect}"
+            end
+          end
+
+          if(stock_location)
+              @@stock_movement_klass.create(:quantity => master_count_on_hand.to_i, :stock_item => load_object.master.stock_items.find_by_stock_location_id(stock_location.id))
+              logger.info "Added #{master_count_on_hand} count_on_hand to Stock Location #{stock_location.inspect}"
+          else
+            puts "WARNING: Stock Location #{stock_location_name} NOT found - Can't set count_on_hand"
+          end
+        end
       end
 
     end
