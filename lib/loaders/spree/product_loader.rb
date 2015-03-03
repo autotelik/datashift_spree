@@ -1,4 +1,4 @@
-# Copyright:: (c) Autotelik Media Ltd 2010
+  # Copyright:: (c) Autotelik Media Ltd 2010
 # Author ::   Tom Statter
 # Date ::     Aug 2010
 # License::   MIT ?
@@ -43,7 +43,7 @@ module DataShift
         # In >= 1.1.0 Image moved to master Variant from Product so no association called Images on Product anymore
         
         # Non Product/database fields we can still  process
-        @we_can_process_these_anyway =  ['images',  "variant_price", "variant_sku", "stock_items"]
+        @we_can_process_these_anyway =  ['images',  "variant_price", "variant_cost_price", "variant_sku", "stock_items"]
           
         # In >= 1.3.0 price moved to master Variant from Product so no association called Price on Product anymore
         # taking care of it here, means users can still simply just include a price column
@@ -89,9 +89,15 @@ module DataShift
 
           add_properties
 
+        # This loads images to Product or Product Master Variant depending on Spree version
         elsif(current_method_detail.operator?('images') && current_value)
 
           add_images( load_object.master )
+        
+        # This loads images to Product Variants
+        elsif(current_method_detail.operator?('variants_images') && current_value)
+
+          add_variant_images(current_value)
 
         elsif(current_method_detail.operator?('variant_price') && current_value)
 
@@ -113,6 +119,27 @@ module DataShift
           else
             super
           end
+
+        elsif(current_method_detail.operator?('variant_cost_price') && current_value)
+
+          if(@load_object.variants.size > 0)
+
+            if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
+
+              # Check if we processed Option Types and assign  per option
+              values = current_value.to_s.split(Delimiters::multi_assoc_delim)
+
+              if(@load_object.variants.size == values.size)
+                @load_object.variants.each_with_index {|v, i| v.cost_price = values[i].to_f }
+                @load_object.save
+              else
+                puts "WARNING: Cost Price entries did not match number of Variants - None Set"
+              end
+            end
+
+          else
+            super
+          end          
           
         elsif(current_method_detail.operator?('variant_sku') && current_value)
 
@@ -378,7 +405,7 @@ module DataShift
         end
 
       end
-      
+
       def add_variants_stock(current_value)
 
         save_if_new
@@ -456,6 +483,165 @@ module DataShift
             puts "WARNING: Stock Location #{stock_location_name} NOT found - Can't set count_on_hand"
           end
         end
+      end
+
+      def add_variant_images(current_value)
+        
+        save_if_new
+
+        # do we have Variants?
+        if(@load_object.variants.size > 0)
+
+          logger.info "[VARIANT IMAGES] - number of variants to process #{@load_object.variants.size}"
+
+          if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
+            # Check if we've already processed Variants and assign count per variant
+            values = current_value.to_s.split(Delimiters::multi_assoc_delim)
+            # variants and variant_images number match?
+            raise "WARNING: Variant Images entries did not match number of Variants - None Set" unless (@load_object.variants.size == values.size)
+          end
+
+          variants = @load_object.variants # just for readability and logic
+          logger.info "Variants: #{@load_object.variants.inspect}"
+
+          variants_images_list = get_each_assoc # we expect to get corresponding images for every variant (might have more than one image for each variant!)
+
+          variants_images_list.each_with_index do |variant_images, i|
+
+            if(variant_images.to_s.include?(Delimiters::multi_value_delim))
+              # multiple images
+              images = variant_images.to_s.split(Delimiters::multi_value_delim)
+            else
+              # single image
+              images << variant_images 
+            end
+  
+            logger.info "Setting #{images.count} images for variant #{variants[i].name}..."
+
+            # Image processing...
+            images.each do |îmage|
+              @spree_uri_regexp ||= Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' )
+              
+              if(image.match(@spree_uri_regexp))
+                 
+                uri, attributes = image.split(Delimiters::attribute_list_start)
+                
+                uri.strip!
+                
+                logger.info("Processing IMAGE from URI [#{uri.inspect}]")
+      
+                if(attributes)
+                  #TODO move to ColumnPacker unpack ?
+                  attributes = attributes.split(', ').map{|h| h1,h2 = h.split('=>'); {h1.strip! => h2.strip!}}.reduce(:merge)
+                  logger.debug("IMAGE has additional attributes #{attributes.inspect}")
+                else
+                  attributes = {} # will blow things up later if we pass nil where {} expected
+                end
+                
+                agent = Mechanize.new
+                
+                image = begin
+                  agent.get(uri)
+                rescue => e
+                  puts "ERROR: Failed to fetch image from URL #{uri}", e.message
+                  raise DataShift::BadUri.new("Failed to fetch image from URL #{uri}")
+                end
+        
+                # Expected image is_a Mechanize::Image
+                # image.filename& image.extract_filename do not handle query string well e,g blah.jpg?v=1234
+                # so for now use URI
+                # extname = image.respond_to?(:filename) ? File.extname(image.filename) : File.extname(uri)
+                extname = File.extname( uri.gsub(/\?.*=.*/, ''))
+      
+                base = image.respond_to?(:filename) ? File.basename(image.filename, '.*') : File.basename(uri, '.*')
+      
+                logger.debug("Storing Image in TempFile #{base.inspect}.#{extname.inspect}")
+      
+                @current_image_temp_file = Tempfile.new([base, extname], :encoding => 'ascii-8bit')
+                          
+                begin
+        
+                  # TODO can we handle embedded img src e.g from Mechanize::Page::Image ?      
+      
+                  # If I call image.save(@current_image_temp_file.path) then it creates a new file with a .1 extension
+                  # so the real temp file data is empty and paperclip chokes
+                  # so this is a copy from the Mechanize::Image save method.  don't like it much, very brittle, but what to do ...
+                  until image.body_io.eof? do
+                    @current_image_temp_file.write image.body_io.read 16384
+                  end           
+                  
+                  @current_image_temp_file.rewind
+      
+                  logger.info("IMAGE downloaded from URI #{uri.inspect}")
+      
+                  attachment = create_attachment(Spree::Image, @current_image_temp_file.path, nil, nil, attributes)
+                  
+                rescue => e
+                  logger.error(e.message)
+                  logger.error("Failed to create Image from URL #{uri}")
+                  raise DataShift::DataProcessingError.new("Failed to create Image from URL #{uri}")
+             
+                ensure 
+                  @current_image_temp_file.close
+                  @current_image_temp_file.unlink
+                end
+      
+              else     
+                
+                path, alt_text = image.split(Delimiters::name_value_delim)
+
+                alt_text = path if !alt_text #ensure name is filled
+      
+                logger.debug("Processing IMAGE from PATH #{path.inspect} #{alt_text.inspect}")
+                
+                path = File.join(config[:image_path_prefix], path) if(config[:image_path_prefix])
+      
+                # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
+                attachment = create_attachment(Spree::Image, path, nil, nil, :alt => alt_text)
+
+              end 
+      
+              begin
+                owner.images << attachment
+                          
+                logger.debug("Product assigned Image from : #{path.inspect}")
+              rescue => e
+                puts "ERROR - Failed to assign attachment to #{owner.class} #{owner.id}"
+                logger.error("Failed to assign attachment to #{owner.class} #{owner.id}")
+              end
+
+            end # images loop
+  
+          end # variants_images_list loop
+  
+        # ... or just single Master Product?
+        elsif(@load_object.variants.size == 0)
+          if(current_value.to_s.include?(Delimiters::multi_assoc_delim))
+            # count_on_hand column MUST HAVE "stock_location_name:master_count_on_hand" format
+            stock_location_name, master_count_on_hand = (current_value.to_s.split(Delimiters::multi_assoc_delim).first).split(Delimiters::name_value_delim)
+            puts "WARNING: Multiple count_on_hand values specified but no Variants/OptionTypes created"
+          else
+            stock_location_name, master_count_on_hand = current_value.split(Delimiters::name_value_delim)
+          end
+          if not stock_location_name # No Stock Location referenced, fallback to default one...
+            logger.info "No Stock Location was referenced. Adding count_on_hand to default Stock Location. Use 'stock_location_name:master_count_on_hand' format to specify prefered Stock Location"
+            stock_location = @@stock_location_klass.where(:default => true).first
+            raise "WARNING: Can't set count_on_hand as no Stock Location exists!" unless stock_location
+          else # go with the one specified...
+            stock_location = @@stock_location_klass.where(:name => stock_location_name).first
+            unless stock_location
+              stock_location = @@stock_location_klass.create( :name => stock_location_name)
+              logger.info "Created New Stock Location #{stock_location.inspect}"
+            end
+          end
+
+          if(stock_location)
+              @@stock_movement_klass.create(:quantity => master_count_on_hand.to_i, :stock_item => load_object.master.stock_items.find_by_stock_location_id(stock_location.id))
+              logger.info "Added #{master_count_on_hand} count_on_hand to Stock Location #{stock_location.inspect}"
+          else
+            puts "WARNING: Stock Location #{stock_location_name} NOT found - Can't set count_on_hand"
+          end
+        end        
       end
 
     end
