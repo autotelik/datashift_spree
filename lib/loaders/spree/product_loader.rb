@@ -142,8 +142,6 @@ module DataShift
           end          
           
         elsif(current_method_detail.operator?('variant_sku') && current_value)
-          puts "variant_sku: #{current_value.inspect}"
-          logger.debug "variant_sku: #{current_value.inspect}"
 
           if(@load_object.variants.size > 0)
 
@@ -522,7 +520,11 @@ module DataShift
   
             logger.info "Setting #{images.count} images for variant #{variants[i].name}..."
 
+            # reset variant images to attach to variant
+            var_images = []
+
             # Image processing...
+            logger.debug "Images to process: #{images.inspect} for variant #{variants[i].name}"
             images.each do |image|
               @spree_uri_regexp ||= Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' )
               
@@ -600,11 +602,11 @@ module DataShift
                 
                 path = File.join(config[:image_path_prefix], path) if(config[:image_path_prefix])
       
-                # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
                 attachment = create_attachment(Spree::Image, path, nil, nil, :alt => alt_text)
 
               end 
 
+              logger.debug "#{attachment.inspect}"
               var_images << attachment if attachment
 
             end # images loop
