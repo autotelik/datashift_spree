@@ -296,7 +296,7 @@ module DataShift
               
               i = @load_object.variants.size + 1
 
-              variant = @load_object.variants.create( :sku => "#{load_object.sku}_#{i}", :price => load_object.price, :weight => load_object.weight, :height => load_object.height, :width => load_object.width, :depth => load_object.depth)
+              variant = @load_object.variants.create( :sku => "#{load_object.sku}_#{i}", :price => load_object.price, :weight => load_object.weight, :height => load_object.height, :width => load_object.width, :depth => load_object.depth, :tax_category_id => load_object.tax_category_id)
 
               variant.option_values << ov_list if(variant)    
             end
