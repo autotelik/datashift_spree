@@ -515,6 +515,7 @@ module DataShift
               images = variant_images.to_s.split(Delimiters::multi_value_delim)
             else
               # single image
+              images = []
               images << variant_images 
             end
   
