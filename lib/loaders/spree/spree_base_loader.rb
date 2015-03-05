@@ -77,7 +77,9 @@ module DataShift
       # different versions have moved images around from Prod to Variant
       owner = DataShift::SpreeEcom::get_image_owner(record)
 
-      get_each_assoc.each do |image|
+      #get_each_assoc.each do |image|
+      # multiple files should maintain comma separated logic with 'Delimiters::multi_value_delim' and not 'Delimiters::multi_assoc_delim'
+      @populator.current_value.to_s.split(Delimiters::multi_value_delim).each do |image|
 
         #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
 
