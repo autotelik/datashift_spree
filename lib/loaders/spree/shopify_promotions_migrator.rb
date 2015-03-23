@@ -61,8 +61,8 @@ module DataShift
             #  e.g 1           : \d => number used, no usage limit
             #  e.g 2/10        : \d/\d e.g 2/10 => number used / max usage limit
             #  e.g 1 out of 1  : \d/ out of \d  => number used / max usage limit
-            limit_regexp1 = Regexp.new('\d\/(\d+)')
-            limit_regexp2 = Regexp.new('\d+ out of (\d+)')
+            limit_regexp1 = Regexp.new('(\d+)\/(\d+)')
+            limit_regexp2 = Regexp.new('(\d+) out of (\d+)')
 
             @sheet.each_with_index do |row, i|
 
@@ -95,12 +95,17 @@ module DataShift
                 shopify_usage_rule = row[2].to_s
 
                 if(shopify_usage_rule.match(limit_regexp1))
-                  load_object.usage_limit =  $1.to_f
-                  logger.info("Promo has usage - Limit Set : [#{$1}]")
+                  load_object.historical_usage = $1.to_i
+                  load_object.usage_limit =  $2.to_f
+                  logger.info("Promo has usage (#{$1}) - Limit Set : [#{$2}]")
 
                 elsif(shopify_usage_rule.match(limit_regexp2))
-                  load_object.usage_limit =  $1.to_f
-                  logger.info("Promo has usage - Limit Set : [#{$1}]")
+                  load_object.historical_usage = $1.to_i
+                  load_object.usage_limit =  $2.to_f
+                  logger.info("Promo has usage (#{$1}) - Limit Set : [#{$2}]")
+
+                else
+                  load_object.historical_usage = $2.to_i
 
                 end
 
