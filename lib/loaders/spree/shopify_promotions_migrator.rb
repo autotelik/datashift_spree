@@ -105,7 +105,7 @@ module DataShift
                   logger.info("Promo has usage (#{$1}) - Limit Set : [#{$2}]")
 
                 else
-                  load_object.historical_usage = $2.to_i
+                  load_object.historical_usage = shopify_usage_rule.to_i
 
                 end
 
