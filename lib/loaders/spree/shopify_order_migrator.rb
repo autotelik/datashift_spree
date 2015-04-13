@@ -51,6 +51,13 @@ module DataShift
         #       go_to_state :complete
 
         Spree::Order.class_eval do
+
+          checkout_flow do
+            go_to_state :address
+            go_to_state :complete
+          end
+
+
           def confirmation_required?
             false;
           end
@@ -60,10 +67,14 @@ module DataShift
           end
         end
 
+        line_item_rows = 0
+
         start_excel(file_name, options)
 
         begin
           puts "Dummy Run - Changes will be rolled back" if options[:dummy]
+
+
           load_object_class.transaction do
 
             Spree::Config[:track_inventory_levels] = false
@@ -86,7 +97,16 @@ module DataShift
               @reporter.processed_object_count += 1
 
               # The spreadsheet contains some lines that are LineItems only for previous Order row
-              if(load_object.id && (!row[0].nil? && !row[0].empty?) && (row[2].nil? || row[2].empty?))   # Financial Status empty on LI rows
+              if(!row[0].nil? && !row[0].empty?) && (row[2].nil? || row[2].empty?)   # Financial Status empty on LI rows
+
+                line_item_rows += 1
+
+                if(load_object.id.nil?)
+                  logger.error "No parent Order for Line Item Only row - Failed for Number #{load_object.number}"
+                  next
+                end
+
+                logger.info "Line Item Only - add row to current Order : #{load_object.id} : #{load_object.number}"
 
                 begin
                   process_line_item( row, load_object )
@@ -109,6 +129,9 @@ module DataShift
 
               # A real Order row, not just LineItem
 
+              logger.info("Start processing new Order from row #{current_row_idx}")
+
+
               begin
                 # We are loading/migrating data - ensure emails not sent
                 load_object.confirmation_delivered = true
@@ -121,17 +144,35 @@ module DataShift
                 rescue    # logged already
                 end
 
-                save
+                #save
 
                 # We are loading/migrating data - try to ensure emails not sent
                 load_object.confirmation_delivered = true
 
                 begin
-                  logger.info("Order - Assigning User with email [#{row[1]}]")
+                  logger.info("Order #{load_object.number} - Assigning User with email [#{row[1]}]")
 
                   load_object.next  #address
 
-                  load_object.associate_user!( Spree.user_class.where( :email =>  @current_row[1] ).first)
+                  user = Spree.user_class.where( :email =>  @current_row[1] ).first
+
+                  load_object.associate_user!(user) if(user)
+
+                  if(load_object.bill_address.id.nil? && load_object.ship_address.id )
+                    load_object.bill_address.attributes = load_object.ship_address.attributes.except('id', 'updated_at', 'created_at')
+
+                  elsif(load_object.ship_address.id.nil? && load_object.bill_address.id )
+                    load_object.clone_billing_address
+
+                  elsif(load_object.ship_address.id.nil? && load_object.bill_address.id.nil? )
+                    # TOFIX . .. try and get the address data from the Order spreadsheet, for now blank out
+                    logger.warn("No Address info for Order #{load_object.number} (#{load_object.id})")
+
+                    load_object.ship_address = nil
+                    load_object.bill_address = nil
+
+                  end
+
                 rescue => e
                   logger.warn("Could not assign User #{row[1]} to Order #{load_object.number}")
                 end
@@ -148,10 +189,10 @@ module DataShift
                 load_object.promo_total = row[@promo_total_idx].to_f
                 load_object.total = row[@total_idx].to_f
 
-
                 save_and_report
 
               rescue => e
+                puts "Failed #{e.inspect}"
                 process_excel_failure(e)
                 next
               end
@@ -164,6 +205,7 @@ module DataShift
 
             end   # all rows processed
 
+             # double check the last Order
             finish
 
             if(options[:dummy])
@@ -179,6 +221,8 @@ module DataShift
         ensure
           report
         end
+
+        puts "Line Item only row count : #{line_item_rows}"
       end
 
       def finish
@@ -196,7 +240,15 @@ module DataShift
 
         load_object.state = 'complete'
 
-        load_object.save    # ok this Order done
+        logger.info("Order #{load_object.id}(#{load_object.number}) state set to 'complete' - Final Save")
+
+        begin
+          load_object.save!    # ok this Order done
+        rescue => x
+          logger.error("Final Spree Order save failed : #{load_object.errors.full_messages.inspect}")
+          puts x.inspect
+        end
+
       end
 
       def process_line_item( row, order )
@@ -252,9 +304,9 @@ module DataShift
 
               logger.info("Attempting to save new LineItem against Order #{order.number} (#{order.id})")
               line_item.save
-              order.reload
+              #order.reload
 
-              logger.info("Success - Added LineItems to Order #{order.number}")
+              logger.info("Success - Added LineItems to Order #{order.number} (#{order.id})")
             end
           rescue => e
             logger.error("Create LineItem failed for [#{sku}] Order #{order.number} (#{order.id}) - #{e.inspect}")

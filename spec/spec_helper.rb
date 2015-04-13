@@ -97,7 +97,7 @@ shared_context 'Populate dictionary ready for Product loading' do
 
         # For Spree important to get instance methods too as Product delegates
         # many important attributes to Variant (master)
-        DataShift::ModelMethodsManager.find_methods( product_klass, :instance_methods => true )
+        DataShift::MethodDictionary.find_operators( product_klass, :instance_methods => true )
 
         DataShift::MethodDictionary.build_method_details( product_klass )
 
