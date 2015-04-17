@@ -74,7 +74,6 @@ module DataShift
         begin
           puts "Dummy Run - Changes will be rolled back" if options[:dummy]
 
-
           load_object_class.transaction do
 
             Spree::Config[:track_inventory_levels] = false
@@ -89,6 +88,7 @@ module DataShift
               # This required in some circumstances where each_with_index keeps going
               # so need to manually detect when actual data ends, so quit once we hit the first completely empty row
               if(row.nil? || row.compact.empty?)
+                puts "Finished - Last Row #{current_row_idx} : #{row}"
                 break
               end
 
@@ -98,6 +98,8 @@ module DataShift
 
               # The spreadsheet contains some lines that are LineItems only for previous Order row
               if(!row[0].nil? && !row[0].empty?) && (row[2].nil? || row[2].empty?)   # Financial Status empty on LI rows
+
+                puts("START processing Line Item Only #{current_row_idx} - #{row[0]} - #{row[17]} - #{row[16]}  -#{row[18]}")
 
                 line_item_rows += 1
 
@@ -125,57 +127,16 @@ module DataShift
                 new_load_object   # Main Order row, create new Spree::Order
               end
 
-              @contains_data = false
 
               # A real Order row, not just LineItem
 
               logger.info("Start processing new Order from row #{current_row_idx}")
 
+              puts("START processing new Order from row #{current_row_idx} - #{row[0]} - #{row[17]} - #{row[16]}  -#{row[18]}")
 
               begin
                 # We are loading/migrating data - ensure emails not sent
                 load_object.confirmation_delivered = true
-
-                process_excel_row( row )
-
-                begin
-                  # make sure we also process the main Order rows, LineItem
-                  process_line_item( row, load_object )
-                rescue    # logged already
-                end
-
-                #save
-
-                # We are loading/migrating data - try to ensure emails not sent
-                load_object.confirmation_delivered = true
-
-                begin
-                  logger.info("Order #{load_object.number} - Assigning User with email [#{row[1]}]")
-
-                  load_object.next  #address
-
-                  user = Spree.user_class.where( :email =>  @current_row[1] ).first
-
-                  load_object.associate_user!(user) if(user)
-
-                  if(load_object.bill_address.id.nil? && load_object.ship_address.id )
-                    load_object.bill_address.attributes = load_object.ship_address.attributes.except('id', 'updated_at', 'created_at')
-
-                  elsif(load_object.ship_address.id.nil? && load_object.bill_address.id )
-                    load_object.clone_billing_address
-
-                  elsif(load_object.ship_address.id.nil? && load_object.bill_address.id.nil? )
-                    # TOFIX . .. try and get the address data from the Order spreadsheet, for now blank out
-                    logger.warn("No Address info for Order #{load_object.number} (#{load_object.id})")
-
-                    load_object.ship_address = nil
-                    load_object.bill_address = nil
-
-                  end
-
-                rescue => e
-                  logger.warn("Could not assign User #{row[1]} to Order #{load_object.number}")
-                end
 
                 @total_idx ||= excel_headers.index('total' )
                 @shipment_total_idx ||= excel_headers.index('shipment_total' )
@@ -184,28 +145,104 @@ module DataShift
                 @promo_total_idx ||= excel_headers.index('promo_total' )
 
                 @payment_state_idx ||= excel_headers.index('payment_state' )
+                @item_count_idx ||= excel_headers.index('item_count' )
+
+
+                #number	Email	payment_state	Paid at	shipment_state	completed_at	Accepts Marketing	Currency
+                #	Discount Code	promo_total	shipping_method:name	Created at	item_count	Lineitem name	Lineitem price	Lineitem compare at price	LineItems sku	Lineitem requires shipping	Lineitem taxable	LineItems fulfillment status	Billing Name	Billing Street	bill_address:address1	Billing Address2	Billing Company	Billing City	Billing Zip	Billing Province	Billing Country	Billing Phone	Shipping Name	Shipping Street	ship_address:address1	Shipping Address2	Shipping Company	Shipping City	Shipping Zip	Shipping Province	Shipping Country	Shipping Phone	Notes	Note Attributes	Cancelled at	Payment Method	Payment Reference	Refunded Amount	Vendor	Id	Tags	Risk Level	Source	Lineitem discount
+
+                load_object.number = @current_row[0]
+                load_object.email = @current_row[1]
+                load_object.currency = @current_row[7]
+
+                load_object.item_count = row[@item_count_idx].to_f
+
+                load_object.id = nil if(load_object.id == 0)   # why the hell is this 0 happening !?
+
+=begin
+process_excel_row( row )
+
+                unless(load_object.valid?)
+                    puts "INVALID ORDER FOR LINE ITEM"
+                    puts "#{load_object.errors.full_messages.inspect}"
+                    load_object.id = nil if(load_object.id == 0)   # why the hell is this 0 happening !?
+                end
+=end
+                # We are loading/migrating data - try to ensure emails not sent
+                load_object.confirmation_delivered = true
+
+                save
+
+                puts("Saved Order #{load_object.number} [#{load_object.id}]")
+
+                logger.info("Saved Order #{load_object.number} [#{load_object.id}]")
+
+                begin
+                  logger.info("Order #{load_object.number} - Assigning User with email [#{row[1]}]")
+
+                  user = Spree.user_class.where( :email =>  @current_row[1] ).first
+
+                  if(user)
+                    logger.info("Found User [#{row[1]}] - assign to #{load_object.number} (#{load_object.id}) ")
+                    load_object.associate_user!(user)
+                  end
+
+                  if(load_object.bill_address && load_object.bill_address.id.nil? && load_object.ship_address.id )
+                    load_object.bill_address.attributes = load_object.ship_address.attributes.except('id', 'updated_at', 'created_at')
+
+                  elsif(load_object.ship_address.id && load_object.ship_address.id.nil? && load_object.bill_address.id )
+                    load_object.clone_billing_address
+
+                  elsif(load_object.ship_address.id.nil? && load_object.bill_address.id.nil? )
+                    # currently no reqmnt to add user  from order export data although is possible
+                    logger.warn("No Address info for Order #{load_object.number} (#{load_object.id})")
+
+                    load_object.ship_address = nil
+                    load_object.bill_address = nil
+
+                  end
+
+                rescue => e
+                  logger.error("Error assigning User #{e.inspect}")
+                  logger.warn("Could not assign User #{row[1]} to Order #{load_object.number}")
+                end
+
+                unless(load_object.valid?)
+                  logger.info("INVALID ADDRESS - Order still Invalid #{load_object.inspect}")
+                  logger.info("Valid Order #{load_object.valid?}")
+                  puts "Row  #{current_row_idx} invalid  #{load_object.errors.full_messages.inspect}"
+                  load_object.id = nil if(load_object.id == 0)   # why the hell is this 0 happening !?
+                end
+
+                begin
+                  # make sure we also process the main Order rows, LineItem
+                  process_line_item( row, load_object )
+                  load_object.next!
+                rescue => x    # logged already
+                  puts "Issue assigning LineItem #{x.inspect}"
+                end
+
+                load_object.payment_state = @current_row[2]
+
+                load_object.completed_at = @current_row[5]
 
                 load_object.shipment_total = row[@shipment_total_idx].to_f
                 load_object.promo_total = row[@promo_total_idx].to_f
                 load_object.total = row[@total_idx].to_f
 
+                load_object.id = nil if(load_object.id == 0)   # why the hell is this 0 happening !?
+
                 save_and_report
 
               rescue => e
-                puts "Failed #{e.inspect}"
+                puts "Save Failed #{e.inspect}"
                 process_excel_failure(e)
                 next
               end
 
-              # This is rubbish but currently have to manually detect when actual data ends,
-              # no other way to detect when we hit the first completely empty row
-              unless(contains_data == true)
-                break
-              end
-
             end   # all rows processed
 
-             # double check the last Order
+            # double check the last Order
             finish
 
             if(options[:dummy])
@@ -232,7 +269,7 @@ module DataShift
         load_object.create_proposed_shipments
 
         if(load_object.shipments.first)
-          load_object.shipments.first.state =  'shipped'
+          load_object.shipments.first.state = 'shipped'
           load_object.shipments.first.shipped_at = load_object.completed_at
         end
 
@@ -241,6 +278,8 @@ module DataShift
         load_object.state = 'complete'
 
         logger.info("Order #{load_object.id}(#{load_object.number}) state set to 'complete' - Final Save")
+
+        load_object.id = nil if(load_object.id == 0)   # why the hell is this 0 happening !?
 
         begin
           load_object.save!    # ok this Order done
@@ -284,31 +323,40 @@ module DataShift
 
           logger.info("Adding LineItem for #{sku} with Quantity #{quantity} to Order #{load_object.inspect}")
 
+          if(order.new_record?)
+            puts "ORDER NEEDS SAVING - #{order.number} (#{order.id})"
+            save
+          end
+
           # idea incase we need full stock management
           # variant.stock_items.first.adjust_count_on_hand(quantity)
 
           begin
+            #puts("Adding LineItem for #{sku} with Quantity #{quantity} to Order #{load_object.inspect}")
+            #puts("Variant [#{variant.sku}] (#{variant.name})") if(variant)
 
-            line_item = Spree::LineItem.new(:variant => variant,
+            logger.info("Attempting to add new LineItem against Order #{order.number} (#{order.id})")
+
+            order.line_items.new(quantity: quantity, variant: variant, :price => price)
+=begin
+
+            line_item = Spree::LineItem.create!(:variant => variant,
                                             :quantity => quantity,
                                             :price => price,
+                                            :pre_tax_amount => price,
                                             :order => order,
                                             :currency => order.currency)
 
 
-
-            unless(line_item.valid?)
-              logger.error("Invalid LineItem :  #{line_item.errors.messages.inspect}")
-            else
-
-
-              logger.info("Attempting to save new LineItem against Order #{order.number} (#{order.id})")
-              line_item.save
+             # line_item.save
               #order.reload
 
               logger.info("Success - Added LineItems to Order #{order.number} (#{order.id})")
             end
+=end
           rescue => e
+            puts("Create LineItem failed for [#{sku}] Order #{order.number} (#{order.id}) - #{e.inspect}")
+            puts("Create LineItem failed for [#{sku}] Order #{order.number} (#{order.id}) - #{e.inspect}")
             logger.error("Create LineItem failed for [#{sku}] Order #{order.number} (#{order.id}) - #{e.inspect}")
             raise
           end
