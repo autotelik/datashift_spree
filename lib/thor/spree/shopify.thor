@@ -30,9 +30,10 @@ module DatashiftSpree
       max_user = Alchemy::User.last.id
 
       begin
-        invoke 'datashift:import:csv', [], options.merge({model: Alchemy::User})
+        # We create the options hash in this weird way because options is a frozen hash
+        invoke 'datashift:import:csv', [], input: options[:input], model: Alchemy::User
       rescue => e
-        log :error, "Fcm Config was not validated. Please check log above, fix and rerun"
+        logger.error "Fcm Config was not validated. Please check log above, fix and rerun"
         exit(-1)
       end
 
