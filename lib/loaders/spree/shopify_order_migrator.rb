@@ -17,7 +17,7 @@ module DataShift
     class ShopifyOrderLoader < SpreeBaseLoader
 
       # Options
-      #  
+      #
       #  :reload           : Force load of the method dictionary for object_class even if already loaded
       #  :verbose          : Verbose logging and to STDOUT
       #
@@ -185,21 +185,35 @@ process_excel_row( row )
                   if(user)
                     logger.info("Found User [#{row[1]}] - assign to #{load_object.number} (#{load_object.id}) ")
                     load_object.associate_user!(user)
+
+                    # The user usually has address information attached so pull it if the order has no prepopulated addresses
+                    load_object.ship_address = load_object.user.ship_address unless load_object.ship_address
+                    load_object.bill_address = load_object.user.bill_address unless load_object.bill_address
                   end
 
-                  if(load_object.bill_address && load_object.bill_address.id.nil? && load_object.ship_address.id )
-                    load_object.bill_address.attributes = load_object.ship_address.attributes.except('id', 'updated_at', 'created_at')
-
-                  elsif(load_object.ship_address.id && load_object.ship_address.id.nil? && load_object.bill_address.id )
-                    load_object.clone_billing_address
-
-                  elsif(load_object.ship_address.id.nil? && load_object.bill_address.id.nil? )
-                    # currently no reqmnt to add user  from order export data although is possible
-                    logger.warn("No Address info for Order #{load_object.number} (#{load_object.id})")
+                  def warn_no_address missing_obj
+                    logger.warn("No #{missing_obj} Address info for Order #{load_object.number} (#{load_object.id})")
 
                     load_object.ship_address = nil
                     load_object.bill_address = nil
+                  end
 
+                  if(load_object.bill_address.nil? and load_object.ship_address.nil?)
+                    warn_no_address "ship and bill"
+                  elsif(load_object.ship_address.nil?)
+                    if(load_object.bill_address.id.nil?)
+                      warn_no_address "ship and bill id"
+                    else
+                      load_object.clone_billing_address
+                    end
+                  elsif(load_object.bill_address.nil?)
+                    if(load_object.ship_address.id.nil?)
+                      warn_no_address "bill and ship id"
+                    else
+                      load_object.bill_address.attributes = load_object.ship_address.attributes.except('id', 'updated_at', 'created_at')
+                    end
+                  elsif(load_object.bill_address.id.nil? and load_object.ship_address.nil?)
+                    warn_no_address "bill id and ship id"
                   end
 
                 rescue => e
