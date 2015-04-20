@@ -103,8 +103,8 @@ module DataShift
 
                 line_item_rows += 1
 
-                if(load_object.id.nil?)
-                  logger.error "No parent Order for Line Item Only row - Failed for Number #{load_object.number}"
+                if(load_object && load_object.id.nil?)
+                  logger.warn "No parent Order for Line Item Only row"
                   next
                 end
 
@@ -145,7 +145,28 @@ module DataShift
                 @promo_total_idx ||= excel_headers.index('promo_total' )
 
                 @payment_state_idx ||= excel_headers.index('payment_state' )
+                @shipment_state_idx ||= excel_headers.index('shipment_state' )
+
+                @completed_at_idx ||= excel_headers.index('completed_at' )
+                @paid_at_idx ||= excel_headers.index('Paid at' )
+                @created_at_idx ||= excel_headers.index('Created at')
+
                 @item_count_idx ||= excel_headers.index('item_count' )
+
+                @shipping_method_idx ||= excel_headers.index("shipping_method:name")
+
+
+                shipment_state = @current_row[@shipment_state_idx]
+                payment_state =  @current_row[@payment_state_idx]
+
+                if(payment_state == 'refunded' && shipment_state == 'pending')
+                  new_load_object
+                  next
+                end
+
+                load_object.shipment_state = shipment_state
+
+                load_object.payment_state = payment_state
 
 
                 #number	Email	payment_state	Paid at	shipment_state	completed_at	Accepts Marketing	Currency
@@ -159,15 +180,6 @@ module DataShift
 
                 load_object.id = nil if(load_object.id == 0)   # why the hell is this 0 happening !?
 
-=begin
-process_excel_row( row )
-
-                unless(load_object.valid?)
-                    puts "INVALID ORDER FOR LINE ITEM"
-                    puts "#{load_object.errors.full_messages.inspect}"
-                    load_object.id = nil if(load_object.id == 0)   # why the hell is this 0 happening !?
-                end
-=end
                 # We are loading/migrating data - try to ensure emails not sent
                 load_object.confirmation_delivered = true
 
@@ -236,9 +248,18 @@ process_excel_row( row )
                   puts "Issue assigning LineItem #{x.inspect}"
                 end
 
-                load_object.payment_state = @current_row[2]
 
-                load_object.completed_at = @current_row[5]
+                shipping_method = Spree::ShippingMethod.where( name:  @current_row[@shipping_method_idx]).first
+
+                load_object.shipping_method_id = shipping_method.id if(shipping_method)
+
+                load_object.completed_at = @current_row[@completed_at_idx].blank? ? @current_row[@paid_at_idx] : @current_row[@completed_at_idx]
+
+                if(load_object.completed_at.blank?)
+                  puts "No suitable completed_at date - using Created at #{@current_row[@created_at_idx]}"
+
+                  load_object.completed_at = @current_row[@created_at_idx]
+                end
 
                 load_object.shipment_total = row[@shipment_total_idx].to_f
                 load_object.promo_total = row[@promo_total_idx].to_f
