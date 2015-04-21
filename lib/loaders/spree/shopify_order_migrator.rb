@@ -303,13 +303,15 @@ module DataShift
 
         load_object.create_proposed_shipments
 
-        if(load_object.shipments.first)
-          load_object.shipments.first.state = 'shipped'
-          load_object.shipments.first.shipped_at = load_object.completed_at
+        # Spree::Order.shipments is a CollectionProxy (empty if no shipments)
+        # so each is safe to use
+        load_object.shipments.each do |s|
+          s.state = 'shipped'
+          s.shipped_at = load_object.completed_at
         end
 
-        load_object.payment_state = "paid"
-
+        load_object.payment_state = 'paid'
+        load_object.shipment_state = 'shipped'
         load_object.state = 'complete'
 
         logger.info("Order #{load_object.id}(#{load_object.number}) state set to 'complete' - Final Save")
