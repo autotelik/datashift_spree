@@ -25,12 +25,12 @@ module DataShift
         super( DataShift::SpreeEcom::get_spree_class('Image'), image, options )
          
         unless(MethodDictionary.for?(@@product_klass))
-          ModelMethodsManager.find_methods( @@product_klass )
+          MethodDictionary.find_operators( @@product_klass )
           MethodDictionary.build_method_details( @@product_klass )
         end
         
         unless(MethodDictionary.for?(@@variant_klass))
-          ModelMethodsManager.find_methods( @@variant_klass )
+          MethodDictionary.find_operators( @@variant_klass )
           MethodDictionary.build_method_details( @@variant_klass )
         end
     
