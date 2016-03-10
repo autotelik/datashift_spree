@@ -15,6 +15,8 @@
 #             Since datashift gem is not a Rails app or a Spree App, provides utilities to internally
 #             create a Spree Database, and to load Spree components, enabling standalone testing.
 #
+# =>          Has been tested with  0.11.2, 0.7, 1.0.0, 1.1.2, 1.1.3
+#
 # =>          TODO - See if we can improve DB creation/migration ....
 #             N.B Some or all of Spree Tests may fail very first time run,
 #             as the database is auto generated

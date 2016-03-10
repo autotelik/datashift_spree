@@ -3,7 +3,6 @@
 # Date ::     June 2014
 # License::   Free, Open Source.
 #
-require 'datashift/exceptions'
 
 module DataShift
 
