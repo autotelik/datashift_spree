@@ -15,18 +15,19 @@ module DataShift
     class ProductLoader < SpreeBaseLoader
 
       # Options
-      #  
-      #  :reload           : Force load of the method dictionary for object_class even if already loaded
-      #  :verbose          : Verbose logging and to STDOUT
       #
-      def initialize(product = nil, options = {})
+      #  :file_name       : Filename that will be loaded
+      #  :verbose         : Verbose logging and to STDOUT
+      #  :strict          : Raise exceptions when issues like missing mandatory columns
+      #
+      def initialize( options = {})
 
         # We want the delegated methods on Variant so always include instance methods
         opts = {:find_operators => true, :instance_methods => true}.merge( options )
 
         # depending on version get_product_class should return us right class, namespaced or not
 
-        super( DataShift::SpreeEcom::get_product_class, product, opts)
+        super(opts)
 
         raise "Failed to create Product for loading" unless @load_object
       end
@@ -34,7 +35,7 @@ module DataShift
       # Options:
       #   [:dummy]           : Perform a dummy run - attempt to load everything but then roll back
       #
-      def perform_load( file_name, opts = {} )
+      def perform_load( klass = DataShift::SpreeEcom::get_product_class, opts = {} )
         
         logger.info "Product load from File [#{file_name}]"
             

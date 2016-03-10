@@ -43,7 +43,7 @@ module DatashiftSpree
 
       require 'product_loader'
 
-      loader = DataShift::SpreeEcom::ProductLoader.new( nil, {:verbose => options[:verbose]})
+      loader = DataShift::SpreeEcom::ProductLoader.new( file_name: input, verbose: options[:verbose] )
 
       # YAML configuration file to drive defaults etc
 
@@ -66,7 +66,7 @@ module DatashiftSpree
       opts = options.dup
       opts[:mandatory] = ['sku', 'name', 'price']
 
-      loader.perform_load(input, opts)
+      loader.run(opts)
     end
 
 

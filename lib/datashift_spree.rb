@@ -35,8 +35,6 @@ require 'rbconfig'
 require 'datashift'
 require 'spree'
 
-$:.unshift '.' unless $:.include?('.')
-
 module DataShift
 
   module SpreeEcom
@@ -89,7 +87,9 @@ module DataShift
     end
 
     def self.require_datashift_spree
-    
+
+      require_relative 'datashift_spree/exceptions'
+
       require_libs = %w{ loaders helpers }
       require_libs.each do |base|
         Dir[File.join(library_path, base, '**/*.rb')].each do |rb|
@@ -125,6 +125,4 @@ end
 
 DataShift::SpreeEcom::require_libraries
 DataShift::SpreeEcom::require_datashift_spree
-
-require 'datashift_spree/exceptions'
 
