@@ -80,35 +80,32 @@ Options:
 
 ## Testing
 
-There are a number of specs to test this gem, located in the spec subdirectory.
+We use RSpec, so tests located in the spec subdirectory.
 
-To properly test this gem we require an actual Spree store, so when the specs are first run 
-we create a sandbox Rails app, containing a Spree store, whose version we can control in spec/Gemfile
+To test this gem we require an actual Spree store, so when the specs are first run 
+a dummy Rails app is created containing a Spree store, whose version we can control in `spec/Gemfile`
 
 It's therefor recommended that all testing be done in spec dir itself, so first cd into spec
 
-Define the version of Spree to test against, in the Gemfile, then run
+Edit `spec/Gemfile` and set the version of Spree you wish to test against and run bundler :
 
 ```ruby 
     cd spec
     bundle install
 ```
 
-If changing Spree versions, it's best to force a rebuild of a clean sandbox, and often removing Gemfile.lock will resolve any funny version issues,
- so  run:
+When changing Spree versions, you should force a rebuild of a clean sandbox, and removing the Gemfile.lock will 
+resolve any funny version issues, so  run:
 
 ```ruby 
     cd spec
-    rm -rf sandbox
+    rm -rf dummy
     rm -rf Gemfile.lock
 ```
 
-Change Gemfile versions and run
+thor datashift:spree_tasks:build_sandbox
 
-```ruby 
-    bundle install
-```
- 
+
 The next time you run rspec the sandbox will be regenerated using the latest versions of Rails/Spree specified in your Gemfile
 
 ```ruby 

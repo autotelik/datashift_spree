@@ -7,7 +7,7 @@
 #               Currently covers :
 #                 Promotions
 #
-require 'spree_base_loader'
+require 'spree_loader_base'
 require 'spree_ecom'
 require 'promotions_rules_actions.rb'
 
@@ -15,7 +15,7 @@ module DataShift
 
   module SpreeEcom
 
-    class ShopifyPromotionsMigrator < SpreeBaseLoader
+    class ShopifyPromotionsMigrator < SpreeLoaderBase
 
       # Options
       #  

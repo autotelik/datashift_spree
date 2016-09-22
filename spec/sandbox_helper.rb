@@ -8,7 +8,7 @@
 
 $:.unshift File.expand_path("#{File.dirname(__FILE__)}/../lib")
 
-require 'spree_ecom'
+require 'datashift_spree'
 
 module DataShift
 
@@ -26,7 +26,7 @@ module DataShift
     end
 
     def self.spree_sandbox_name
-      'rspec_spree_sandbox'
+      'dummy'
     end
     
     def self.spree_sandbox_path
@@ -46,9 +46,13 @@ module DataShift
       run_in(rails_sandbox_root)  do
         system('rails new ' + spree_sandbox_name)     
       end
-      
+
+      # The SPREE INSTALL COMMANDS AS PER https://github.com/spree/spree#getting-started
       run_in(path)  do
-        system("spree install --auto-accept") 
+
+        system("rails g spree:install --user_class=Spree::User")
+        system("rails g spree:auth:install")
+        system("rails g spree_gateway:install")
       end
       
       puts "Created Spree sandbox store : #{path}"

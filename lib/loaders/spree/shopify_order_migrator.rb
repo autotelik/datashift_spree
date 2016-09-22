@@ -7,14 +7,14 @@
 #               Currently covers :
 #                 Orders
 #
-require 'spree_base_loader'
+require 'spree_loader_base'
 require 'spree_ecom'
 
 module DataShift
 
   module SpreeEcom
 
-    class ShopifyOrderLoader < SpreeBaseLoader
+    class ShopifyOrderLoader < SpreeLoaderBase
 
       # Options
       #

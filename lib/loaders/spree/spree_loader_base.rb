@@ -15,19 +15,13 @@ require 'mechanize'
 
 module DataShift
 
-  class SpreeBaseLoader < LoaderBase
+  class SpreeLoaderBase < LoaderBase
 
-    include DataShift::CsvLoading
-    include DataShift::ExcelLoading
     include DataShift::ImageLoading
 
-    # depending on version get_product_class should return us right class, namespaced or not
+    def initialize
 
-    def initialize(klass, loader_object = nil, options = {})
-
-      super(klass, loader_object, options)
-
-      logger.info "Spree Loading initialised with:\n#{options.inspect}"
+      super
 
       #TODO - ditch this backward compatability now and just go with namespaced ?
       #
@@ -45,19 +39,9 @@ module DataShift
 
     end
 
-    
-    # Options :
-    #   :image_path_prefix : A common path to prefix before each image path
-    #                        e,g to specifiy particular drive  {:image_path_prefix => 'C:\' }
-    #
-    def perform_load( file_name, opts = {} )
-      logger.info "SpreeBaseLoader - starting load from file [#{file_name}]"
-      super(file_name, opts)
-    end
 
-    # TOFIX - why is this in the base class when it looks like tis Prod/Vars ?
-    # either move it or make it generic so the owner can be any model that supports attachments
-  
+    # If no owner class specified will attach Image to Spree image Owner (varies depending on version)
+    #
     # Special case for Images
     #
     # A list of entries for Images.
@@ -68,14 +52,13 @@ module DataShift
     # 
     # For example to supply the optional 'alt' text, or position for an image
     #
-    #   Example => path_1{:alt => text}|path_2{:alt => more alt blah blah, :position => 5}|path_3{:alt => the alt text for this path}
+    #   Example => path_1{:alt => text}|path_2{:alt => more alt blah blah,
+    # :position => 5}|path_3{:alt => the alt text for this path}
     #
-    def add_images( record )
-
-      #save_if_new
+    def add_images( record, owner = nil )
 
       # different versions have moved images around from Prod to Variant
-      owner = DataShift::SpreeEcom::get_image_owner(record)
+      owner ||= DataShift::SpreeEcom::get_image_owner(record)
 
       #get_each_assoc.each do |image|
       # multiple files should maintain comma separated logic with 'Delimiters::multi_value_delim' and not 'Delimiters::multi_assoc_delim'

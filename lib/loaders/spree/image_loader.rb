@@ -4,7 +4,7 @@
 # License::   MIT. Free, Open Source.
 #
 require 'loader_base'
-require 'spree_base_loader'
+require 'spree_loader_base'
 #require 'paperclip/attachment_loader'
 
 module DataShift
@@ -18,7 +18,7 @@ module DataShift
     #   1)  Identifies a Product via Name or SKU column
     #   2+) The full path(s) to the Images to attach to Product from column 1
     #
-    class ImageLoader < SpreeBaseLoader
+    class ImageLoader < SpreeLoaderBase
   
       def initialize(image = nil, options = {})
         

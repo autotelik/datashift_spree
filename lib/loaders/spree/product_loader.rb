@@ -5,14 +5,14 @@
 #
 # Details::   Specific over-rides/additions to support Spree Products
 #
-require 'spree_base_loader'
+require 'spree_loader_base'
 require 'spree_ecom'
 
 module DataShift
 
   module SpreeEcom
 
-    class ProductLoader < SpreeBaseLoader
+    class ProductLoader < SpreeLoaderBase
 
       # Options
       #  

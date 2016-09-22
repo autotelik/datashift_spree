@@ -1,6 +1,6 @@
-# Copyright:: (c) Autotelik Media Ltd 2011
+# Copyright:: (c) Autotelik Media Ltd 2016
 # Author ::   Tom Statter
-# Date ::     Aug 2011
+# Date ::     Aug 2016
 # License::   MIT
 #
 # Details::   Spec Helper for Active Record Loader
@@ -90,16 +90,17 @@ shared_context 'Populate dictionary ready for Product loading' do
     #  instance_variable_set("@#{k}_klass", DataShift::SpreeEcom::get_spree_class(k))
     #end
 
+    config.before(:each) do
+      DataShift::Configuration.reset
+      DataShift::Exporters::Configuration.reset
+      DataShift::Loaders::Configuration.reset
+    end
+
     before do
       begin
 
-        DataShift::MethodDictionary.clear
-
-        # For Spree important to get instance methods too as Product delegates
-        # many important attributes to Variant (master)
-        DataShift::MethodDictionary.find_operators( product_klass, :instance_methods => true )
-
-        DataShift::MethodDictionary.build_method_details( product_klass )
+        DataShift::ModelMethods::Catalogue.clear
+        DataShift::ModelMethods::Manager.clear
 
       rescue => e
         puts e.inspect
