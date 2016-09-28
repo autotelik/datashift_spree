@@ -14,7 +14,7 @@
 #             
 #             These are marked with :passes_only_in_spec_dir => true do
 #             
-require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
+require "spec_helper"
 
 require 'product_loader'
 require 'image_loader'

@@ -9,20 +9,19 @@
 #             Provides Loaders and rake tasks specifically tailored for uploading or exporting
 #             Spree Products, associations and Images
 #
-require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
-
+require "spec_helper"
 
 describe 'SpreeLoader' do
 
   include_context 'Populate dictionary ready for Product loading'
 
+  let(:loader) { DataShift::ExcelLoader.new }
+
   it "should process a simple .xls spreadsheet" do
 
     @Zone_klass.delete_all
 
-    loader = DataShift::ExcelLoader.new(@Zone_klass, true)
-    
-    loader.perform_load( ifixture_file('SpreeZoneExample.xls') )
+    loader.run( ifixture_file('SpreeZoneExample.xls'), @Zone_klass)
 
     expect(loader.loaded_count).to eq @Zone_klass.count
   end
@@ -31,24 +30,24 @@ describe 'SpreeLoader' do
 
     @Zone_klass.delete_all
 
-    loader = DataShift::CsvLoader.new(@Zone_klass)
+    loader = DataShift::CsvLoader.new
 
-    loader.perform_load( ifixture_file('SpreeZoneExample.csv') )
+    loader.run( ifixture_file('SpreeZoneExample.csv'), @Zone_klass)
 
     expect(loader.loaded_count).to eq @Zone_klass.count
   end
   
   it "should raise an error for missing file" do
-    lambda { test_basic_product('SpreeProductsSimple.txt') }.should raise_error DataShift::BadFile
+    expect { test_basic_product('SpreeProductsSimple.txt') }.to raise_error DataShift::BadFile
   end
 
   it "should raise an error for unsupported file types" do
-    lambda { test_basic_product('SpreeProductsDefaults.yml') }.should raise_error DataShift::UnsupportedFileType
+    expect { test_basic_product('SpreeProductsDefaults.yml') }.to raise_error DataShift::UnsupportedFileType
   end
   
   # Loader should perform identically regardless of source, whether csv, .xls etc
   
-  it "should load basic Products .xls via Spree loader" do
+  it "should load basic Products .xls via Spree loader", duff: true do
     test_basic_product('SpreeProductsSimple.xls')
   end
 
@@ -57,8 +56,10 @@ describe 'SpreeLoader' do
   end
 
   def test_basic_product( source )
-    
-    product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price', 'shipping_category'] )
+
+   # DataShift::Configuration.call.mandatory = ['sku', 'name', 'price', 'shipping_category']
+
+    product_loader.run( ifixture_file(source))
 
     expect(@Product_klass.count).to eq 3
     
@@ -111,7 +112,6 @@ describe 'SpreeLoader' do
     product_loader.populator.set_prefix('sku', 'SPEC_')
       
     test_default_values
-
   end
 
   it "should support default values from config for Spree Products loader" do

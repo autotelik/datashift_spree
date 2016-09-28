@@ -3,6 +3,8 @@ source 'https://rubygems.org'
 
 gem "datashift_spree", path: '..'
 
+gem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :master
+
 # This Gemfile is for TESTING really. 
 
 # DEFINE VERSIONS YOU WANT TO TEST AGAINST HERE
@@ -29,11 +31,6 @@ gem 'database_cleaner'
 gem 'coffee-rails'
 gem 'sass-rails'
 
-#if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
-#gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
-#else
-gem 'datashift', :path => "/home/rubyuser/SoftwareDev/git/datashift"
-#end
 
 # we want to test both JRuby and non JRuby especially for Excel
 

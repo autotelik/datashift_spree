@@ -30,9 +30,19 @@ module DataShift
     end
     
     def self.spree_sandbox_path
-      File.join(File.dirname(__FILE__), spree_sandbox_name)
+      File.join(DatashiftSpreeLibraryBase, 'spec', spree_sandbox_name)
     end
-      
+
+    # The SPREE INSTALL COMMANDS based on current Gemfile Spree versions
+    #
+    # SEE  https://github.com/spree/spree#getting-started
+    #
+    def self.spree_install_cmds
+      system("rails g spree:install --user_class=Spree::User --auto-accept --migrate --no-seed")
+      system("rails g spree:auth:install")
+      system("rails g spree_gateway:install")
+    end
+
     def self.build_sandbox
       
       path = DataShift::SpreeEcom::spree_sandbox_path
@@ -47,12 +57,10 @@ module DataShift
         system('rails new ' + spree_sandbox_name)     
       end
 
-      # The SPREE INSTALL COMMANDS AS PER https://github.com/spree/spree#getting-started
-      run_in(path)  do
+      # ***** SPREE INSTALL COMMANDS ****
 
-        system("rails g spree:install --user_class=Spree::User")
-        system("rails g spree:auth:install")
-        system("rails g spree_gateway:install")
+      run_in(path)  do
+        spree_install_cmds
       end
       
       puts "Created Spree sandbox store : #{path}"
@@ -60,21 +68,12 @@ module DataShift
       # Now create a thor file for testing the CLI
       
       gem_string = "\n\n#RSPEC datashift-spree testing\ngem 'datashift_spree',  :path => \"#{File.expand_path(rails_sandbox_root + '/..')}\"\n"
-      
-      if(Gem.loaded_specs['datashift'])
-       gem_string += "\ngem 'datashift', '#{Gem.loaded_specs['datashift'].version.version}'\n"
-      else
-        gem_string += "\ngem 'datashift'\n"
-      end
-       
+
+      # TOFIX read this from ../Gemfile
+      gem_string += "\ngem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :master\n"
+
       File.open("#{path}/Gemfile", 'a') { |f| f << gem_string }
-      
-      # Might need to add in User model if new 1.2 version which splits out Auth from spree core
-      #
-      #if(DataShift::SpreeEcom::version.to_f >= 1.2 || DataShift::SpreeEcom::version.to_f < 2 )
-      #  File.open('Gemfile', 'a') { |f| f << "gem 'spree_auth_devise', :git => \"git://github.com/spree/spree_auth_devise\"\n" }
-      #  end
-            
+
       File.open("#{path}/spree_sandbox.thor", 'w') do |f| 
         thor_code = <<-EOS
         

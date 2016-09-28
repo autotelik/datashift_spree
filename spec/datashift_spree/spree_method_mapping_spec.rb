@@ -9,7 +9,7 @@
 #             Tests the method mapping aspect, such as that we correctly identify 
 #             Spree Product attributes and associations
 #             
-require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
+require "spec_helper"
 
 describe 'SpreeMethodMapping' do
 
