@@ -47,55 +47,52 @@ describe 'SpreeLoader' do
   
   # Loader should perform identically regardless of source, whether csv, .xls etc
   
-  it "should load basic Products .xls via Spree loader", duff: true do
+  it "should load basic Products .xls via Spree loader" do
     test_basic_product('SpreeProductsSimple.xls')
   end
 
-  it "should load basic Products from .csv via Spree loader"  do
+  it "should load basic Products from .csv via Spree loader", duff: true  do
     test_basic_product('SpreeProductsSimple.csv')
   end
 
   def test_basic_product( source )
 
-   # DataShift::Configuration.call.mandatory = ['sku', 'name', 'price', 'shipping_category']
-
     product_loader.run( ifixture_file(source))
 
-    expect(@Product_klass.count).to eq 3
+    expect(Spree::Product.count).to eq 3
     
     # 2 products available_on set in past, 1 in future
-    expect(@Product_klass.active.size).to eq  2
-    expect(@Product_klass.available.size).to eq  2
+    expect(Spree::Product.active.size).to eq 2
+    expect(Spree::Product.available.size).to eq 2
 
-    expect(product_loader.failed_count).to eq  0
-    expect(product_loader.loaded_count).to eq  3
+    loader = product_loader.datashift_loader
 
-    expect(product_loader.loaded_count).to eq  @Product_klass.count
+    expect(loader.failed_count).to eq 0
+    expect(loader.loaded_count).to eq 3
 
-    p = @Product_klass.first
-     
-    p.sku.should == "SIMPLE_001"
-    p.price.should == 345.78
-    p.name.should == "Simple Product for AR Loader"
-    p.description.should == "blah blah"
-    p.cost_price.should == 320.00
+    expect(loader.loaded_count).to eq  Spree::Product.count
+
+    p = Spree::Product.first
+
+    expect(p.sku).to eq  "SIMPLE_001"
+    expect(p.price).to eq  345.78
+    expect(p.name).to eq  "Simple Product for AR Loader"
+    expect(p.description).to eq  "blah blah"
+    expect(p.cost_price).to eq  320.00
     
     expect(p.option_types.size).to eq 1
     expect(p.option_types.size).to eq 1
-    
-    p.has_variants?.should be false
+
+    expect(p.has_variants?).to eq false
     
     if(DataShift::SpreeEcom::version.to_f < 2  )
-      p.master.count_on_hand.should == 12
-      DataShift::SpreeEcom::version < "1.1.3" ?  p.count_on_hand.should == 12 : p.count_on_hand.should == 0
-      
-      @Product_klass.last.master.count_on_hand.should == 23
+      expect(p.master.count_on_hand).to eq 12
+      expect(Spree::Product.last.master.count_on_hand).to eq 23
     else
       puts p.master.stock_items.first.count_on_hand.inspect
      # expect(p.master.stock_items.first.count_on_hand).to eq 12
     end
-     
-   
+
   end
 
   
@@ -125,23 +122,23 @@ describe 'SpreeLoader' do
   end
   
   def test_default_values
-    product_loader.perform_load( ifixture_file('SpreeProductsMandatoryOnly.xls'), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.run( ifixture_file('SpreeProductsMandatoryOnly.xls'), :mandatory => ['sku', 'name', 'price'] )
     
-    @Product_klass.count.should == 3
+    Spree::Product.count.to eq  3
 
-    product_loader.failed_count.should == 0
-    product_loader.loaded_count.should == 3
+    product_loader.failed_count.to eq  0
+    product_loader.loaded_count.to eq  3
     
-    p = @Product_klass.first
+    p = Spree::Product.first
     
-    p.sku.should == "SPEC_SIMPLE_001"
+    p.sku.to eq  "SPEC_SIMPLE_001"
       
-    @Product_klass.all { |p|
+    Spree::Product.all { |p|
       p.sku.should.include "SPEC_"
       p.cost_price = 1.0
-      p.available_on.should == @expected_time
-      p.meta_description.should == 'super duper meta desc.'
-      p.meta_keywords.should == 'techno dubstep d&b'
+      p.available_on.to eq  @expected_time
+      p.meta_description.to eq  'super duper meta desc.'
+      p.meta_keywords.to eq  'techno dubstep d&b'
     }
   end
 
@@ -171,7 +168,7 @@ describe 'SpreeLoader' do
 
     expect(@Property_klass.count).to eq 1
 
-    product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.run( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
     
     expected_multi_column_properties
   
@@ -179,12 +176,12 @@ describe 'SpreeLoader' do
   
   def expected_multi_column_properties
     # 3 MASTER products, 11 VARIANTS
-    expect(@Product_klass.count).to eq  3
+    expect(Spree::Product.count).to eq  3
     expect(@Variant_klass.count).to eq 14
 
-    expect(@Product_klass.first.properties.size).to eq 1
+    expect(Spree::Product.first.properties.size).to eq 1
 
-    p3 = @Product_klass.all.last
+    p3 = Spree::Product.all.last
 
     expect(p3.product_properties.size).to eq 3
     expect(p3.properties.size).to eq 3
@@ -205,21 +202,21 @@ describe 'SpreeLoader' do
  
   
   it "should raise exception when mandatory columns missing from .xls", :ex => true do
-    expect {product_loader.perform_load(negative_fixture_file('SpreeProdMissManyMandatory.xls'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {product_loader.run(negative_fixture_file('SpreeProdMissManyMandatory.xls'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
   end
   
 
   it "should raise exception when single mandatory column missing from .xls", :ex => true do
-    expect {product_loader.perform_load(negative_fixture_file('SpreeProdMiss1Mandatory.xls'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {product_loader.run(negative_fixture_file('SpreeProdMiss1Mandatory.xls'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
   end
 
   it "should raise exception when mandatory columns missing from .csv", :ex => true do
-    expect {product_loader.perform_load(negative_fixture_file('SpreeProdMissManyMandatory.csv'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {product_loader.run(negative_fixture_file('SpreeProdMissManyMandatory.csv'), :mandatory => ['sku', 'name', 'price'] )}.to raise_error(DataShift::MissingMandatoryError)
   end
   
 
   it "should raise exception when single mandatory column missing from .csv", :ex => true do
-    expect {product_loader.perform_load(negative_fixture_file('SpreeProdMiss1Mandatory.csv'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
+    expect {product_loader.run(negative_fixture_file('SpreeProdMiss1Mandatory.csv'), :mandatory => 'sku' )}.to raise_error(DataShift::MissingMandatoryError)
   end
 
   

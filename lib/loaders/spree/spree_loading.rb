@@ -13,6 +13,7 @@ module DataShift
   module SpreeLoading
 
     include DataShift::ImageLoading
+    include DataShift::Delimiters
 
     # These originally required to support early versions when Spree went from no namespace to Spree namespace
 
@@ -67,7 +68,7 @@ module DataShift
     #
     # A list of entries for Images.
     #
-    # Multiple image items can be delimited by Delimiters::multi_assoc_delim
+    # Multiple image items can be delimited by multi_assoc_delim
     #
     # Each item can  contain optional attributes for the Image class within {}. 
     # 
@@ -81,11 +82,9 @@ module DataShift
       # different versions have moved images around from Prod to Variant
       owner ||= DataShift::SpreeEcom::get_image_owner(record)
 
-      #get_each_assoc.each do |image|
-      # multiple files should maintain comma separated logic with 'Delimiters::multi_value_delim' and not 'Delimiters::multi_assoc_delim'
-      @populator.current_value.to_s.split(Delimiters::multi_value_delim).each do |image|
+      value.to_s.split(multi_value_delim).each do |image|
 
-        #TODO - make this Delimiters::attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
+        #TODO - make this attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
 
         # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz
 
@@ -93,7 +92,7 @@ module DataShift
 
         if(image.match(@spree_uri_regexp))
 
-          uri, attributes = image.split(Delimiters::attribute_list_start)
+          uri, attributes = image.split(attribute_list_start)
 
           uri.strip!
 
@@ -130,7 +129,7 @@ module DataShift
 
           begin
 
-            # TODO can we handle embedded img src e.g from Mechanize::Page::Image ?      
+            # TODO can we handle embedded img src e.g from Mechanize::Page::Image ?
 
             # If I call image.save(@current_image_temp_file.path) then it creates a new file with a .1 extension
             # so the real temp file data is empty and paperclip chokes
@@ -144,7 +143,6 @@ module DataShift
             logger.info("IMAGE downloaded from URI #{uri.inspect}")
 
             attachment = create_attachment(Spree::Image, @current_image_temp_file.path, nil, nil, attributes)
-
           rescue => e
             logger.error(e.message)
             logger.error("Failed to create Image from URL #{uri}")
@@ -157,23 +155,31 @@ module DataShift
 
         else
 
-          path, alt_text = image.split(Delimiters::name_value_delim)
+          path, alt_text = image.split(name_value_delim)
 
           logger.debug("Processing IMAGE from PATH #{path.inspect} #{alt_text.inspect}")
 
-          path = File.join(config[:image_path_prefix], path) if(config[:image_path_prefix])
+          path = File.join(Configuration.call.image_path_prefix, path) if(Configuration.call.image_path_prefix)
 
-          # create_attachment(klass, attachment_path, record = nil, attach_to_record_field = nil, options = {})
-          attachment = create_attachment(Spree::Image, path, nil, nil, :alt => alt_text)
+          begin
+            attachment = create_attachment(Spree::Image, path, nil, nil, :alt => alt_text)
+          rescue => e
+            logger.error(e.message)
+            logger.error("Failed to create Image from URL #{uri}")
+            raise DataShift::DataProcessingError.new("Failed to create Image from URL #{uri}")
+          end
+
         end
+
+        raise DataShift::DataProcessingError.new("No errors reported but failed to create Attachment") unless attachment
 
         begin
           owner.images << attachment
 
           logger.debug("Product assigned Image from : #{path.inspect}")
         rescue => e
-          puts "ERROR - Failed to assign attachment to #{owner.class} #{owner.id}"
           logger.error("Failed to assign attachment to #{owner.class} #{owner.id}")
+          logger.error(e.message)
         end
 
       end

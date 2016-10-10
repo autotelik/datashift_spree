@@ -49,7 +49,7 @@ describe 'SpreeLoader' do
     expect(root.root.children.size).to eq 1
     expect(root.root.children[0].name).to eq 'Landscape'
     
-    product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.run( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
     
     expected_multi_column_taxons
   end
@@ -115,7 +115,7 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.count.should == 0
     @Taxon_klass.count.should == 0 
     
-    product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.xls') )
+    product_loader.run( ifixture_file('SpreeProductsComplexTaxons.xls') )
     
     expected_nested_multi_column_taxons
   end
@@ -128,7 +128,7 @@ describe 'SpreeLoader' do
     @Taxonomy_klass.count.should == 0
     @Taxon_klass.count.should == 0 
     
-    product_loader.perform_load( ifixture_file('SpreeProductsComplexTaxons.csv') )
+    product_loader.run( ifixture_file('SpreeProductsComplexTaxons.csv') )
     
     expected_nested_multi_column_taxons
     

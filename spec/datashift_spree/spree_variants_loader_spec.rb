@@ -60,7 +60,7 @@ describe 'Spree Variants Loader' do
     @Product_klass.count.should == 0
     @Variant_klass.count.should == 0
 
-    product_loader.perform_load( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.run( ifixture_file(source), :mandatory => ['sku', 'name', 'price'] )
 
     expected_multi_column_variants
   end
@@ -137,13 +137,13 @@ describe 'Spree Variants Loader' do
   # which creates a SINGLE Variant with 2 option types
 
   it "should create Variants with MULTIPLE option types from single column in CSV", :fails => true  do
-    product_loader.perform_load( ifixture_file('SpreeMultiVariant.csv'), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.run( ifixture_file('SpreeMultiVariant.csv'), :mandatory => ['sku', 'name', 'price'] )
 
     expected_single_column_multi_variants
   end
 
   it "should create Variants with MULTIPLE option types from single column in XLS", :fail => true  do
-    product_loader.perform_load( ifixture_file('SpreeMultiVariant.xls'), :mandatory => ['sku', 'name', 'price'] )
+    product_loader.run( ifixture_file('SpreeMultiVariant.xls'), :mandatory => ['sku', 'name', 'price'] )
 
     expected_single_column_multi_variants
   end

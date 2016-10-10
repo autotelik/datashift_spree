@@ -134,6 +134,10 @@ RSpec.configure do |config|
     File.expand_path(File.dirname(__FILE__) + '/fixtures')
   end
 
+  def rspec_spec_path
+    File.expand_path(File.dirname(__FILE__))
+  end
+
   def ifixture_file( name )
     File.join(fixtures_path(), name)
   end

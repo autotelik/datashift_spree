@@ -31,7 +31,7 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price']}
 
-    product_loader.perform_load( ifixture_file('SpreeProductsWithImageUrls.xls'), options )
+    product_loader.run( ifixture_file('SpreeProductsWithImageUrls.xls'), options )
 
     product_loader.reporter.processed_object_count.should == 3
     product_loader.loaded_count.should == 3
@@ -65,7 +65,7 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price']}
 
-    product_loader.perform_load( ifixture_file('SpreeProductsWithImageUrlsLarge.xls'), options )
+    product_loader.run( ifixture_file('SpreeProductsWithImageUrlsLarge.xls'), options )
 
     product_loader.reporter.processed_object_count.should == 300
     product_loader.loaded_count.should == 300

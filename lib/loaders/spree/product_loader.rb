@@ -22,10 +22,11 @@ module DataShift
       # See delegate_belongs_to :master @ https://github.com/spree/spree/blob/master/core/app/models/spree/product.rb
       #
       def force_inclusion_columns
-        @force_inclusion_columns ||= %w{ sku
+        @force_inclusion_columns ||= %w{ cost_price
                                          images
                                          price
                                          shipping_category
+                                         sku
                                          stock_items
                                          variant_sku
                                          variant_cost_price
@@ -36,7 +37,7 @@ module DataShift
 
       def run(file_name)
 
-        DataShift::ContextFactory.global_populator_class = DataShift::SpreeEcom::ProductPopulator
+        DataShift::PopulatorFactory.global_populator_class = DataShift::SpreeEcom::ProductPopulator
 
         logger.info "Product load from File [#{file_name}]"
 

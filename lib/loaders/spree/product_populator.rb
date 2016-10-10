@@ -224,16 +224,23 @@ module DataShift
 
               logger.info("Creating Variant from OptionValue(s) #{ov_list.collect(&:name).inspect}")
 
-              i = @product_load_object.variants.size + 1
+              i = product_load_object.variants.size + 1
 
-              variant = @product_load_object.variants.create( :sku => "#{product_load_object.sku}_#{i}", :price => product_load_object.price, :weight => product_load_object.weight, :height => product_load_object.height, :width => product_load_object.width, :depth => product_load_object.depth, :tax_category_id => product_load_object.tax_category_id)
+              variant = product_load_object.variants.create(
+                :sku => "#{product_load_object.sku}_#{i}",
+                :price => product_load_object.price,
+                :weight => product_load_object.weight,
+                :height => product_load_object.height,
+                :width => product_load_object.width,
+                :depth => product_load_object.depth,
+                :tax_category_id => product_load_object.tax_category_id
+              )
 
               variant.option_values << ov_list if(variant)
             end
           end
 
-          @product_load_object.reload unless @product_load_object.new_product_load_object?
-          #puts "DEBUG Load Object now has Variants : #{@product_load_object.variants.inspect}" if(verbose)
+          product_load_object.reload
         end
 
       end # each Variant
@@ -242,19 +249,21 @@ module DataShift
       # A list of Properties with a optional Value - supplied in form :
       #   property_name:value|property_name|property_name:value
       #  Example :
-      #  test_pp_002|test_pp_003:Example free value|yet_another_property
+      #  test_pp_002|test_pp_003:Example free value
 
       def add_properties
         # TODO smart column ordering to ensure always valid by time we get to associations
         product_load_object.save_if_new
 
-        property_list = split_multi_assoc_value#data.split(multi_assoc_delim)
+        property_list = split_multi_assoc_value
 
-        property_list.each do |pstr|
+        property_list.each do |property_string|
 
           # Special case, we know we lookup on name so operator is effectively the name to lookup
-          find_by_name, find_by_value = get_operator_and_data( pstr )
 
+          # split into usable parts ; size:large or colour:red,green,blue
+          find_by_name, find_by_value = property_string.split(name_value_delim)
+          
           raise "Cannot find Property via #{find_by_name} (with value #{find_by_value})" unless(find_by_name)
 
           property = property_klass.where(:name => find_by_name).first
