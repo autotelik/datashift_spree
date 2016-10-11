@@ -66,7 +66,7 @@ describe 'SpreeExporter' do
 
     exporter = DataShift::ExcelExporter.new
       
-    exporter.export_with_associations(expected, @Product_klass, @Product_klass.all)
+    exporter.export_with_associations(expected, Spree::Product, Spree::Product.all)
 
     puts "Exported Products to #{expected}"
     
@@ -81,7 +81,7 @@ describe 'SpreeExporter' do
 
     exporter = DataShift::CsvExporter.new
       
-    exporter.export_with_associations(expected, @Product_klass, @Product_klass.all)
+    exporter.export_with_associations(expected, Spree::Product, Spree::Product.all)
 
     puts "Exported Products to #{expected}"
     

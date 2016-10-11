@@ -13,6 +13,9 @@ module DataShift
 
       include SpreeLoading
 
+      include DataShift::Logging
+      extend DataShift::Logging
+
       attr_reader :product_load_object
 
       def prepare_and_assign_method_binding(method_binding, record, data)
@@ -21,7 +24,9 @@ module DataShift
 
         @product_load_object = record
 
-        super(method_binding, record, data) unless data
+        logger.debug("Populating data via Spree specific ProductPopulator")
+
+        logger.debug("Populating data via Spree specific ProductPopulator [#{method_binding.operator}] - [#{data}]")
 
         # Special cases for Products, generally where a simple one stage lookup won't suffice
         # otherwise simply use default processing from base class
@@ -33,12 +38,12 @@ module DataShift
 
           add_taxons
 
-        elsif(method_binding.operator?('product_properties') )
+        elsif(method_binding.operator?('product_properties')|| method_binding.operator?('properties') )
 
           add_properties
 
           # This loads images to Product or Product Master Variant depending on Spree version
-        elsif(method_binding.operator?('images'))
+        elsif(method_binding.operator?('images') || method_binding.operator?('Images'))
 
           add_images( product_load_object.master )
 
@@ -101,7 +106,7 @@ module DataShift
           add_variants_stock(data)
 
         else
-          super(method_binding, product_load_object, data)
+          super(method_binding, product_load_object, data) if(data)
         end
 
       end
@@ -116,6 +121,7 @@ module DataShift
       #   2) Provide a value for at least one of these OptionType
       #   3) A composite Variant can be created by supplying a value for more than one OptionType
       #       fro example Colour : Red and Size Medium
+      #
       # Supported Syntax :
       #  '|' seperates Variants
       #
@@ -124,6 +130,57 @@ module DataShift
       #
       #     mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
       #
+      def build_option_types(option_types)
+
+        optiontype_vlist_map = {}
+
+        option_types.each do |ostr|
+
+          oname, value_str = ostr.split(name_value_delim)
+
+          option_type = option_type_klass.where(:name => oname).first
+
+          unless option_type
+            option_type = option_type_klass.create(:name => oname, :presentation => oname.humanize)
+
+            unless option_type
+              logger.warm("WARNING: OptionType #{oname} NOT found and could not create - Not set Product")
+              next
+            end
+            logger.info "Created missing OptionType #{option_type.inspect}"
+          end
+
+          # OptionTypes must be specified first on Product to enable Variants to be created
+          product_load_object.option_types << option_type unless product_load_object.option_types.include?(option_type)
+
+          # Can be simply list of OptionTypes, some or all without values
+          next unless(value_str)
+
+          optiontype_vlist_map[option_type] ||= []
+
+          # Now get the value(s) for the option e.g red,blue,green for OptType 'colour'
+          optiontype_vlist_map[option_type] += value_str.split(',').flatten
+        end
+
+
+        # A single Variant can have MULTIPLE Option Types and the Syntax supports this combining
+        #
+        # So we need the LONGEST set of OptionValues - to use as the BASE for combining with the rest
+        #
+        #   mime_type:png,PDF; print_type:colour
+        #
+        # This means create 2 Variants
+        #     1 mime_type:png && print_type:colour
+        #     1 mime_type:PDF && print_type:colour
+        #
+        # And we want to identify this "mime_type:png,PDF" as the longest to combine with the smaller print_type list
+
+        sorted_map = optiontype_vlist_map.sort_by { |ot, ov| ov.size }.reverse
+
+        sorted_map
+
+      end
+
       def add_options_variants
 
         # TODO smart column ordering to ensure always valid by time we get to associations
@@ -133,63 +190,24 @@ module DataShift
           logger.error("Cannot add OptionTypes/Variants - Save Failed : #{e.inspect}")
           raise ProductLoadError.new("Cannot add OptionTypes/Variants - Save failed on parent Product")
         end
-        # example : mime_type:jpeg;print_type:black_white|mime_type:jpeg|mime_type:png, PDF;print_type:colour
 
-        variants = split_multi_assoc_value
+        # Split into multiple Variants - '|' seperates
+        #
+        # So  mime_type:jpeg | print_type:black_white
+        #
+        #     => 2 Variants on different OpTypes, mime_type and print_type
+        #
+        variant_chain =  value.to_s.split( multi_assoc_delim )
 
-        logger.info "Adding Options Variants #{variants.inspect}"
-
-        # example line becomes :
-        #   1) mime_type:jpeg|print_type:black_white
-        #   2) mime_type:jpeg
-        #   3) mime_type:png, PDF|print_type:colour
-
-        variants.each do |per_variant|
+        variant_chain.each do |per_variant|
 
           option_types = per_variant.split(multi_facet_delim)    # => [mime_type:jpeg, print_type:black_white]
 
-          logger.info "Checking Option Types #{option_types.inspect}"
+          logger.info "Building Variants based on Option Types #{option_types.inspect}"
 
-          optiontype_vlist_map = {}
+          sorted_map = build_option_types(option_types)
 
-          option_types.each do |ostr|
-
-            oname, value_str = ostr.split(name_value_delim)
-
-            option_type = option_type_klass.where(:name => oname).first
-
-            unless option_type
-              option_type = option_type_klass.create(:name => oname, :presentation => oname.humanize)
-              # TODO - dynamic creation should be an option
-
-              unless option_type
-                logger.warm("WARNING: OptionType #{oname} NOT found and could not create - Not set Product")
-                next
-              end
-              logger.info "Created missing OptionType #{option_type.inspect}"
-            end
-
-            # OptionTypes must be specified first on Product to enable Variants to be created
-            product_load_object.option_types << option_type unless product_load_object.option_types.include?(option_type)
-
-            # Can be simply list of OptionTypes, some or all without values
-            next unless(value_str)
-
-            optiontype_vlist_map[option_type] ||= []
-
-            # Now get the value(s) for the option e.g red,blue,green for OptType 'colour'
-            optiontype_vlist_map[option_type] += value_str.split(',').flatten
-
-            logger.debug("Parsed OptionValues #{optiontype_vlist_map[option_type]} for Option_Type #{option_type.name}")
-          end
-
-          next if(optiontype_vlist_map.empty?) # only option types specified - no values
-
-          # Now create set of Variants, some of which maybe composites
-          # Find the longest set of OptionValues to use as base for combining with the rest
-          sorted_map = optiontype_vlist_map.sort_by { |ot, ov| ov.size }.reverse
-
-          logger.debug("Processing Options into Variants #{sorted_map.inspect}")
+          next if(sorted_map.empty?) # Only option types specified - no values, so no Variant to create
 
           # {mime => ['pdf', 'jpeg', 'gif'], print_type => ['black_white']}
 
@@ -203,8 +221,11 @@ module DataShift
 
             ovname.strip!
 
+            logger.info("Adding Variant for #{ovname} on #{lead_option_type}")
+
             # TODO - not sure why I create the OptionValues here, rather than above with the OptionTypes
-            ov = option_value_klass.where(:name => ovname, :option_type_id => lead_option_type.id).first_or_create(:presentation => ovname.humanize)
+            ov = option_value_klass.where(:name => ovname,
+                                          :option_type_id => lead_option_type.id).first_or_create(:presentation => ovname.humanize)
             ov_list << ov if ov
 
             # Process rest of array of types => values
@@ -213,8 +234,9 @@ module DataShift
 
                 ov_for_composite.strip!
 
-                # Prior Rails 4 - ov = option_value_klass.find_or_create_by_name_and_option_type_id(for_composite, ot.id, :presentation => for_composite.humanize)
-                ov = option_value_klass.where(:name => ov_for_composite, :option_type_id => ot.id).first_or_create(:presentation => ov_for_composite.humanize)
+                ov = option_value_klass.where(
+                  :name => ov_for_composite,
+                  :option_type_id => ot.id).first_or_create(:presentation => ov_for_composite.humanize)
 
                 ov_list << ov if(ov)
               end
@@ -222,25 +244,24 @@ module DataShift
 
             unless(ov_list.empty?)
 
-              logger.info("Creating Variant from OptionValue(s) #{ov_list.collect(&:name).inspect}")
+              logger.info("Creating Variant on OptionValue(s) #{ov_list.collect(&:name).inspect}")
 
               i = product_load_object.variants.size + 1
 
-              variant = product_load_object.variants.create(
+              product_load_object.variants.create!(
                 :sku => "#{product_load_object.sku}_#{i}",
                 :price => product_load_object.price,
                 :weight => product_load_object.weight,
                 :height => product_load_object.height,
                 :width => product_load_object.width,
                 :depth => product_load_object.depth,
-                :tax_category_id => product_load_object.tax_category_id
+                :tax_category_id => product_load_object.tax_category_id,
+                :option_values => ov_list
               )
 
-              variant.option_values << ov_list if(variant)
             end
           end
 
-          product_load_object.reload
         end
 
       end # each Variant
@@ -255,7 +276,7 @@ module DataShift
         # TODO smart column ordering to ensure always valid by time we get to associations
         product_load_object.save_if_new
 
-        property_list = split_multi_assoc_value
+        property_list = value.to_s.split(multi_assoc_delim)
 
         property_list.each do |property_string|
 
@@ -263,10 +284,10 @@ module DataShift
 
           # split into usable parts ; size:large or colour:red,green,blue
           find_by_name, find_by_value = property_string.split(name_value_delim)
-          
+
           raise "Cannot find Property via #{find_by_name} (with value #{find_by_value})" unless(find_by_name)
 
-          property = property_klass.where(:name => find_by_name).first
+          property = Spree::Property.where(:name => find_by_name).first
 
           unless property
             property = property_klass.create( :name => find_by_name, :presentation => find_by_name.humanize)
@@ -296,7 +317,7 @@ module DataShift
         # TODO smart column ordering to ensure always valid by time we get to associations
         product_load_object.save_if_new
 
-        chain_list = split_multi_assoc_value  # potentially multiple chains in single column (delimited by multi_assoc_delim)
+        chain_list = value.to_s.split(multi_assoc_delim)  # potentially multiple chains in single column (delimited by multi_assoc_delim)
 
         chain_list.each do |chain|
 
@@ -364,7 +385,7 @@ module DataShift
           variants = @product_load_object.variants # just for readability and logic
           logger.info "Variants: #{@product_load_object.variants.inspect}"
 
-          stock_coh_list = split_multi_assoc_value # we expect to get corresponding stock_location:count_on_hand for every variant
+          stock_coh_list = value.to_s.split(multi_assoc_delim) # we expect to get corresponding stock_location:count_on_hand for every variant
 
           stock_coh_list.each_with_index do |stock_coh, i|
 
@@ -445,7 +466,7 @@ module DataShift
           logger.info "Variants: #{variants.inspect}"
 
           # we expect to get corresponding images for every variant (might have more than one image for each variant!)
-          variants_images_list = split_multi_assoc_value
+          variants_images_list = value.to_s.split(multi_assoc_delim)
 
           variants_images_list.each_with_index do |variant_images, i|
 

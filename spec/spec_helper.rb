@@ -49,12 +49,7 @@ RSpec.configure do |config|
   config.before(:suite) do
     puts "Booting spree rails app - version #{DataShift::SpreeEcom::version}"
 
-    # We are not a Spree project, so we implement a spree application of our own
-    if(DataShift::SpreeEcom::is_namespace_version )
-      spree_boot
-    else
-      boot('test_spree_standalone')             # key to YAML db e.g  test_memory, test_mysql
-    end
+    spree_boot
 
     puts "Testing Spree standalone - version #{DataShift::SpreeEcom::version}"
   end
@@ -71,45 +66,6 @@ RSpec.configure do |config|
   config.after(:each) do
     DatabaseCleaner.clean
   end
-
-  shared_context 'Populate dictionary ready for Product loading' do
-
-    set_spree_class_helpers
-
-    let(:product_klass) { DataShift::SpreeEcom::get_product_class }
-
-    let(:product_loader) { DataShift::SpreeEcom::ProductLoader.new }
-
-    # %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
-
-    let(:image_klass) {  DataShift::SpreeEcom::get_spree_class 'Image' }
-
-    @Product_klass = DataShift::SpreeEcom::get_product_class
-
-    #spree_klass_list.each do |k|
-    #  instance_variable_set("@#{k}_klass", DataShift::SpreeEcom::get_spree_class(k))
-    #end
-
-    config.before(:each) do
-      DataShift::Configuration.reset
-      DataShift::Exporters::Configuration.reset
-      DataShift::Loaders::Configuration.reset
-    end
-
-    before do
-      begin
-
-        DataShift::ModelMethods::Catalogue.clear
-        DataShift::ModelMethods::Manager.clear
-
-      rescue => e
-        puts e.inspect
-        puts e.backtrace
-        raise e
-      end
-    end
-  end
-
 
   def capture(stream)
     begin
@@ -186,11 +142,6 @@ RSpec.configure do |config|
     end
   end
 
-  def before_each_spree
-    # replaced by proper database cleaner
-  end
-
-
   def set_logger( name = 'datashift_spree_spec.log')
 
     require 'logger'
@@ -249,9 +200,6 @@ RSpec.configure do |config|
         Dir.chdir DataShift::SpreeEcom::spree_sandbox_path
         puts "Running bundle install"
         system('bundle install')
-
-       # puts "Running rake db:migrate"
-        #system('bundle exec rake db:migrate')
       ensure
         Dir.chdir original_dir
       end
@@ -285,99 +233,9 @@ RSpec.configure do |config|
   def set_spree_class_helpers
     @spree_klass_list  =  %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
 
-    @Product_klass = DataShift::SpreeEcom::get_product_class
-
     @spree_klass_list.each do |k|
       instance_variable_set("@#{k}_klass", DataShift::SpreeEcom::get_spree_class(k))
     end
-  end
-
-  def self.boot( database_env)
-
-    ActiveRecord::Base.clear_active_connections!()
-
-    unless(DataShift::SpreeEcom::is_namespace_version)
-
-      DataShift::SpreeEcom::load()
-
-      db_connect( database_env )
-      @dslog.info "Booting Spree using pre 1.0.0 version"
-      boot_pre_1
-      @dslog.info "Booted Spree using pre 1.0.0 version"
-
-      migrate_up      # create an sqlite Spree database on the fly
-    end
-  end
-
-  def self.boot_pre_1
-
-    require 'rake'
-    require 'rubygems/package_task'
-    require 'thor/group'
-
-    require 'spree_core/preferences/model_hooks'
-    #
-    # Initialize preference system
-    ActiveRecord::Base.class_eval do
-      include Spree::Preferences
-      include Spree::Preferences::ModelHooks
-    end
-
-    gem 'paperclip'
-    gem 'nested_set'
-
-    require 'nested_set'
-    require 'paperclip'
-    require 'acts_as_list'
-
-    CollectiveIdea::Acts::NestedSet::Railtie.extend_active_record
-    ActiveRecord::Base.send(:include, Paperclip::Glue)
-
-    gem 'activemerchant'
-    require 'active_merchant'
-    require 'active_merchant/billing/gateway'
-
-    ActiveRecord::Base.send(:include, ActiveMerchant::Billing)
-
-    require 'scopes'
-
-    # Not sure how Rails manages this seems lots of circular dependencies so
-    # keep trying stuff till no more errors
-
-    Dir[lib_root + '/*.rb'].each do |r|
-      begin
-        require r if File.file?(r)
-      rescue => e
-      end
-    end
-
-    Dir[lib_root + '/**/*.rb'].each do |r|
-      begin
-        require r if File.file?(r) && ! r.include?('testing')  && ! r.include?('generators')
-      rescue => e
-      end
-    end
-
-    load_models( true )
-
-    Dir[lib_root + '/*.rb'].each do |r|
-      begin
-        require r if File.file?(r)
-      rescue => e
-      end
-    end
-
-    Dir[lib_root + '/**/*.rb'].each do |r|
-      begin
-        require r if File.file?(r) && ! r.include?('testing')  && ! r.include?('generators')
-      rescue => e
-      end
-    end
-
-    #  require 'lib/product_filters'
-
-    load_models( true )
-
   end
 
   def self.load_models( report_errors = nil )

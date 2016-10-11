@@ -1,11 +1,14 @@
-# Copyright:: (c) Autotelik Media Ltd 2011
+# Copyright:: (c) Autotelik Media Ltd 2016
 # Author ::   Tom Statter
 # Date ::     Aug 2011
 # License::   MIT
 #
 # Details::   Spree Helper for Product Loading. 
 # 
-#             Utils to try to manage different Spree versions seamlessly.
+#             Used to contain Utils to try to manage different Spree versions seamlessly.
+#
+#             But Spree now Version 3 and code base makes this pointless, anyone still on an old version
+#             can just use the associated older version of this gem
 #             
 #             Spree Helper for RSpec testing, enables mixing in Support for
 #             testing or loading Rails Spree e-commerce.
@@ -15,12 +18,11 @@
 #             Since datashift gem is not a Rails app or a Spree App, provides utilities to internally
 #             create a Spree Database, and to load Spree components, enabling standalone testing.
 #
-# =>          Has been tested with  0.11.2, 0.7, 1.0.0, 1.1.2, 1.1.3
+# =>          Has been tested with
+#               0.7, 0.11.2
+#               1.0.0, 1.1.2, 1.1.3
+#               3-1-stable
 #
-# =>          TODO - See if we can improve DB creation/migration ....
-#             N.B Some or all of Spree Tests may fail very first time run,
-#             as the database is auto generated
-# =>          
 require 'spree'
 require 'spree_core'
     
@@ -41,19 +43,15 @@ module DataShift
         MapperUtils::class_from_string(x.to_s)
       end
     end
-      
-    def self.get_product_class
-      get_spree_class 'Product'
-    end
-    
+
     # Return the right CLASS to attach Product images to
     # for the callers version of Spree
       
     def self.product_attachment_klazz
       @product_attachment_klazz  ||= if(DataShift::SpreeEcom::version.to_f > 1.0 )
-        DataShift::SpreeEcom::get_spree_class('Variant' )
+        DataShift::SpreeEcom::get_spree_class('Variant')
       else
-        DataShift::SpreeEcom::get_spree_class('Product' )
+        DataShift::SpreeEcom::get_spree_class('Product')
       end
     end
     
@@ -61,11 +59,7 @@ module DataShift
     # for the callers version of Spree
     
     def self.get_image_owner(record)
-      if(SpreeEcom::version.to_f > 1)
-       record.is_a?(get_product_class) ? record.master : record     # owner is VARIANT
-      else
-        record.is_a?(get_product_class) ? record : record.product   # owner is PRODUCT
-      end
+       record.is_a?(Spree::Product) ? record.master : record     # Owner is VARIANT
     end
     
     def self.version
@@ -84,9 +78,5 @@ module DataShift
       File.join(root, 'app')
     end
 
-    def self.load()
-      require 'spree'
-      require 'spree_core'
-    end   
   end
 end 

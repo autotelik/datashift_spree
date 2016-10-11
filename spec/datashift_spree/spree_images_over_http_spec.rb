@@ -37,7 +37,7 @@ describe 'SpreeImageLoading' do
     product_loader.loaded_count.should == 3
     product_loader.failed_count.should == 0
     
-    p = @Product_klass.where(:name => "Demo Product for AR Loader").first
+    p = Spree::Product.where(:name => "Demo Product for AR Loader").first
     
     expect(p.images.size).to eq 1
 
@@ -48,7 +48,7 @@ describe 'SpreeImageLoading' do
  
     expected = [["image/jpeg", "DEMO_001_ror_bag"], ["image/png", 'spree'], ["image/jpeg", 'DEMO_004_ror_ringer']]
     
-    @Product_klass.all.each_with_index do |p, idx| 
+    Spree::Product.all.each_with_index do |p, idx|
       expect(p.images.size).to eq 1
       i = p.images[0]
 

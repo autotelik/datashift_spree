@@ -22,9 +22,6 @@ module DataShift
     end
 
     before do
-
-      before_each_spree   # inits tests, cleans DB setups model types
-
       # Create some test data
       root = @Taxonomy_klass.create( :name => 'Paintings' )
 
@@ -67,7 +64,7 @@ module DataShift
 
       excel = DataShift::ExcelGenerator.new
 
-      excel.generate_with_associations(expected, @Product_klass)
+      excel.generate_with_associations(expected, Spree::Product)
 
       expect(File.exists?(expected)).to eq true
 
@@ -76,11 +73,11 @@ module DataShift
 
       expect(excel.worksheets.size).to eq 1
 
-      expect(excel.worksheet(0).name).to eq @Product_klass.name
+      expect(excel.worksheet(0).name).to eq Spree::Product.name
 
       headers = excel.worksheets[0].row(0)
 
-      expect(headers).to include(*@Product_klass.columns.collect(&:name))
+      expect(headers).to include(*Spree::Product.columns.collect(&:name))
     end
   end
 end

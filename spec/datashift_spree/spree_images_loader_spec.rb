@@ -24,8 +24,7 @@ module DataShift
 
     include_context 'Populate dictionary ready for Product loading'
 
-    let (:product)          { Spree::Product.new }
-    let (:product_loader)   { DataShift::SpreeEcom::ProductLoader.new }
+    let (:product)  { Spree::Product.new }
 
     before(:each) do
       DataShift::Configuration.call.mandatory = ['sku', 'name', 'price']
@@ -41,7 +40,9 @@ module DataShift
 
     def report_errors_tests( x )
 
-      product_loader.run( ifixture_file(x) )
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file(x))
+
+      product_loader.run
 
       loader = product_loader.datashift_loader
 
@@ -59,7 +60,9 @@ module DataShift
 
     it "should create Image from path in Product loading column from CSV" do
 
-      product_loader.run( ifixture_file('SpreeProductsWithImages.csv') )
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file('SpreeProductsWithImages.csv'))
+
+      product_loader.run
 
       loader = product_loader.datashift_loader
 
@@ -81,7 +84,9 @@ module DataShift
     it "should create Image from path in Product loading column from .xls"  do
 
       # Spreadsheet contains paths relative to here
-      product_loader.run( ifixture_file('SpreeProductsWithImages.xls'))
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file('SpreeProductsWithImages.xls'))
+
+      product_loader.run
 
       loader = product_loader.datashift_loader
 
@@ -105,7 +110,9 @@ module DataShift
       # Base of the fixtures path, will create a FULL path to each image
       Configuration.call.image_path_prefix = rspec_spec_path
 
-      product_loader.run( ifixture_file('SpreeProductsWithImages.xls'))
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file('SpreeProductsWithImages.xls'))
+
+      product_loader.run
 
       loader = product_loader.datashift_loader
 
@@ -123,11 +130,13 @@ module DataShift
       expect(Spree::Image.count).to eq 3
     end
 
-    it "should assign Images to preloaded Products by SKU via Excel", duff: true  do
+    it "should assign Images to preloaded Products by SKU via Excel"  do
       
       expect(Spree::Product.count).to eq 0
 
-      product_loader.run( ifixture_file('SpreeProducts.xls'))
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
+
+      product_loader.run
 
       expect(Spree::Image.count).to eq 0
 
@@ -154,7 +163,9 @@ module DataShift
 
       expect(Spree::Product.count).to eq 0
 
-      product_loader.run( ifixture_file('SpreeProducts.xls'))
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
+
+      product_loader.run
 
       loader = product_loader.datashift_loader
 
@@ -184,7 +195,9 @@ module DataShift
 
       Configuration.call.image_path_prefix = rspec_spec_path
 
-      product_loader.run(ifixture_file('SpreeProductsWithMultipleImages.xls'))
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file('SpreeProductsWithMultipleImages.xls'))
+
+      product_loader.run
 
       expect(Spree::Product.count).to eq 2
       expect(Spree::Image.count).to eq  5
@@ -204,12 +217,14 @@ module DataShift
     end
 
 
-    it "should assign Images to preloaded Products from filesystem on SKU" do
+    it "should assign Images to preloaded Products from filesystem on SKU", duff: true do
 
       # first load some products with SKUs that match the image names
       expect(Spree::Product.count).to eq 0
 
-      product_loader.run( ifixture_file('SpreeProducts.xls'))
+      product_loader = DataShift::SpreeEcom::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
+
+      product_loader.run
 
       expect(Spree::Product.count).to eq 3
       expect(Spree::Image.all.size).to eq 0
@@ -220,31 +235,21 @@ module DataShift
 
       raise "Cannot find Attachment Class" unless image_klass
 
-      loader_options = { :verbose => true }
-
-      owner_klass = DataShift::SpreeEcom::product_attachment_klazz
-
-      if(DataShift::SpreeEcom::version.to_f > 1.0 )
-        expect(owner_klass).to eq Spree::Variant
-      else
-        expect(owner_klass).to eq Spree::Product
-      end
-
-      loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
+      owner_klass = Spree::Variant
 
       # TOFIX - name wont currently work for Variant and sku won't work for Product
       # so need  way to build a where clause or add scopes to Variant/Product
-      loader_options[:attach_to_find_by_field] = (owner_klass == Spree::Variant) ? :sku : :name
+      attach_to_find_by_field = (owner_klass == Spree::Variant) ? :sku : :name
 
-      loader_options[:attach_to_field] = 'images'
+      attach_to_field = 'images'
 
-      loader = DataShift::Paperclip::AttachmentLoader.new#(image_klass, nil, loader_options)
+      loader = DataShift::Paperclip::AttachmentLoader.new
 
-      expect(loader.attach_to_klass).to eq owner_klass
+      loader.split_file_name_on = '_'
 
-      attachment_options = { :split_file_name_on => '_' }
+      loader.init(owner_klass, attach_to_find_by_field, attach_to_field)
 
-      loader.process_from_filesystem( File.join(fixtures_path, 'images'), attachment_options)
+      loader.run(File.join(fixtures_path, 'images'), Spree::Image)
 
       expect(Spree::Image.count).to eq 3
     end

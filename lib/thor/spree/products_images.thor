@@ -13,9 +13,7 @@
 # Note, not DataShift, case sensitive, create namespace for command line : datashift
 
 require 'spree'
-
 require 'datashift_spree'
-
 require 'spree_ecom'
 
 module DatashiftSpree 
@@ -43,7 +41,7 @@ module DatashiftSpree
 
       require 'product_loader'
 
-      loader = DataShift::SpreeEcom::ProductLoader.new( nil, {:verbose => options[:verbose]})
+      loader = DataShift::SpreeEcom::ProductLoader.new(input)
 
       # YAML configuration file to drive defaults etc
 
@@ -61,9 +59,6 @@ module DatashiftSpree
       loader.set_prefix('sku', options[:sku_prefix] ) if(options[:sku_prefix])
 
       puts "DataShift::Product starting upload from file: #{input}"
-
-      opts = options.dup
-      opts[:mandatory] = ['sku', 'name', 'price']
 
       loader.run(input, opts)
     end

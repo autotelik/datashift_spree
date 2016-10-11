@@ -13,7 +13,7 @@ module DataShift
 
     # TODO - THIS CONCEPT NOW BELONGS AS A POPULATOR
 
-    
+
     # Very specific Image Loading for existing Products in Spree. 
     #
     # Requirements : A CSV or Excel file which has 2+ columns
@@ -75,7 +75,7 @@ module DataShift
         elsif(current_value && method_detail.operator )    
           
           # find the db record to assign our Image usually expect either SKU (Variant) or Name (product)
-          if( MethodDictionary::find_method_detail_if_column(@@product_klass, operator) )
+          if( MethodDictionary::find_method_detail_if_column(Spree::Product, operator) )
             @load_object = get_record_by(@@product_klass, operator, current_value)
             
           elsif( MethodDictionary::find_method_detail_if_column(@@variant_klass, operator) )

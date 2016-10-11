@@ -109,17 +109,16 @@ module DataShift
       Dir["#{base}/*.rake"].sort.each { |ext| load ext }
     end
 
-  
     # Load all the datashift Thor commands and make them available throughout app
-
-    def self.load_commands()
+    def self.load_commands
       base = File.join(library_path, 'thor', '**')
-    
+
       Dir["#{base}/*.thor"].each do |f|
         next unless File.file?(f)
-        Thor::Util.load_thorfile(f)
+        load(f)
       end
     end
+
   end
 end
 

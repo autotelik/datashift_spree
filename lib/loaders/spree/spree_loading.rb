@@ -29,10 +29,6 @@ module DataShift
       @option_value_klass  ||= DataShift::SpreeEcom::get_spree_class('OptionValue')
     end
 
-    def product_klass
-      @product_klass  ||= DataShift::SpreeEcom::get_spree_class('Product')
-    end
-
     def property_klass
       @property_klass  ||= DataShift::SpreeEcom::get_spree_class('Property')
     end
@@ -61,6 +57,14 @@ module DataShift
       @variant_klass  ||= DataShift::SpreeEcom::get_spree_class('Variant')
     end
 
+    # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz
+
+    def spree_uri_regexp
+      @spree_uri_regexp ||= Regexp::new(
+        '(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?'
+      )
+    end
+
 
     # If no owner class specified will attach Image to Spree image Owner (varies depending on version)
     #
@@ -79,18 +83,15 @@ module DataShift
     #
     def add_images( record, owner = nil )
 
-      # different versions have moved images around from Prod to Variant
-      owner ||= DataShift::SpreeEcom::get_image_owner(record)
+      # Spree 3 - Images stored on Variant (record.master if record is a Product)
 
-      value.to_s.split(multi_value_delim).each do |image|
+      owner ||=  DataShift::SpreeEcom::get_image_owner(record)
+
+      value.to_s.split(multi_assoc_delim).each do |image|
 
         #TODO - make this attributes_start_delim and support {alt=> 'blah, :position => 2 etc}
 
-        # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz
-
-        @spree_uri_regexp ||= Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' )
-
-        if(image.match(@spree_uri_regexp))
+        if(image.match(spree_uri_regexp))
 
           uri, attributes = image.split(attribute_list_start)
 
@@ -175,7 +176,6 @@ module DataShift
 
         begin
           owner.images << attachment
-
           logger.debug("Product assigned Image from : #{path.inspect}")
         rescue => e
           logger.error("Failed to assign attachment to #{owner.class} #{owner.id}")

@@ -13,7 +13,7 @@ require 'datashift_spree'
 module DataShift
 
   module SpreeEcom
-    
+
     def self.run_in(dir)
       puts "Running cmd in [#{dir}]"
       original_dir = Dir.pwd
@@ -28,7 +28,7 @@ module DataShift
     def self.spree_sandbox_name
       'dummy'
     end
-    
+
     def self.spree_sandbox_path
       File.join(DatashiftSpreeLibraryBase, 'spec', spree_sandbox_name)
     end
@@ -41,40 +41,45 @@ module DataShift
       system("rails g spree:install --user_class=Spree::User --auto-accept --migrate --no-seed")
       system("rails g spree:auth:install")
       system("rails g spree_gateway:install")
+      system('rails g spree_digital:install --auto-run-migrations')
     end
 
     def self.build_sandbox
-      
-      path = DataShift::SpreeEcom::spree_sandbox_path
-      
-      puts "Creating new Rails sandbox for Spree : #{path}"
-      
-      FileUtils::rm_rf(path) if(File.exists?(path))
-            
-      rails_sandbox_root = File.expand_path("#{path}/..")
-         
+
+      spree_sandbox_path = DataShift::SpreeEcom::spree_sandbox_path
+
+      puts "Creating new Rails sandbox for Spree : #{spree_sandbox_path}"
+
+      FileUtils::rm_rf(spree_sandbox_path) if(File.exists?(spree_sandbox_path))
+
+      rails_sandbox_root = File.expand_path("#{spree_sandbox_path}/..")
+
       run_in(rails_sandbox_root)  do
-        system('rails new ' + spree_sandbox_name)     
+        system('rails new ' + spree_sandbox_name)
       end
+
+      # Now add any gems required specifically for datashift_spree to the Gemfile
+
+      gem_string = "\n\n#RSPEC datashift-spree testing\ngem 'datashift_spree',  :path => \"#{File.expand_path(rails_sandbox_root + '/..')}\"\n"
+
+      gem_string += "\ngem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :master\n"
+
+      gem_string += "\ngem 'spree_digital', github: 'spree-contrib/spree_digital', :branch => spree_version\n"
+
+      File.open("#{spree_sandbox_path}/Gemfile", 'a') { |f| f << gem_string }
 
       # ***** SPREE INSTALL COMMANDS ****
 
-      run_in(path)  do
+      run_in(spree_sandbox_path)  do
         spree_install_cmds
+
       end
-      
-      puts "Created Spree sandbox store : #{path}"
-       
+
+      puts "Created Spree sandbox store : #{spree_sandbox_path}"
+
       # Now create a thor file for testing the CLI
-      
-      gem_string = "\n\n#RSPEC datashift-spree testing\ngem 'datashift_spree',  :path => \"#{File.expand_path(rails_sandbox_root + '/..')}\"\n"
 
-      # TOFIX read this from ../Gemfile
-      gem_string += "\ngem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :master\n"
-
-      File.open("#{path}/Gemfile", 'a') { |f| f << gem_string }
-
-      File.open("#{path}/spree_sandbox.thor", 'w') do |f| 
+      File.open("#{spree_sandbox_path}/spree_sandbox.thor", 'w') do |f|
         thor_code = <<-EOS
         
 require 'datashift'

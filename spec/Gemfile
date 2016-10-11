@@ -20,6 +20,7 @@ spree_version = '3-1-stable'
 gem 'spree', github: 'spree/spree', branch: spree_version
 gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', branch: spree_version
 gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :branch => spree_version
+gem 'spree_digital', github: 'spree-contrib/spree_digital', :branch => spree_version
 
 #gem 'spree_bootstrap_frontend', github: '200Creative/spree_bootstrap_frontend', branch: spree_version
 
@@ -31,6 +32,11 @@ gem 'database_cleaner'
 gem 'coffee-rails'
 gem 'sass-rails'
 
+
+group :development, :test do
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug'
+end
 
 # we want to test both JRuby and non JRuby especially for Excel
 

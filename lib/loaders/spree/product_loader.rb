@@ -15,7 +15,21 @@ module DataShift
 
       include SpreeLoading
 
+      attr_accessor :file_name
+
       attr_accessor :datashift_loader
+
+      delegate :loaded_count, :failed_count, :processed_object_count, to: :datashift_loader
+
+      delegate :configure_from, to: :datashift_loader
+
+      def initialize(file_name)
+
+        @file_name = file_name
+
+        # gets a file type specific loader e.g csv, excel
+        @datashift_loader = DataShift::Loader::Factory.get_loader(file_name)
+      end
 
       # Non Product database fields we can still process - delegated to Variant
       #
@@ -35,18 +49,15 @@ module DataShift
         }
       end
 
-      def run(file_name)
-
-        DataShift::PopulatorFactory.global_populator_class = DataShift::SpreeEcom::ProductPopulator
+      def run
 
         logger.info "Product load from File [#{file_name}]"
 
+        DataShift::PopulatorFactory.global_populator_class = DataShift::SpreeEcom::ProductPopulator
+
         DataShift::Configuration.call.force_inclusion_of_columns = force_inclusion_columns
 
-        # gets a file type specific loader e.g csv, excel
-        @datashift_loader = DataShift::Loader::Factory.get_loader(file_name)
-
-        datashift_loader.run(file_name, product_klass)
+        datashift_loader.run(file_name, Spree::Product)
       end
 
     end
