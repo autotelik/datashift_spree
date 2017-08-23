@@ -51,16 +51,19 @@ module DatashiftSpree
         puts "DataShift::Product proccssing config from: #{options[:config]}"
         loader.configure_from( options[:config] )
       else
-        loader.populator.set_default_value('available_on', Time.now.to_s(:db) )
-        loader.populator.set_default_value('cost_price', 0.0 )
-        loader.populator.set_default_value('price', 0.0 )
+         DataShift::Transformation.factory do |factory|
+          factory.set_default_on(Spree::Product, 'available_on', Time.now.to_s(:db) )
+          factory.set_default_on(Spree::Product, 'cost_price', 0.0 )
+          factory.set_default_on(Spree::Product, 'price', 0.0 )
+        end
+
       end
 
-      loader.set_prefix('sku', options[:sku_prefix] ) if(options[:sku_prefix])
+      DataShift::Transformation.factory.set_prefix(Spree::Product, 'sku', options[:sku_prefix] ) if(options[:sku_prefix])
 
       puts "DataShift::Product starting upload from file: #{input}"
 
-      loader.run(input, opts)
+      loader.run()
     end
 
 
