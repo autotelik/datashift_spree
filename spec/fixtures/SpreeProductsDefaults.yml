@@ -1,15 +1,13 @@
-## YAML Template.
-
-# Format is :
-#  --- !ruby/object:ActiveRecordModel
-#   :datashift_defaults
-#       key: value
+# YAML Configuration file for Datashift Spree Product Import/Export
 #
+data_flow_schema:
+  Spree::Product:
+    defaults:
+      available_on:  <%= Time.now.to_s(:db) %>
+      cost_price: 1.0
+      meta_description: 'super duper meta desc.'
+      meta_keywords: 'techno dubstep d&b'
 
-Spree::Product: 
-  datashift_defaults: 
-   available_on:  <%= Time.now.to_s(:db) %>
-   cost_price: 1.0 
-   meta_description: 'super duper meta desc.'
-   meta_keywords: 'techno dubstep d&b'
+
+
       

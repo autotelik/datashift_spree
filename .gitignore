@@ -1,5 +1,16 @@
 # DATASHIFT
 
+dummy
+spec/.bundle
+spec/dummy
+spec/dummy/**
+spec/logs
+spec/fixtures/results
+/spec/MissingAttachmentRecords
+/spec/tmp/*
+/spec/rspec_spree_sandbox
+/spec/rspec_spree_sandbox/*
+
 sandbox
 sandbox/**
 
@@ -21,12 +32,6 @@ public
 public/**
 
 MissingAttachmentRecords
-spec/logs
-spec/fixtures/results
-/spec/MissingAttachmentRecords
-/spec/tmp/*
-/spec/rspec_spree_sandbox
-/spec/rspec_spree_sandbox/*
 
 nbproject
 Thumbs.db

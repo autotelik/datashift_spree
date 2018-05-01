@@ -7,6 +7,9 @@
 # Details::   Spec tools for DataShiftSpree Gem
 # 
 #
+require 'datashift'
+require_relative 'sandbox_helper'
+
 module Datashift
       
   class SpreeTasks < Thor  
@@ -15,11 +18,7 @@ module Datashift
 
     def build_sandbox()
       
-      $:.unshift '.'
-      
-      require 'datashift'
-      require 'sandbox_helper'
-     
+
       DataShift::SpreeEcom::build_sandbox
       
       original_dir = Dir.pwd

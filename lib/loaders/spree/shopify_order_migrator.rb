@@ -7,14 +7,14 @@
 #               Currently covers :
 #                 Orders
 #
-require 'spree_base_loader'
+require 'spree_loader_base'
 require 'spree_ecom'
 
 module DataShift
 
   module SpreeEcom
 
-    class ShopifyOrderLoader < SpreeBaseLoader
+    class ShopifyOrderLoader < SpreeLoaderBase
 
       # Options
       #
@@ -35,8 +35,8 @@ module DataShift
       # Options:
       #   [:dummy]           : Perform a dummy run - attempt to load everything but then roll back
       #
-      def perform_load( file_name, opts = {} )
-        logger.info "Shopify perform_load for Orders from File [#{file_name}]"
+      def run( file_name, opts = {} )
+        logger.info "Shopify run for Orders from File [#{file_name}]"
         super(file_name, opts)
       end
 

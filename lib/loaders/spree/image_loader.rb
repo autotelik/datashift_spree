@@ -4,13 +4,16 @@
 # License::   MIT. Free, Open Source.
 #
 require 'loader_base'
-require 'spree_base_loader'
-#require 'paperclip/attachment_loader'
+require 'spree_loader_base'
+
 
 module DataShift
 
   module SpreeEcom
-      
+
+    # TODO - THIS CONCEPT NOW BELONGS AS A POPULATOR
+
+
     # Very specific Image Loading for existing Products in Spree. 
     #
     # Requirements : A CSV or Excel file which has 2+ columns
@@ -18,22 +21,16 @@ module DataShift
     #   1)  Identifies a Product via Name or SKU column
     #   2+) The full path(s) to the Images to attach to Product from column 1
     #
-    class ImageLoader < SpreeBaseLoader
+    class ImageLoader < SpreeLoaderBase
   
-      def initialize(image = nil, options = {})
+      def initialize()
         
-        super( DataShift::SpreeEcom::get_spree_class('Image'), image, options )
-         
-        unless(MethodDictionary.for?(@@product_klass))
-          ModelMethodsManager.find_methods( @@product_klass )
-          MethodDictionary.build_method_details( @@product_klass )
-        end
-        
-        unless(MethodDictionary.for?(@@variant_klass))
-          ModelMethodsManager.find_methods( @@variant_klass )
-          MethodDictionary.build_method_details( @@variant_klass )
-        end
-    
+        super()
+
+        ModelMethods::Manager.catalog_class(Spree::Image)
+        ModelMethods::Manager.catalog_class(Spree::Product)
+        ModelMethods::Manager.catalog_class(Spree::Variant)
+
         puts "Attachment Class is #{SpreeEcom::product_attachment_klazz}" if(@verbose)
       end
       
@@ -44,13 +41,8 @@ module DataShift
         @load_object = nil
       end
       
-      def perform_load( file_name, opts = {} )
-        options = opts.dup
-        
-        # force inclusion means add headers to operator list even not present on Image
-        options[:include_all] = true
-
-        super(file_name, options)
+      def run(file_name)
+        super(file_name, Spree::Image)
       end
 
       def self.acceptable_path_headers
@@ -83,7 +75,7 @@ module DataShift
         elsif(current_value && method_detail.operator )    
           
           # find the db record to assign our Image usually expect either SKU (Variant) or Name (product)
-          if( MethodDictionary::find_method_detail_if_column(@@product_klass, operator) )
+          if( MethodDictionary::find_method_detail_if_column(Spree::Product, operator) )
             @load_object = get_record_by(@@product_klass, operator, current_value)
             
           elsif( MethodDictionary::find_method_detail_if_column(@@variant_klass, operator) )

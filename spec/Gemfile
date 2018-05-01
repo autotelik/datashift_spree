@@ -1,26 +1,42 @@
 source 'https://rubygems.org'
 
+
+gem "datashift_spree", path: '..'
+
+gem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :master
+
 # This Gemfile is for TESTING really. 
-# Not sure it has any use for anyone just wanting to use this gem
 
 # DEFINE VERSIONS YOU WANT TO TEST AGAINST HERE
 # THIS SHOULD BASICALLY REPLICATE WHAT IS IN THE SANDBOX GEMFILE
 
-gem 'rails', '4.1.8'
+# N.B Spree will update the sandbox Gemfile with additional Spree gems
+# e,g User model and Authorisation
+# For rspec you  may need to add them in here or you'll get missing Spree constants
+# TODO - update  sandbox code so it automatically adds Spree gems in here
 
-#DATASHIFT TESTING
-#
+spree_version = '3-1-stable'
+
+gem 'spree', github: 'spree/spree', branch: spree_version
+gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', branch: spree_version
+gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :branch => spree_version
+gem 'spree_digital', github: 'spree-contrib/spree_digital', :branch => spree_version
+
+#gem 'spree_bootstrap_frontend', github: '200Creative/spree_bootstrap_frontend', branch: spree_version
+
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
 gem 'therubyracer', platforms: :ruby
 gem 'mechanize'
 
 gem 'database_cleaner'
+gem 'coffee-rails'
+gem 'sass-rails'
 
-#if(File.exists?('/home/ruby_user/SoftwareDev/git/datashift'))
-#gem 'datashift',  :path => "/home/ruby_user/SoftwareDev/git/datashift"
-#else
-gem 'datashift', :path => "/home/rubyuser/SoftwareDev/git/datashift"
-#end
+
+group :development, :test do
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug'
+end
 
 # we want to test both JRuby and non JRuby especially for Excel
 
@@ -32,49 +48,6 @@ end
 platform :ruby do
   gem 'sqlite3'
 end
-
-# FROM SANDBOX GEMFILE
-
-# Use SCSS for stylesheets
-gem 'sass-rails', '~> 4.0.2'
-
-# Use Uglifier as compressor for JavaScript assets
-gem 'uglifier', '>= 1.3.0'
-
-# Use CoffeeScript for .js.coffee assets and views
-gem 'coffee-rails', '~> 4.0.0'
-
-# See https://github.com/sstephenson/execjs#readme for more supported runtimes
-# gem 'therubyracer', platforms: :ruby
-
-# Use jquery as the JavaScript library
-gem 'jquery-rails'
-
-# Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
-gem 'turbolinks'
-
-# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem 'jbuilder', '~> 1.2'
-
-group :doc do
-  # bundle exec rake doc:rails generates the API under doc/api.
-  gem 'sdoc', require: false
-end
-
-# N.B Spree will update the sandbox Gemfile with additional Spree gems
-# e,g User model and Authorisation
-# For rspec you  may need to add them in here or you'll get missing Spree constants
-#TODO - update  sandbox code so it automatically adds Spree gems in here
-
-spree_version = '2-3-stable'
-
-gem 'spree', github: 'spree/spree', branch: spree_version
-gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :branch => spree_version
-gem 'spree_bootstrap_frontend', github: '200Creative/spree_bootstrap_frontend', branch: spree_version
-gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', branch: spree_version
-
-
-gem 'paperclip'
 
 # STATIC GEMS
 

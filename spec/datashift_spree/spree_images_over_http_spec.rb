@@ -14,7 +14,7 @@
 #             
 #             These are marked with :passes_only_in_spec_dir => true do
 #             
-require File.join(File.expand_path(File.dirname(__FILE__) ), "spec_helper")
+require "spec_helper"
 
 require 'product_loader'
 require 'image_loader'
@@ -31,13 +31,13 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price']}
 
-    product_loader.perform_load( ifixture_file('SpreeProductsWithImageUrls.xls'), options )
+    product_loader.run( ifixture_file('SpreeProductsWithImageUrls.xls'), options )
 
     product_loader.reporter.processed_object_count.should == 3
     product_loader.loaded_count.should == 3
     product_loader.failed_count.should == 0
     
-    p = @Product_klass.where(:name => "Demo Product for AR Loader").first
+    p = Spree::Product.where(:name => "Demo Product for AR Loader").first
     
     expect(p.images.size).to eq 1
 
@@ -48,7 +48,7 @@ describe 'SpreeImageLoading' do
  
     expected = [["image/jpeg", "DEMO_001_ror_bag"], ["image/png", 'spree'], ["image/jpeg", 'DEMO_004_ror_ringer']]
     
-    @Product_klass.all.each_with_index do |p, idx| 
+    Spree::Product.all.each_with_index do |p, idx|
       expect(p.images.size).to eq 1
       i = p.images[0]
 
@@ -65,7 +65,7 @@ describe 'SpreeImageLoading' do
 
     options = {:mandatory => ['sku', 'name', 'price']}
 
-    product_loader.perform_load( ifixture_file('SpreeProductsWithImageUrlsLarge.xls'), options )
+    product_loader.run( ifixture_file('SpreeProductsWithImageUrlsLarge.xls'), options )
 
     product_loader.reporter.processed_object_count.should == 300
     product_loader.loaded_count.should == 300

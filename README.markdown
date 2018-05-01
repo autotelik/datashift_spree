@@ -6,25 +6,7 @@ Wiki here : **https://github.com/autotelik/datashift_spree/wiki**
 
 ### Versions
 
-The loaders have been tested with 0.11, 1.3 and 2.2
-
-The specs have been designed to use an internal Spree sandbox so it's 
-easy to change the Spree version and re-run the specs. See Testing section below.
-
-### Features
-
-Import and Export Spree models through .xls or CSV  files, including
-all associations and setting configurable defaults or over rides.
-
-High level thor command line tasks for import/export provided.
-
-Specific loaders and command line tasks provided out the box for **Spree E-Commerce**, 
-enabling import/export of Product data including creating Variants with different
- count on hands and all associations including Properties/Taxons/OptionTypes and Images.
-
-Loaders can be configured via YAML with over ride values, default values and mandatory column settings.
-
-Many example Spreadsheets/CSV files in spec/fixtures, fully documented with comments for each column.
+This release has been tested against Spree 3.1
 
 ## Installation
 
@@ -35,8 +17,7 @@ Add to bundle :
     gem 'datashift'
     gem 'datashift_spree'
 
-Create a high level .thor file - e.g mysite.thor - in your applications root directory 
-
+Create a high level .thor file (thor will search root or lib/tasks) so for example `lib/tasks/shop.thor`
 
 ```ruby
 require 'datashift'
@@ -60,55 +41,61 @@ usage information via ```thor help <command>``` ... for example
     bundle exec thor help datashift_spree:load:products
 ```
 
-Will print out usage and latest options like ...
+### Features
+
+Template Generation
+
+You can create Excel templates of models through the task `datashift:generate:excel`
+
+For example to create a template for loading Products, including all associations
 
 ```ruby
-Usage:
-  thor datashift_spree:load:products -i, --input=INPUT
-
-Options:
-  -i, --input=INPUT                            # The import file (.xls or .csv)
-  -s, [--sku-prefix=SKU_PREFIX]                # Prefix to add to each SKU before saving Product
-  -p, [--image-path-prefix=IMAGE_PATH_PREFIX]  # Prefix to add to image path for importing from disk
-  -v, [--verbose]                              # Verbose logging
-  -c, [--config=CONFIG]                        # Configuration file containg defaults or over rides in YAML
-  -d, [--dummy]                                # Dummy run, do not actually save Image or Product
-
-
-   Populate Spree Product/Variant data from .xls (Excel) or CSV file
+datashift:generate:excel -m Spree::Product --assoc -r tmp/product_template.xls
 ```
+
+Import and Export Spree models through .xls or CSV  files, including
+all associations and setting configurable defaults or over rides.
+
+High level thor command line tasks for import/export provided.
+
+Specific loaders and command line tasks provided out the box for **Spree E-Commerce**, 
+enabling import/export of Product data including creating Variants with different
+ count on hands and all associations including Properties/Taxons/OptionTypes and Images.
+
+Loaders can be configured via YAML with over ride values, default values and mandatory column settings.
+
+Many example Spreadsheets/CSV files in spec/fixtures, fully documented with comments for each column.
+
 
 ## Testing
 
-There are a number of specs to test this gem, located in the spec subdirectory.
+We use RSpec, so tests located in the spec subdirectory.
 
-To properly test this gem we require an actual Spree store, so when the specs are first run 
-we create a sandbox Rails app, containing a Spree store, whose version we can control in spec/Gemfile
+To test this gem we require an actual Spree store, so when the specs are first run 
+a dummy Rails app is created containing a Spree store, whose version we can control in `spec/Gemfile`
+so it's easy to change the Spree version and re-run the specs.
 
 It's therefor recommended that all testing be done in spec dir itself, so first cd into spec
 
-Define the version of Spree to test against, in the Gemfile, then run
+Edit `spec/Gemfile` and set the version of Spree you wish to test against and run bundler :
 
 ```ruby 
     cd spec
     bundle install
 ```
 
-If changing Spree versions, it's best to force a rebuild of a clean sandbox, and often removing Gemfile.lock will resolve any funny version issues,
- so  run:
+When changing Spree versions, you should force a rebuild of a clean sandbox, and removing the Gemfile.lock will 
+resolve any funny version issues, so  run:
 
 ```ruby 
     cd spec
-    rm -rf sandbox
+    rm -rf dummy
     rm -rf Gemfile.lock
 ```
 
-Change Gemfile versions and run
+thor datashift:spree_tasks:build_sandbox
 
-```ruby 
-    bundle install
-```
- 
+
 The next time you run rspec the sandbox will be regenerated using the latest versions of Rails/Spree specified in your Gemfile
 
 ```ruby 

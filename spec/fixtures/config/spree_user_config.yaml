@@ -1,0 +1,15 @@
+# YAML Configuration file for Datashift Import/Export
+#
+data_flow_schema:
+  Spree::User:
+    # Defaults are looked up by class via the OPERATOR
+    defaults:
+      'password=':  'spree_rspec_123'
+      'password_confirmation=':  'spree_rspec_123'
+    nodes:
+        - password:
+            operator: password=
+            operator_type: :method
+        - password_confirmation:
+            operator: password_confirmation=
+            operator_type: :method

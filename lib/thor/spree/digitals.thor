@@ -13,9 +13,6 @@
 # Note, not DataShift, case sensitive, create namespace for command line : datashift
 
 require 'datashift_spree'
-
-
-
 require 'spree_ecom'
 
 module DatashiftSpree 
@@ -46,12 +43,6 @@ EOS
     method_option :split_file_name_on,  :type => :string, :desc => "delimiter to progressivley split filename for lookup", :default => ' '
 
     def bulk()
-
-      DataShift::load_commands
-
-      # TODO - We're assuming run from a rails app/top level dir...
-      # ...can we make this more robust ? e.g what about when using active record but not in Rails app,
-      require File.expand_path('config/environment.rb')
 
       cmd = [
         '--attachment-klass',        'Spree::Digital', 
