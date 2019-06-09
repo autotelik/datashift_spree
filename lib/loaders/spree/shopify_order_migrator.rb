@@ -8,7 +8,7 @@
 #                 Orders
 #
 require 'spree_loader_base'
-require 'spree_ecom'
+# require 'spree_ecom'
 
 module DataShift
 
