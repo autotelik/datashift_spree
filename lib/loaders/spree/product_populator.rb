@@ -3,7 +3,7 @@
 # Date ::     2016
 # License::   MIT
 #
-# Details::   Specific Populator for Spree generate
+# Details::   Specific Populator for Spree Products
 #
 module DataShift
 
