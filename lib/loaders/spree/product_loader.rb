@@ -13,7 +13,7 @@ module DataShift
 
     class ProductLoader
 
-      include SpreeLoading
+      include DataShift::SpreeLoading
 
       attr_accessor :file_name
 

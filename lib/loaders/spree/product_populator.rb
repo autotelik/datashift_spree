@@ -14,7 +14,7 @@ module DataShift
 
     class ProductPopulator < Populator
 
-      include SpreeLoading
+      include DataShift::SpreeLoading
 
       include DataShift::Logging
       extend DataShift::Logging
