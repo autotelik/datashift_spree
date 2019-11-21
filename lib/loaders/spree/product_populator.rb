@@ -6,6 +6,7 @@
 # Details::   Specific Populator for Spree Products
 #
 
+require 'mechanize'
 require 'loaders/spree/spree_loading'
 
 module DataShift

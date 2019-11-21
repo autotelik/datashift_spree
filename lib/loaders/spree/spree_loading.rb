@@ -6,6 +6,7 @@
 # Details::   Specific support for Loading Spree data
 #
 
+require 'mechanize'
 require 'loaders/paperclip/image_loading'
 
 module DataShift
@@ -85,7 +86,7 @@ module DataShift
 
       # Spree 3 - Images stored on Variant (record.master if record is a Product)
 
-      owner ||=  DataShift::SpreeEcom::get_image_owner(record)
+      owner ||=  record.is_a?(Spree::Product) ? record.master : record
 
       value.to_s.split(multi_assoc_delim).each do |image|
 
