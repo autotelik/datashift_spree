@@ -5,7 +5,9 @@
 #
 # Details::   Specific over-rides/additions to support Spree Products
 #
-require 'spree_loading'
+
+require 'loaders/paperclip/image_loading'
+require 'loaders/spree/spree_loading'
 
 module DataShift
 

@@ -7,6 +7,8 @@
 #
 # require 'spree_ecom'
 
+require 'loaders/spree/spree_loading'
+
 module DataShift
 
   module SpreeEcom
