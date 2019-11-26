@@ -19,43 +19,43 @@ module DataShift
     # These originally required to support early versions when Spree went from no namespace to Spree namespace
 
     def image_klass
-      @image_klass  ||= DataShift::SpreeEcom::get_spree_class('Image')
+      @image_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Image')
     end
 
     def option_type_klass
-      @option_type_klass  ||= DataShift::SpreeEcom::get_spree_class('OptionType')
+      @option_type_klass  ||= DataShift::MapperUtils::class_from_string('Spree::OptionType')
     end
 
     def option_value_klass
-      @option_value_klass  ||= DataShift::SpreeEcom::get_spree_class('OptionValue')
+      @option_value_klass  ||= DataShift::MapperUtils::class_from_string('Spree::OptionValue')
     end
 
     def property_klass
-      @property_klass  ||= DataShift::SpreeEcom::get_spree_class('Property')
+      @property_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Property')
     end
 
     def product_property_klass
-      @product_property_klass  ||= DataShift::SpreeEcom::get_spree_class('ProductProperty')
+      @product_property_klass  ||= DataShift::MapperUtils::class_from_string('Spree::ProductProperty')
     end
 
     def stock_location_klass
-      @stock_location_klass  ||= DataShift::SpreeEcom::get_spree_class('StockLocation')
+      @stock_location_klass  ||= DataShift::MapperUtils::class_from_string('Spree::StockLocation')
     end
 
     def stock_movement_klass
-      @stock_movement_klass  ||= DataShift::SpreeEcom::get_spree_class('StockMovement')
+      @stock_movement_klass  ||= DataShift::MapperUtils::class_from_string('Spree::StockMovement')
     end
 
     def taxonomy_klass
-      @taxonomy_klass  ||= DataShift::SpreeEcom::get_spree_class('Taxonomy')
+      @taxonomy_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Taxonomy')
     end
 
     def taxon_klass
-      @taxon_klass  ||= DataShift::SpreeEcom::get_spree_class('Taxon')
+      @taxon_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Taxon')
     end
 
     def variant_klass
-      @variant_klass  ||= DataShift::SpreeEcom::get_spree_class('Variant')
+      @variant_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Variant')
     end
 
     # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz

@@ -122,13 +122,13 @@ module DatashiftSpree
 
       require 'paperclip/attachment_loader'
 
-      image_klass = DataShift::SpreeEcom::get_spree_class('Image' )
+      image_klass = DataShift::MapperUtils::class_from_string("Spree::Image")
 
       raise "Cannot find suitable Paperclip Attachment Class" unless image_klass
 
       loader_options = { :verbose => true }
 
-      owner_klass = DataShift::SpreeEcom::product_attachment_klazz
+      owner_klass = DataShift::MapperUtils::class_from_string("Spree::Variant")
 
       loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
 

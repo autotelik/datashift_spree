@@ -31,7 +31,6 @@ module DataShift
         ModelMethods::Manager.catalog_class(Spree::Product)
         ModelMethods::Manager.catalog_class(Spree::Variant)
 
-        puts "Attachment Class is #{SpreeEcom::product_attachment_klazz}" if(@verbose)
       end
       
       # Load object not an Image - need to look it up via Name or SKU
