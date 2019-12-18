@@ -28,7 +28,7 @@
 # To pull DataShift commands into your main Spree application :
 #
 #     require 'datashift_spree'
-#
+# 
 #     DataShift::SpreeEcom::load_commands
 #
 require 'rbconfig'
@@ -111,9 +111,8 @@ module DataShift
     # Load all public datashift spree Thor commands and make them available throughout app
 
     def self.load_commands
-      base = File.join(library_path, 'tasks')
-
-      Dir["#{base}/*.thor"].each do |f|
+      base = File.join(library_path, 'thor')
+      Dir["#{base}/**/*.thor"].each do |f|
         next unless File.file?(f)
         Thor::Util.load_thorfile(f)
       end

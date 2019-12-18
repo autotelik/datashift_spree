@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 
 gem "datashift_spree", path: '..'
 
-gem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :master
+gem 'datashift', :git => 'https://github.com/bhtabor/datashift.git', branch: 'spree-3-7'
 
 # This Gemfile is for TESTING really. 
 
@@ -15,14 +15,10 @@ gem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :
 # For rspec you  may need to add them in here or you'll get missing Spree constants
 # TODO - update  sandbox code so it automatically adds Spree gems in here
 
-spree_version = '3-1-stable'
-
-gem 'spree', github: 'spree/spree', branch: spree_version
-gem 'spree_auth_devise', :git => 'https://github.com/spree/spree_auth_devise.git', branch: spree_version
-gem 'spree_gateway', :git => 'https://github.com/spree/spree_gateway.git', :branch => spree_version
-gem 'spree_digital', github: 'spree-contrib/spree_digital', :branch => spree_version
-
-#gem 'spree_bootstrap_frontend', github: '200Creative/spree_bootstrap_frontend', branch: spree_version
+gem 'spree', '~> 3.7.0'
+gem 'spree_auth_devise', '~> 3.5'
+gem 'spree_gateway', '~> 3.4'
+gem 'spree_digital', github: 'spree-contrib/spree_digital', branch: 'master'
 
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
 gem 'therubyracer', platforms: :ruby

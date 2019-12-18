@@ -5,13 +5,17 @@
 #
 # Details::   Specific Populator for Spree Products
 #
+
+require 'mechanize'
+require 'loaders/spree/spree_loading'
+
 module DataShift
 
   module  SpreeEcom
 
     class ProductPopulator < Populator
 
-      include SpreeLoading
+      include DataShift::SpreeLoading
 
       include DataShift::Logging
       extend DataShift::Logging

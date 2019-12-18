@@ -19,7 +19,7 @@ module DatashiftSpree
     
       def no_image(report = nil)
 
-        require 'spree_ecom'
+        # require 'spree_ecom'
         require 'csv_exporter'
         require 'image_loader'
         require 'exporters/excel_exporter'
@@ -27,7 +27,7 @@ module DatashiftSpree
 
         require File.expand_path('config/environment.rb')
 
-        klass = DataShift::SpreeEcom::get_spree_class('Product')
+        klass = DataShift::MapperUtils::class_from_string('Spree::Product')
       
         missing = klass.all.find_all {|p| p.images.size == 0 }
       

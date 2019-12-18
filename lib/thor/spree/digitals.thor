@@ -13,7 +13,7 @@
 # Note, not DataShift, case sensitive, create namespace for command line : datashift
 
 require 'datashift_spree'
-require 'spree_ecom'
+
 
 module DatashiftSpree 
   

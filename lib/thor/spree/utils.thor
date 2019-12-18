@@ -23,12 +23,12 @@ module DatashiftSpree
 
       require File.expand_path('config/environment.rb')
 
-      require 'spree_ecom'
+      # require 'spree_ecom'
 
       require File.expand_path('config/environment.rb')
 
       ActiveRecord::Base.connection.execute("TRUNCATE spree_products_taxons")
-      ActiveRecord::Base.connection.execute("TRUNCATE spree_products_promotion_rules")
+      ActiveRecord::Base.connection.execute("TRUNCATE spree_product_promotion_rules")
       
       cleanup =  %w{ Image OptionType OptionValue 
                     Product Property ProductProperty ProductOptionType 
@@ -38,7 +38,7 @@ module DatashiftSpree
       cleanup += ["Taxonomy", "Taxon"] if(options[:taxons])
       
       cleanup.each do |k|
-        klass = DataShift::SpreeEcom::get_spree_class(k)
+        klass = DataShift::MapperUtils::class_from_string("Spree::#{k}")
         if(klass)
           puts "Clearing model #{klass}"
           begin
