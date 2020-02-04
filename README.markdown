@@ -1,6 +1,7 @@
 ##  DataShift Spree
 
-Specific loaders and command line tasks for Spree E-Commerce.
+Import and Export Spree E-Commerce models through .xls or CSV  files, including
+all associations and setting configurable defaults or over rides.
 
 Wiki here : **https://github.com/autotelik/datashift_spree/wiki**
 
@@ -17,7 +18,11 @@ Add to bundle :
     gem 'datashift'
     gem 'datashift_spree'
 
-Create a high level .thor file (thor will search root or lib/tasks) so for example `lib/tasks/shop.thor`
+Most functionality provided via command line tools, so create a high level .thor file 
+
+thor will search root or lib/tasks so for example you can place it in `lib/tasks/shop.thor`
+
+And then copy in the following
 
 ```ruby
 require 'datashift'
@@ -33,28 +38,29 @@ To check the available tasks run thor list with a search term, for example
     bundle exec thor list datashift
     bundle exec thor list datashift_spree
 ```
+To check latest usage information use ```thor help <command>```
 
-New functionality and options under active development so check latest
-usage information via ```thor help <command>``` ... for example
+for example
 
 ```ruby
     bundle exec thor help datashift_spree:load:products
 ```
 
-### Features
+### Usage
 
-Template Generation
+##### Template Generation
 
-You can create Excel templates of models through the task `datashift:generate:excel`
+For loading data, probably the first thing you'll want to do is create an Excel template for the model(s) you wish to import.
 
-For example to create a template for loading Products, including all associations
+This can be accomplished with the task `datashift:generate:excel`
+
+For example to create a template for loading Spree Products, including all associations
 
 ```ruby
-datashift:generate:excel -m Spree::Product --assoc -r tmp/product_template.xls
+thor datashift:generate:excel -m Spree::Product --associations -r tmp/product_template.xls
 ```
 
-Import and Export Spree models through .xls or CSV  files, including
-all associations and setting configurable defaults or over rides.
+##### Data Import/Export
 
 High level thor command line tasks for import/export provided.
 
