@@ -1,9 +1,8 @@
 ##  DataShift Spree
 
-Import and Export Spree E-Commerce models through .xls or CSV  files, including
-all associations and setting configurable defaults or over rides.
+Import and Export Spree E-Commerce models through .xls or CSV  files, including all associations.
 
-Wiki here : **https://github.com/autotelik/datashift_spree/wiki**
+Create and assign taxons, properties, shipping, tax categories and more through single spreadsheet.
 
 ### Versions
 
@@ -25,6 +24,10 @@ thor will search root or lib/tasks so for example you can place it in `lib/tasks
 And then copy in the following
 
 ```ruby
+
+# You may/may not need this next line depending on your Rails/thor setup
+require File.expand_path('config/environment.rb')
+
 require 'datashift'
 require 'datashift_spree'
 
@@ -54,23 +57,46 @@ For loading data, probably the first thing you'll want to do is create an Excel 
 
 This can be accomplished with the task `datashift:generate:excel`
 
-For example to create a template for loading Spree Products, including all associations
+For example to create a simple template for loading Spree Products
 
 ```ruby
-thor datashift:generate:excel -m Spree::Product --associations -r tmp/product_template.xls
+thor datashift_spree:template:product -r tmp/product_template.xls
+```
+
+To also include all possible associations
+
+```ruby
+thor datashift:generate:excel -m Spree::Product --associations -r tmp/full_product_template.xls
 ```
 
 ##### Data Import/Export
 
-High level thor command line tasks for import/export provided.
+###### Simple Product
 
-Specific loaders and command line tasks provided out the box for **Spree E-Commerce**, 
-enabling import/export of Product data including creating Variants with different
- count on hands and all associations including Properties/Taxons/OptionTypes and Images.
+**Variant Prices/SKUs**
 
-Loaders can be configured via YAML with over ride values, default values and mandatory column settings.
+To assign different SKUs or Prices to each variant, datashift supports two special columns
 
-Many example Spreadsheets/CSV files in spec/fixtures, fully documented with comments for each column.
+    variant_price
+    variant_sku
+
+These should contain pipe '|' delimited lists of the prices, or SKUs, to assign, to each Variant available, and should therefor **contain exactly the same number of entries as Variants available**.
+
+**N.B** These columns should come AFTER the Variant creation columns, as the Variants must exists at the time these columns are processed.
+
+Example
+
+    variant_price	                 variant_sku
+
+```
+171.56|260.44|171.56|260.44	TARR.SFOP424EW0|TARR.SFOP424EW3|TARR.SFOP414EW0|TARR.SFOP414EW3     
+119.33|208.23	                MOLE.SFOP140EA0|MOLE.SFOP140EA3
+110.00|198.00	                TALL.SFOP140EW0|TALL.SFOP140EW3
+54.89|109.78|69.24	        CHET.SFOP128EW3|CHET.SFOP140EW0|CHET.SFOP140EW3
+42.22	                        LOST.REDL218EW0
+```
+
+###### Creating Association data - Excel or CSV
 
 
 ## Testing
