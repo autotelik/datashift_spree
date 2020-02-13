@@ -69,9 +69,14 @@ thor datashift:generate:excel -m Spree::Product --associations -t tmp/full_produ
 
 A large number of example Spreadsheets with headers and comments, can be found in the **spec/fixtures** directory - including .xls and csv versions for simple Products or complex Products with multiple/nested Taxons, Variants, Properties etc 
 
-Excel versions contain column headings with **Comments ** with full descriptions and instructions on supported syntax for each column. 
+Excel versions contain column headings with **Comments ** with instructions on supported syntax for each column. 
 
 The same DSL syntax is supported in both Excel and CSV versions.
+
+To get detailed information on the impact/usage of each column see the [Spree guides](https://guides.spreecommerce.org) 
+
+For example to understand the `promotionable` field see . https://guides.spreecommerce.org/user/promotions/
+
 
 ##### Data Import/Export
 
@@ -87,6 +92,13 @@ Once you have data prepared you can import it using task :
   -d, [--dummy], [--no-dummy]                  # Dummy run, do not actually save Image or Product
 ```
 
+Dummy Run is very useful to drive out any issues without actually impacting the database. All changes are rolled back.
+
+A summary of the import is printed to the console,and incase of errors the datashift log will contain full details.
+
+For example, not setting compulsory fields :
+
+```Save Error : #<ActiveRecord::RecordInvalid: Validation failed: Shipping Category can't be blank, Price can't be blank> on DataShift::LoadObject```
 
 ###### Simple Product
 
