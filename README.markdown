@@ -53,23 +53,40 @@ for example
 
 ##### Template Generation
 
-For loading data, probably the first thing you'll want to do is create an Excel template for the model(s) you wish to import.
+For loading data, probably the first thing you'll want to do is create an Excel template for the model(s) you wish to import. There is a general task `datashift:generate:excel` ( or ```datashift:generate:csv ```) for generating a template for any model.
 
-This can be accomplished with the task `datashift:generate:excel`
-
-For example to create a simple template for loading Spree Products
+There are some higher level tasks, specifically for producing the specific template for loading Spree Products
 
 ```ruby
-thor datashift_spree:template:product -r tmp/product_template.xls
+thor datashift_spree:template:product -t tmp/product_template.xls
 ```
 
 To also include all possible associations
 
 ```ruby
-thor datashift:generate:excel -m Spree::Product --associations -r tmp/full_product_template.xls
+thor datashift:generate:excel -m Spree::Product --associations -t tmp/full_product_template.xls
 ```
 
+A large number of example Spreadsheets with headers and comments, can be found in the **spec/fixtures** directory - including .xls and csv versions for simple Products or complex Products with multiple/nested Taxons, Variants, Properties etc 
+
+Excel versions contain column headings with **Comments ** with full descriptions and instructions on supported syntax for each column. 
+
+The same DSL syntax is supported in both Excel and CSV versions.
+
 ##### Data Import/Export
+
+Once you have data prepared you can import it using task : 
+
+```thor datashift_spree:load:products
+
+  -i, --input=INPUT                            # The import file (.xls or .csv)
+  -s, [--sku-prefix=SKU_PREFIX]                # Prefix to add to each SKU before saving Product
+  -p, [--image-path-prefix=IMAGE_PATH_PREFIX]  # Prefix to add to image path for importing from disk
+  -v, [--verbose], [--no-verbose]              # Verbose logging
+  -c, [--config=CONFIG]                        # Configuration file containg defaults or over rides in YAML
+  -d, [--dummy], [--no-dummy]                  # Dummy run, do not actually save Image or Product
+```
+
 
 ###### Simple Product
 
