@@ -2,34 +2,63 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cdfdf3c1-1291-4207-8cc5-2ce7e84d15ea" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/thor/spree/templates.thor" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.markdown" beforeDir="false" afterPath="$PROJECT_DIR$/README.markdown" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VERSION" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/datashift_spree.gemspec" beforeDir="false" afterPath="$PROJECT_DIR$/datashift_spree.gemspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/exceptions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/exceptions.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/version.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/version.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/image_loader.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/image_loader.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/product_loader.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/product_loader.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/product_populator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/product_populator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/promotions_rules_actions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/promotions_rules_actions.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/shopify_order_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/shopify_order_migrator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/shopify_promotions_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/shopify_promotions_migrator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/Gemfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree.thor" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_exporter_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_exporter_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_generator_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_generator_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_images_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_images_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_taxons_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_taxons_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_thor_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_thor_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_variants_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_variants_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/spec_helper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/spec_helper.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/support/product_loading.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/product_loading.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/datashift_spree.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/datashift_spree.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/datashift_spree_test.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/.ruby-version" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/Rakefile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/assets/config/manifest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/assets/images/.keep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/assets/stylesheets/application.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/channels/application_cable/channel.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/channels/application_cable/connection.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/controllers/application_controller.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/controllers/concerns/.keep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/helpers/application_helper.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/javascript/packs/application.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/jobs/application_job.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/mailers/application_mailer.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/models/application_record.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/models/concerns/.keep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/views/layouts/application.html.erb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/views/layouts/mailer.html.erb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/app/views/layouts/mailer.text.erb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/bin/rails" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/bin/rake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/bin/setup" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config.ru" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/application.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/boot.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/cable.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/database.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/environment.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/environments/development.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/environments/production.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/environments/test.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/application_controller_renderer.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/assets.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/backtrace_silencers.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/content_security_policy.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/cookies_serializer.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/filter_parameter_logging.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/inflections.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/mime_types.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/initializers/wrap_parameters.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/locales/en.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/puma.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/routes.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/spring.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/config/storage.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/lib/assets/.keep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/log/.keep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/public/404.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/public/422.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/public/500.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/public/apple-touch-icon-precomposed.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/public/apple-touch-icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dummy/public/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/integration/navigation_test.rb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,6 +117,7 @@
       <workItem from="1581595298758" duration="176000" />
       <workItem from="1581600353519" duration="1416000" />
       <workItem from="1581605392597" duration="3838000" />
+      <workItem from="1581609455448" duration="85000" />
     </task>
     <servers />
   </component>
@@ -119,10 +149,10 @@
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
     <state x="837" y="363" key="SettingsEditor/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581516650903" />
-    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1581608652483">
+    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1581609481493">
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
-    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581608652483" />
+    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581609481493" />
     <state x="676" y="334" width="728" height="466" key="find.popup" timestamp="1581608817727">
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
