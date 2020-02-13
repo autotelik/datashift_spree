@@ -8,7 +8,7 @@
 
 module DataShift
 
-  module SpreeEcom
+  module Spree
 
     # Adjustment can only be applied Once per Order
     #     $36.00 off of the Picks (once per order)

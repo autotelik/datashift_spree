@@ -12,7 +12,7 @@ require 'spree_loader_base'
 
 module DataShift
 
-  module SpreeEcom
+  module Spree
 
     class ShopifyOrderLoader < SpreeLoaderBase
 

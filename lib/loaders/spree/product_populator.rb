@@ -4,14 +4,14 @@
 # License::   MIT
 #
 # Details::   Specific Populator for Spree Products
-#
+#ts
 
 require 'mechanize'
 require 'loaders/spree/spree_loading'
 
 module DataShift
 
-  module  SpreeEcom
+  module  Spree
 
     class ProductPopulator < Populator
 
@@ -24,13 +24,16 @@ module DataShift
 
       def prepare_and_assign_method_binding(method_binding, record, data)
 
-        prepare_data(method_binding, data)
+        value, attribute_hash = prepare_data(method_binding, data)
 
+=begin
+        puts "Prepared data for #{method_binding}"
+        pp value
+        pp attribute_hash
+=end
         @product_load_object = record
 
-        logger.debug("Populating data via Spree specific ProductPopulator")
-
-        logger.debug("Populating data via Spree specific ProductPopulator [#{method_binding.operator}] - [#{data}]")
+        logger.debug("Populating data via Spree ProductPopulator [#{method_binding.operator}] - [#{value}]")
 
         # Special cases for Products, generally where a simple one stage lookup won't suffice
         # otherwise simply use default processing from base class
@@ -107,10 +110,10 @@ module DataShift
 
           product_load_object.save_if_new
 
-          add_variants_stock(data)
+          add_variants_stock(value)
 
         else
-          super(method_binding, product_load_object, data) if(data)
+          super(method_binding, product_load_object, value) if(value.present?)
         end
 
       end

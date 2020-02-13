@@ -1,18 +1,14 @@
 # Copyright:: (c) Autotelik Media Ltd 2014
 # Author ::   Tom Statter
-# Date ::     June 2014
 # License::   MIT
 #
 # Details::   Helper for creating testing sandbox
 #
-
-$:.unshift File.expand_path("#{File.dirname(__FILE__)}/../lib")
-
 require 'datashift_spree'
 
 module DataShift
 
-  module SpreeEcom
+  module Spree
 
     def self.run_in(dir)
       puts "Running cmd in [#{dir}]"
@@ -30,7 +26,7 @@ module DataShift
     end
 
     def self.spree_sandbox_path
-      File.join(DatashiftSpreeLibraryBase, 'spec', spree_sandbox_name)
+      File.join('..', 'spec', spree_sandbox_name)
     end
 
     # The SPREE INSTALL COMMANDS based on current Gemfile Spree versions
@@ -46,7 +42,7 @@ module DataShift
 
     def self.build_sandbox
 
-      spree_sandbox_path = DataShift::SpreeEcom::spree_sandbox_path
+      spree_sandbox_path = DataShift::Spree::spree_sandbox_path
 
       puts "Creating new Rails sandbox for Spree : #{spree_sandbox_path}"
 
@@ -85,7 +81,7 @@ module DataShift
 require 'datashift'
 require 'datashift_spree'
 
-DataShift::SpreeEcom::load_commands
+DataShift::Spree::load_commands
 DataShift::load_commands
         EOS
         f << thor_code

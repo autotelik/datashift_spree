@@ -11,7 +11,7 @@ require 'loaders/spree/spree_loading'
 
 module DataShift
 
-  module SpreeEcom
+  module Spree
 
     class ProductLoader
 
@@ -55,7 +55,7 @@ module DataShift
 
         logger.info "Product load from File [#{file_name}]"
 
-        DataShift::PopulatorFactory.global_populator_class = DataShift::SpreeEcom::ProductPopulator
+        DataShift::PopulatorFactory.global_populator_class = DataShift::Spree::ProductPopulator
 
         DataShift::Configuration.call.force_inclusion_of_columns = force_inclusion_columns
 

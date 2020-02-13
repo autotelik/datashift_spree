@@ -12,7 +12,7 @@ require 'promotions_rules_actions.rb'
 
 module DataShift
 
-  module SpreeEcom
+  module Spree
 
     class ShopifyPromotionsMigrator < SpreeLoaderBase
 

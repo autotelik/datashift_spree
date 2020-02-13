@@ -1,5 +1,3 @@
-module DataShift
-    module SpreeEcom
-        VERSION = '0.40.5'.freeze unless defined?(SpreeEcom::VERSION)
-    end
+module DatashiftSpree
+  VERSION = '0.7.0'
 end

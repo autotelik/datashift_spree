@@ -1,6 +1,5 @@
-# Copyright:: (c) Autotelik Media Ltd 2010 - 2012 Tom Statter
+# Copyright:: (c) Autotelik Media Ltd 2020
 # Author ::   Tom Statter
-# Date ::     Aug 2012
 # License::   Free, Open Source.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -24,23 +23,11 @@
 #++
 
 # Details:: Spree Product and Image Loader from .xls or CSV
-# 
-# To pull DataShift commands into your main Spree application :
-#
-#     require 'datashift_spree'
-# 
-#     DataShift::SpreeEcom::load_commands
-#
-require 'rbconfig'
+
 require 'datashift'
-require 'spree'
 
-$:.unshift '.' unless $:.include?('.')
+module DatashiftSpree
 
-module DataShift
-
-  module SpreeEcom
-    
     def self.gem_version
       unless(@gem_version)
         if(File.exists?(File.join(root_path, 'VERSION') ))
@@ -51,10 +38,6 @@ module DataShift
         end
       end
       @gem_version
-    end
-
-    def self.gem_name
-      "datashift_spree"
     end
 
     def self.root_path
@@ -121,8 +104,7 @@ module DataShift
   end
 end
 
-DataShift::SpreeEcom::require_libraries
-DataShift::SpreeEcom::require_datashift_spree
+DatashiftSpree::require_libraries
+DatashiftSpree::require_datashift_spree
 
 require 'datashift_spree/exceptions'
-

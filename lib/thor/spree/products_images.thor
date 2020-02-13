@@ -21,7 +21,7 @@ module DatashiftSpree
 
     include DataShift::Logging
 
-    desc "products", "Populate Spree Product/Variant data from .xls (Excel) or CSV file"
+    desc "products", 'Populate Spree Product/Variant data from .xls (Excel) or CSV file'
 
     method_option :input, :aliases => '-i', :required => true, :desc => "The import file (.xls or .csv)"
     method_option :sku_prefix, :aliases => '-s', :desc => "Prefix to add to each SKU before saving Product"
@@ -32,22 +32,20 @@ module DatashiftSpree
 
     def products()
 
-      # TODO - We're assuming run from a rails app/top level dir...
-      # ...can we make this more robust ? e.g what about when using active record but not in Rails app,
       require File.expand_path('config/environment.rb')
 
       input = options[:input]
 
       require 'product_loader'
 
-      loader = DataShift::SpreeEcom::ProductLoader.new(input)
+      loader = DataShift::Spree::ProductLoader.new(input)
 
       # YAML configuration file to drive defaults etc
 
       if(options[:config])
         raise "Bad Config - Cannot find specified file #{options[:config]}" unless File.exists?(options[:config])
 
-        puts "DataShift::Product proccssing config from: #{options[:config]}"
+        puts "DataShift::Product processing config from: #{options[:config]}"
         loader.configure_from( options[:config] )
       else
          DataShift::Transformation.factory do |factory|
@@ -76,7 +74,7 @@ module DatashiftSpree
 
       require 'image_loader'
 
-      loader = DataShift::SpreeEcom::ImageLoader.new(nil, options)
+      loader = DataShift::Spree::ImageLoader.new(nil, options)
 
       loader.run( options[:input], options )
     end

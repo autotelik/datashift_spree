@@ -9,7 +9,7 @@ require 'spree_loader_base'
 
 module DataShift
 
-  module SpreeEcom
+  module Spree
 
     # TODO - THIS CONCEPT NOW BELONGS AS A POPULATOR
 

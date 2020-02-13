@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="cdfdf3c1-1291-4207-8cc5-2ce7e84d15ea" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/lib/thor/spree/templates.thor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.markdown" beforeDir="false" afterPath="$PROJECT_DIR$/README.markdown" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VERSION" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/datashift_spree.gemspec" beforeDir="false" afterPath="$PROJECT_DIR$/datashift_spree.gemspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/datashift_spree.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/exceptions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/exceptions.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/version.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/version.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/image_loader.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/image_loader.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/product_loader.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/product_loader.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/product_populator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/product_populator.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/promotions_rules_actions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/promotions_rules_actions.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/shopify_order_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/shopify_order_migrator.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/loaders/spree/shopify_promotions_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/loaders/spree/shopify_promotions_migrator.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/Gemfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree.thor" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree.thor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_exporter_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_exporter_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_generator_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_generator_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_images_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_images_loader_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_loader_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_taxons_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_taxons_loader_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_thor_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_thor_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_variants_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree/spree_variants_loader_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/spec_helper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/spec_helper.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/support/product_loading.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/product_loading.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileColors">
+    <fileColor scope="Non-Project Files (Material Default)" color="2E3C43" />
+    <fileColor scope="Non-Project Files (Material Darker)" color="323232" />
+    <fileColor scope="Non-Project Files (Material Lighter)" color="eae8e8" />
+    <fileColor scope="Non-Project Files (Material Palenight)" color="2f2e43" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1Xi5IaD1Z8EL7KEcOchsncdMWvR" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../data_service_center" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib/thor/spree" />
+    </key>
+  </component>
+  <component name="RubyModuleManagerSettings">
+    <option name="shouldAskUser" value="false" />
+    <option name="shouldCreateModules" value="false" />
+  </component>
+  <component name="SpringUtil" SPRING_PRE_LOADER_OPTION="true" RAKE_SPRING_PRE_LOADER_OPTION="false" RAILS_SPRING_PRE_LOADER_OPTION="false" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cdfdf3c1-1291-4207-8cc5-2ce7e84d15ea" name="Default Changelist" comment="" />
+      <created>1581507095973</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1581507095973</updated>
+      <workItem from="1581507097108" duration="1143000" />
+      <workItem from="1581511953337" duration="1065000" />
+      <workItem from="1581515997141" duration="1559000" />
+      <workItem from="1581519334940" duration="1052000" />
+      <workItem from="1581525195684" duration="216000" />
+      <workItem from="1581593099541" duration="1338000" />
+      <workItem from="1581595298758" duration="176000" />
+      <workItem from="1581600353519" duration="1416000" />
+      <workItem from="1581605392597" duration="3838000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="882" y="358" key="FileChooserDialogImpl" timestamp="1581521035016">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state x="882" y="358" key="FileChooserDialogImpl/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581521035016" />
+    <state width="843" height="258" key="GridCell.Tab.0.bottom" timestamp="1581595457181">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state width="843" height="258" key="GridCell.Tab.0.bottom/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581595457181" />
+    <state width="843" height="258" key="GridCell.Tab.0.center" timestamp="1581595457181">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state width="843" height="258" key="GridCell.Tab.0.center/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581595457181" />
+    <state width="843" height="258" key="GridCell.Tab.0.left" timestamp="1581595457181">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state width="843" height="258" key="GridCell.Tab.0.left/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581595457181" />
+    <state width="843" height="258" key="GridCell.Tab.0.right" timestamp="1581595457181">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state width="843" height="258" key="GridCell.Tab.0.right/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581595457181" />
+    <state x="837" y="363" key="SettingsEditor" timestamp="1581516650903">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state x="837" y="363" key="SettingsEditor/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581516650903" />
+    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1581608652483">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581608652483" />
+    <state x="676" y="334" width="728" height="466" key="find.popup" timestamp="1581608817727">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state x="676" y="334" width="728" height="466" key="find.popup/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581608817727" />
+  </component>
+</project>

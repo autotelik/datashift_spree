@@ -1,6 +1,5 @@
 # Copyright:: (c) Autotelik Media Ltd 2016
 # Author ::   Tom Statter
-# Date ::     Summer 2012
 #
 # License::   MIT - Free, OpenSource
 #

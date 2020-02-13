@@ -13,11 +13,11 @@ require 'datashift'
 
 describe 'Datshift Spree Thor tasks' do
 
-  let(:spree_sandbox_app_path) { DataShift::SpreeEcom::spree_sandbox_path }
+  let(:spree_sandbox_app_path) { DataShift::Spree::spree_sandbox_path }
 
   before(:all) do
     DataShift.load_commands
-    DataShift::SpreeEcom.load_commands
+    DataShift::Spree.load_commands
   end
 
   it 'should list available datashift thor tasks' do
