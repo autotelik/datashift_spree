@@ -64,7 +64,7 @@ thor datashift_spree:template:product -t tmp/product_template.xls
 To also include all possible associations
 
 ```ruby
-thor datashift:generate:excel -m Spree::Product --associations -t tmp/full_product_template.xls
+thor datashift_spree:template:product -m Spree::Product --associations -t tmp/full_product_template.xls
 ```
 
 A large number of example Spreadsheets with headers and comments, can be found in the **spec/fixtures** directory - including .xls and csv versions for simple Products or complex Products with multiple/nested Taxons, Variants, Properties etc 
@@ -82,7 +82,9 @@ For example to understand the `promotionable` field see . https://guides.spreeco
 
 Once you have data prepared you can import it using task : 
 
-```thor datashift_spree:load:products
+```
+
+thor datashift_spree:load:products
 
   -i, --input=INPUT                            # The import file (.xls or .csv)
   -s, [--sku-prefix=SKU_PREFIX]                # Prefix to add to each SKU before saving Product
@@ -94,11 +96,15 @@ Once you have data prepared you can import it using task :
 
 Dummy Run is very useful to drive out any issues without actually impacting the database. All changes are rolled back.
 
-A summary of the import is printed to the console,and incase of errors the datashift log will contain full details.
+A summary of the import is printed to the console,and incase of errors the datashift log ('log/datashift.log') will contain full details.
 
-For example, not setting compulsory fields :
+For example, not setting compulsory fields would show up as :
 
-```Save Error : #<ActiveRecord::RecordInvalid: Validation failed: Shipping Category can't be blank, Price can't be blank> on DataShift::LoadObject```
+```Save Error : #<ActiveRecord::RecordInvalid: Validation failed: Shipping Category can't be blank, Price can't be blank> on DataShift::LoadObject
+E, [2020-02-13T12:12:31.469743 #24410] ERROR -- : Failure(s) reported :
+E, [2020-02-13T12:12:31.469757 #24410] ERROR -- : 	Shipping Category can't be blank
+E, [2020-02-13T12:12:31.469762 #24410] ERROR -- : 	Price can't be blank
+```
 
 ###### Simple Product
 
