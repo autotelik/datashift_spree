@@ -17,8 +17,9 @@ module DatashiftSpree
     method_option :template, aliases: '-t', default: 'product_template.xls', desc:'Filename for the template'
 
     def full
-      pass_options = defaults.merge(assoc: true)
+      pass_options = defaults.merge(associations: true)
 
+      pp pass_options
       invoke('datashift:generate:excel', [], pass_options)
     end
 

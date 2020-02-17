@@ -32,7 +32,7 @@ require 'datashift'
 require 'datashift_spree'
 
 DataShift::load_commands
-DataShift::Spree::load_commands
+DataShiftSpree::load_commands
 ```
 
 To check the available tasks run thor list with a search term, for example
@@ -55,16 +55,16 @@ for example
 
 For loading data, probably the first thing you'll want to do is create an Excel template for the model(s) you wish to import. There is a general task `datashift:generate:excel` ( or ```datashift:generate:csv ```) for generating a template for any model.
 
-There are some higher level tasks, specifically for producing the specific template for loading Spree Products
+There is a task available for producing the template for loading a basic Spree Product :
 
 ```ruby
 thor datashift_spree:template:product -t tmp/product_template.xls
 ```
 
-To also include all possible associations
+To generate the full Product template including all possible associations :
 
 ```ruby
-thor datashift_spree:template:product -m Spree::Product --associations -t tmp/full_product_template.xls
+thor datashift_spree:template:full -t tmp/full_product_template.xls
 ```
 
 A large number of example Spreadsheets with headers and comments, can be found in the **spec/fixtures** directory - including .xls and csv versions for simple Products or complex Products with multiple/nested Taxons, Variants, Properties etc 
@@ -80,10 +80,11 @@ For example to understand the `promotionable` field see . https://guides.spreeco
 
 ##### Data Import/Export
 
-Once you have data prepared you can import it using task : 
+Once you have data prepared you can import it using task `thor datashift_spree:load:products` : 
+
+Details
 
 ```
-
 thor datashift_spree:load:products
 
   -i, --input=INPUT                            # The import file (.xls or .csv)
@@ -92,6 +93,10 @@ thor datashift_spree:load:products
   -v, [--verbose], [--no-verbose]              # Verbose logging
   -c, [--config=CONFIG]                        # Configuration file containg defaults or over rides in YAML
   -d, [--dummy], [--no-dummy]                  # Dummy run, do not actually save Image or Product
+```
+
+```ruby
+thor datashift_spree:load:products -v -d -i tmp/product_template.xls
 ```
 
 Dummy Run is very useful to drive out any issues without actually impacting the database. All changes are rolled back.

@@ -1,20 +1,17 @@
-# Copyright:: (c) Autotelik Media Ltd 2015
+# Copyright:: (c) Autotelik Media Ltd 2020
 # Author ::   Tom Statter
-# Date ::     Aug 2015
 # License::   MIT
 #
 # Details::   Supports migrating Shopify spreadsheets to Spree
 #               Currently covers :
 #                 Promotions
 #
-require 'spree_loader_base'
-require 'promotions_rules_actions.rb'
+require_relative 'promotions_rules_actions'
+require_relative 'loader_base'
 
-module DataShift
+module DataShiftSpree
 
-  module Spree
-
-    class ShopifyPromotionsMigrator < SpreeLoaderBase
+    class ShopifyPromotionsMigrator < DataShiftSpree::LoaderBase
 
       # Options
       #  
@@ -200,5 +197,4 @@ module DataShift
 
     end
 
-  end
 end

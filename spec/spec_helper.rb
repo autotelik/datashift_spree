@@ -38,11 +38,11 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
-    puts "Booting spree rails app - version #{DataShift::Spree::version}"
+    puts "Booting spree rails app - version #{DataShiftSpree::version}"
 
     spree_boot
 
-    puts "Testing Spree standalone - version #{DataShift::Spree::version}"
+    puts "Testing Spree standalone - version #{DataShiftSpree::version}"
   end
 
   config.before(:each) do
@@ -149,7 +149,7 @@ RSpec.configure do |config|
 
     configuration = {}
 
-    database_yml_path = File.join(DataShift::Spree::spree_sandbox_path, 'config', 'database.yml')
+    database_yml_path = File.join(DataShiftSpree::spree_sandbox_path, 'config', 'database.yml')
 
     configuration[:database_configuration] = YAML::load( ERB.new( IO.read(database_yml_path) ).result )
     db = configuration[:database_configuration][ env ]
@@ -176,19 +176,19 @@ RSpec.configure do |config|
 
   def spree_boot()
 
-    spree_sandbox_app_path = DataShift::Spree::spree_sandbox_path
+    spree_sandbox_app_path = DataShiftSpree::spree_sandbox_path
 
     unless(File.exists?(spree_sandbox_app_path))
       puts "Creating new Rails sandbox for Spree : #{spree_sandbox_app_path}"
 
-      DataShift::Spree::build_sandbox
+      DataShiftSpree::build_sandbox
 
       original_dir = Dir.pwd
 
       # TOFIX - this don't work ... but works if run straight after the task
       # maybe the env not right using system ?
       begin
-        Dir.chdir DataShift::Spree::spree_sandbox_path
+        Dir.chdir DataShiftSpree::spree_sandbox_path
         puts "Running bundle install"
         system('bundle install')
       ensure
@@ -207,9 +207,9 @@ RSpec.configure do |config|
       require 'spree'
 
       begin
-        puts "Booting Spree #{DataShift::Spree::version} in sandbox"
+        puts "Booting Spree #{DataShiftSpree::version} in sandbox"
         load 'config/environment.rb'
-        puts "Booted Spree using version #{DataShift::Spree::version}"
+        puts "Booted Spree using version #{DataShiftSpree::version}"
       rescue => e
         #somethign in deface seems to blow up suddenly on 1.1
         puts "Warning - Potential issue initializing Spree sandbox:"
@@ -218,20 +218,20 @@ RSpec.configure do |config|
       end
     }
 
-    puts "Booted Spree using version #{DataShift::Spree::version}"
+    puts "Booted Spree using version #{DataShiftSpree::version}"
   end
 
   def set_spree_class_helpers
     @spree_klass_list  =  %w{Image OptionType OptionValue Property ProductProperty Variant Taxon Taxonomy Zone}
 
     @spree_klass_list.each do |k|
-      instance_variable_set("@#{k}_klass", DataShift::Spree::get_spree_class(k))
+      instance_variable_set("@#{k}_klass", DataShiftSpree::get_spree_class(k))
     end
   end
 
   def self.load_models( report_errors = nil )
-    puts 'Loading Spree models from', DataShift::Spree::root
-    Dir[DataShift::Spree::root + '/app/models/**/*.rb'].each {|r|
+    puts 'Loading Spree models from', DataShiftSpree::root
+    Dir[DataShiftSpree::root + '/app/models/**/*.rb'].each {|r|
       begin
         require r if File.file?(r)
       rescue => e
@@ -241,7 +241,7 @@ RSpec.configure do |config|
   end
 
   def self.migrate_up
-    ActiveRecord::Migrator.up( File.join(DataShift::Spree::root, 'db/migrate') )
+    ActiveRecord::Migrator.up( File.join(DataShiftSpree::root, 'db/migrate') )
   end
 
 end

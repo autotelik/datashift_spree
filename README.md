@@ -29,7 +29,7 @@ require 'datashift'
 require 'datashift_spree'
 
 DataShift::load_commands
-DataShift::Spree::load_commands
+DataShiftSpree::load_commands
 ```
 
 To check the available tasks run thor list with a search term, for example

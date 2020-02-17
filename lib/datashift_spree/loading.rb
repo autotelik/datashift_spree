@@ -1,17 +1,15 @@
-# Copyright:: (c) Autotelik Media Ltd 2016
+# Copyright:: (c) Autotelik Media Ltd 2020
 # Author ::   Tom Statter
-# Date ::     Aug 2010
-# License::   MIT ?
+# License::   MIT
 #
 # Details::   Specific support for Loading Spree data
 #
-
 require 'mechanize'
 require 'loaders/paperclip/image_loading'
 
-module DataShift
+module DataShiftSpree
 
-  module SpreeLoading
+  module Loading
 
     include DataShift::ImageLoading
     include DataShift::Delimiters

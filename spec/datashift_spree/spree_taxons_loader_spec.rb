@@ -48,7 +48,7 @@ describe 'SpreeLoader' do
     expect(root.root.children.size).to eq 1
     expect(root.root.children[0].name).to eq 'Landscape'
 
-    product_loader =  DataShift::Spree::ProductLoader.new(ifixture_file(source))
+    product_loader =  DataShiftSpree::ProductLoader.new(ifixture_file(source))
 
     product_loader.run
     
@@ -131,7 +131,7 @@ describe 'SpreeLoader' do
   
   def expected_nested_multi_column_taxons(source)
 
-    product_loader = DataShift::Spree::ProductLoader.new(ifixture_file(source) )
+    product_loader = DataShiftSpree::ProductLoader.new(ifixture_file(source) )
 
 
     product_loader.run

@@ -42,7 +42,7 @@ module DataShift
 
     def self.build_sandbox
 
-      spree_sandbox_path = DataShift::Spree::spree_sandbox_path
+      spree_sandbox_path = DataShiftSpree::spree_sandbox_path
 
       puts "Creating new Rails sandbox for Spree : #{spree_sandbox_path}"
 
@@ -81,7 +81,7 @@ module DataShift
 require 'datashift'
 require 'datashift_spree'
 
-DataShift::Spree::load_commands
+DataShiftSpree::load_commands
 DataShift::load_commands
         EOS
         f << thor_code

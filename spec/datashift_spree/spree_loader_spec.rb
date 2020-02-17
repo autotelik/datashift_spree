@@ -62,7 +62,7 @@ describe 'SpreeLoader' do
 
     def test_basic_product( source )
 
-      product_loader =  DataShift::Spree::ProductLoader.new(ifixture_file(source))
+      product_loader =  DataShiftSpree::ProductLoader.new(ifixture_file(source))
 
       product_loader.run
 
@@ -92,7 +92,7 @@ describe 'SpreeLoader' do
 
       expect(p.has_variants?).to eq false
 
-      if(DataShift::Spree::version.to_f < 2  )
+      if(DataShiftSpree::version.to_f < 2  )
         expect(p.master.count_on_hand).to eq 12
         expect(Spree::Product.last.master.count_on_hand).to eq 23
       else
@@ -120,14 +120,14 @@ describe 'SpreeLoader' do
         factory.set_prefix_on(Spree::Product, 'SKU', 'SPEC_')
       end
 
-      product_loader = DataShift::Spree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
+      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
 
       test_default_values(product_loader)
     end
 
     it "should support default values from config for Spree Products loader" do
 
-      product_loader = DataShift::Spree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
+      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
 
       product_loader.configure_from(  ifixture_file('SpreeProductsDefaults.yml') )
 
@@ -181,7 +181,7 @@ describe 'SpreeLoader' do
 
     def test_properties_creation( source )
 
-      product_loader = DataShift::Spree::ProductLoader.new(ifixture_file(source))
+      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file(source))
 
       # want to test both lookup and dynamic creation - this Prop should be found, rest created
       Spree::Property.create( :name => 'test_pp_001', :presentation => 'Test PP 001' )
@@ -228,7 +228,7 @@ describe 'SpreeLoader' do
       end
 
       let(:product_loader) {
-        DataShift::Spree::ProductLoader.new(negative_fixture_file('SpreeProdMissManyMandatory.xls'))
+        DataShiftSpree::ProductLoader.new(negative_fixture_file('SpreeProdMissManyMandatory.xls'))
       }
 
       it "should raise exception when mandatory columns missing from .xls", :ex => true do

@@ -13,7 +13,7 @@ RSpec.configure do |config|
 
     let(:product_klass) { Spree::Product }
 
-    let(:image_klass) {  DataShift::Spree::get_spree_class 'Image' }
+    let(:image_klass) {  DataShiftSpree::get_spree_class 'Image' }
 
     config.before(:each) do
       DataShift::Configuration.reset
