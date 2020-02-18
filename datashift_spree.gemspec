@@ -25,12 +25,14 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
-  spec.add_runtime_dependency 'datashift'
+  #spec.add_runtime_dependency 'datashift'
+  #
   spec.add_runtime_dependency 'mechanize'
   spec.add_runtime_dependency 'spree', '~> 4.1.0.rc1'
   spec.add_runtime_dependency 'spree_auth_devise', '~> 4.1.0.rc1'
   spec.add_runtime_dependency 'spree_gateway', '~> 3.7'
 
   spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "rspec-rails"
 
 end

@@ -143,40 +143,39 @@ Example
 
 We use RSpec, so tests located in the spec subdirectory.
 
-To test this gem we require an actual Spree store, so when the specs are first run 
-a dummy Rails app is created containing a Spree store, whose version we can control in `spec/Gemfile`
-so it's easy to change the Spree version and re-run the specs.
+This is a Rail engine so to test this gem requires an actual Spree store, so there is a dummy Rails app
+with a Gemfile pointing to a Spree store. 
 
-It's therefor recommended that all testing be done in spec dir itself, so first cd into spec
+The versions of Rails, Spree and Datashift to test can be controlled in `spec/dummy/Gemfile`
 
-Edit `spec/Gemfile` and set the version of Spree you wish to test against and run bundler :
+Edit `spec/dummy/Gemfile` and set the version of Spree you wish to test against and run bundler :
 
 ```ruby 
-    cd spec
+    cd spec/dummy
     bundle install
 ```
 
-When changing Spree versions, you should force a rebuild of a clean sandbox, and removing the Gemfile.lock will 
-resolve any funny version issues, so  run:
+When changing Spree versions, you might need to force a Spree reinstallm in a clean dummy area.
 
 ```ruby 
-    cd spec
-    rm -rf dummy
-    rm -rf Gemfile.lock
+    rm -rf spec/dummy/spree_sandbox_installed.txt
 ```
 
-thor datashift:spree_tasks:build_sandbox
-
+This will trigger an installation.
 
 The next time you run rspec the sandbox will be regenerated using the latest versions of Rails/Spree specified in your Gemfile
 
+##### Manual Spree Install
+
 ```ruby 
-    bundle exec rspec -c .
+    cd spec/dummy
+    bundle install
+    bundle exec rails g spree:install --force --user_class=Spree::User --sample=false --seed=false --copy_storefront=false
 ```
 
 ## License
 
-Copyright:: (c) Autotelik Media Ltd 2012
+Copyright:: (c) Autotelik B.V 2012
 
 Author ::   Tom Statter
 

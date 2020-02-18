@@ -1,4 +1,4 @@
-# Copyright:: (c) Autotelik Media Ltd 2020
+# Copyright:: (c) Autotelik B.V 2020
 # Author ::   Tom Statter
 # License::   MIT
 #
@@ -45,11 +45,11 @@ module DataShiftSpree
     end
 
     def taxonomy_klass
-      @taxonomy_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Taxonomy')
+      ::Spree::Taxonomy  ||= DataShift::MapperUtils::class_from_string('Spree::Taxonomy')
     end
 
     def taxon_klass
-      @taxon_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Taxon')
+      ::Spree::Taxon  ||= DataShift::MapperUtils::class_from_string('Spree::Taxon')
     end
 
     def variant_klass

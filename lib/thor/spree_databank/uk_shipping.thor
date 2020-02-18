@@ -1,4 +1,4 @@
-# Copyright:: (c) Autotelik Media Ltd 201=3
+# Copyright:: (c) Autotelik B.V 201=3
 # Author ::   Tom Statter
 # Date ::     Jan 2013
 # License::   MIT. Free, Open Source.

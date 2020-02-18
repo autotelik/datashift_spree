@@ -1,4 +1,4 @@
-# Copyright:: (c) Autotelik Media Ltd 2014
+# Copyright:: (c) Autotelik B.V 2014
 # Author ::   Tom Statter
 # Date ::     June 2014
 #

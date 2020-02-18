@@ -110,7 +110,7 @@ The next time you run rspec the sandbox will be regenerated using the latest ver
 
 ## License
 
-Copyright:: (c) Autotelik Media Ltd 2020
+Copyright:: (c) Autotelik B.V 2020
 Author ::   Tom Statter
 
 The MIT License

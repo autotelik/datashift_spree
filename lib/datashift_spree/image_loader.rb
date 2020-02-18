@@ -1,4 +1,4 @@
-# Copyright:: (c) Autotelik Media Ltd 2020
+# Copyright:: (c) Autotelik B.V 2020
 # Author ::   Tom Statter
 # License::   MIT. Free, Open Source.
 #
