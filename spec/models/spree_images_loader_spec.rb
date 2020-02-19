@@ -1,6 +1,5 @@
-# Copyright:: (c) Autotelik B.V 2011
+# Copyright:: (c) Autotelik B.V 2020
 # Author ::   Tom Statter
-# Date ::     Summer 2011
 #
 # License::   MIT - Free, OpenSource
 #
@@ -16,7 +15,7 @@
 #             
 require "rails_helper"
 
-module DataShift
+module DatashiftSpree
 
   describe 'SpreeImageLoading' do
 
@@ -28,7 +27,7 @@ module DataShift
       DataShift::Configuration.call.mandatory = ['sku', 'name', 'price']
     end
 
-    it "should report errors in Image paths during CSV Product loading" do
+    it "should report errors in Image paths during CSV Product loading", ffs: true do
       report_errors_tests 'SpreeProductsWithBadImages.csv'
     end
 
@@ -38,7 +37,8 @@ module DataShift
 
     def report_errors_tests( x )
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file(x))
+      puts "Load ", ifixture_file(x)
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file(x))
 
       product_loader.run
 
@@ -52,13 +52,13 @@ module DataShift
 
       p = Spree::Product.find_by_name("Demo Product for AR Loader")
 
-      p.should be_nil
+      expect(p).to be_nil
 
     end
 
     it "should create Image from path in Product loading column from CSV" do
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithImages.csv'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithImages.csv'))
 
       product_loader.run
 
@@ -82,7 +82,7 @@ module DataShift
     it "should create Image from path in Product loading column from .xls"  do
 
       # Spreadsheet contains paths relative to here
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithImages.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithImages.xls'))
 
       product_loader.run
 
@@ -108,7 +108,7 @@ module DataShift
       # Base of the fixtures path, will create a FULL path to each image
       Configuration.call.image_path_prefix = rspec_spec_path
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithImages.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithImages.xls'))
 
       product_loader.run
 
@@ -132,7 +132,7 @@ module DataShift
       
       expect(Spree::Product.count).to eq 0
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
 
       product_loader.run
 
@@ -148,7 +148,7 @@ module DataShift
       Configuration.call.image_path_prefix = rspec_spec_path
 
       pending "This should now be a Populator"
-      DataShiftSpree::ImageLoader.new.run( ifixture_file('SpreeImagesBySku.xls') )
+      DatashiftSpree::ImageLoader.new.run( ifixture_file('SpreeImagesBySku.xls') )
 
       expect(Spree::Image.count).to eq 3
 
@@ -161,7 +161,7 @@ module DataShift
 
       expect(Spree::Product.count).to eq 0
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
 
       product_loader.run
 
@@ -174,7 +174,7 @@ module DataShift
       expect(p.images.size).to eq 0
 
       pending "This should now be a Populator"
-      loader = DataShiftSpree::ImageLoader.new
+      loader = DatashiftSpree::ImageLoader.new
 
       loader.run(ifixture_file('SpreeImagesByName.xls'))
 
@@ -193,14 +193,14 @@ module DataShift
 
       Configuration.call.image_path_prefix = rspec_spec_path
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithMultipleImages.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProductsWithMultipleImages.xls'))
 
       product_loader.run
 
       expect(Spree::Product.count).to eq 2
       expect(Spree::Image.count).to eq  5
 
-      p = DataShiftSpree::get_image_owner( Spree::Product.find_by_name("Demo Product 001") )
+      p = DatashiftSpree::get_image_owner( Spree::Product.find_by_name("Demo Product 001") )
 
       expect(p.sku).to eq 'MULTI_001'
       expect(p.images.size).to eq 3
@@ -208,7 +208,7 @@ module DataShift
       expect(p.images[0].alt).to eq ''
       expect(p.images[1].alt).to eq 'alt text for multi 001'
 
-      p = DataShiftSpree::get_image_owner( Spree::Product.find_by_name("Demo Product 002") )
+      p = DatashiftSpree::get_image_owner( Spree::Product.find_by_name("Demo Product 002") )
 
       expect(p.sku).to eq 'MULTI_002'
       expect(p.images.size).to eq 2
@@ -220,7 +220,7 @@ module DataShift
       # first load some products with SKUs that match the image names
       expect(Spree::Product.count).to eq 0
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProducts.xls'))
 
       product_loader.run
 
@@ -229,7 +229,7 @@ module DataShift
 
       # now the test - find files, chew up name, find product, create image, attach
 
-      image_klass = DataShiftSpree::get_spree_class('Image' )
+      image_klass = DatashiftSpree::get_spree_class('Image' )
 
       raise "Cannot find Attachment Class" unless image_klass
 

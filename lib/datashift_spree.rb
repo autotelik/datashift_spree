@@ -34,6 +34,10 @@ module DatashiftSpree
     end
   end
 
+  # Test and code for this saved at : http://www.rubular.com/r/1de2TZsVJz
+
+  SPREE_URI_REGEX = Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' ) unless defined? SPREE_URI_REGEX
+
 end
 
 Gem.find_files('datashift_spree/**/*.rb').each { |path| require path }

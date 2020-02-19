@@ -4,7 +4,7 @@
 #
 require_relative 'loader_base'
 
-module DataShiftSpree
+module DatashiftSpree
 
   # TODO - THIS CONCEPT NOW BELONGS AS A POPULATOR
 
@@ -15,7 +15,7 @@ module DataShiftSpree
   #   1)  Identifies a Product via Name or SKU column
   #   2+) The full path(s) to the Images to attach to Product from column 1
   #
-  class ImageLoader < DataShiftSpree::LoaderBase
+  class ImageLoader < DatashiftSpree::LoaderBase
 
     def initialize()
 

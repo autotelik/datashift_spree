@@ -2,21 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cdfdf3c1-1291-4207-8cc5-2ce7e84d15ea" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/spec/dummy/config/initializers/devise.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/datashift_spree/image_populator.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/datashift_spree.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/datashift_spree.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Gemfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.markdown" beforeDir="false" afterPath="$PROJECT_DIR$/README.markdown" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Rakefile" beforeDir="false" afterPath="$PROJECT_DIR$/Rakefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/rails" beforeDir="false" afterPath="$PROJECT_DIR$/bin/rails" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/datashift_spree.gemspec" beforeDir="false" afterPath="$PROJECT_DIR$/datashift_spree.gemspec" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datashift_spree.thor" beforeDir="false" afterPath="$PROJECT_DIR$/datashift_spree.thor" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/exceptions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/exceptions.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/image_loader.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/image_loader.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/loader_base.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/loader_base.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/loading.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/loading.rb" afterDir="false" />
@@ -25,27 +19,18 @@
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/promotions_rules_actions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/promotions_rules_actions.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/shopify_order_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/shopify_order_migrator.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/shopify_promotions_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/shopify_promotions_migrator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/digitals.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/digitals.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/exports.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/exports.thor" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/reports.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/reports.thor" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/utils.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/utils.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree_databank/uk_shipping.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree_databank/uk_shipping.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/spec/dummy/Gemfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/Gemfile.lock" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/spec/datashift_spree.thor" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_digitals_spec.rb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_exporter_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_exporter_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_generator_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_generator_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_images_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_images_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_images_over_http_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_images_over_http_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_taxons_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_taxons_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_thor_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_thor_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/spree_variants_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_variants_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree/users_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/users_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/spec_helper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/spec_helper.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/dummy/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/spec/dummy/Gemfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/dummy/config/application.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/dummy/config/application.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/dummy/spree_sandbox.thor" beforeDir="false" afterPath="$PROJECT_DIR$/spec/dummy/spree_sandbox.thor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/models/spree_generator_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_generator_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/models/spree_images_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_images_loader_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/models/spree_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_loader_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/models/spree_taxons_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_taxons_loader_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/models/spree_thor_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_thor_spec.rb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/models/spree_variants_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_variants_loader_spec.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spec/support/product_loading.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/product_loading.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" afterDir="false" />
     </list>
@@ -71,20 +56,22 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../shopper" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/lib/datashift_spree" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/lib/thor/spree" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/spec/dummy" />
       <recent name="$PROJECT_DIR$/lib/datashift_spree" />
       <recent name="$PROJECT_DIR$/lib/datashift_spree/loaders" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib/datashift_spree" />
+      <recent name="$PROJECT_DIR$/lib/thor/spree" />
     </key>
   </component>
   <component name="RubyModuleManagerSettings">
@@ -115,7 +102,8 @@
       <workItem from="1581930236412" duration="6394000" />
       <workItem from="1582025271806" duration="6638000" />
       <workItem from="1582037023201" duration="2323000" />
-      <workItem from="1582043349199" duration="1403000" />
+      <workItem from="1582043349199" duration="7577000" />
+      <workItem from="1582126076109" duration="1836000" />
     </task>
     <servers />
   </component>
@@ -147,17 +135,35 @@
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
     <state x="837" y="363" key="SettingsEditor/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581516650903" />
-    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1582044482405">
+    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1582107488265">
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
-    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582044482405" />
-    <state x="676" y="334" width="728" height="466" key="find.popup" timestamp="1582033900536">
+    <state x="37" y="199" width="1883" height="738" key="com.intellij.history.integration.ui.views.FileHistoryDialog/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582107488265" />
+    <state x="731" y="238" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1582110922541">
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
-    <state x="676" y="334" width="728" height="466" key="find.popup/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582033900536" />
+    <state x="731" y="238" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582110922541" />
+    <state x="676" y="334" width="728" height="466" key="find.popup" timestamp="1582111210348">
+      <screen x="37" y="24" width="1883" height="1056" />
+    </state>
+    <state x="676" y="334" width="728" height="466" key="find.popup/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582111210348" />
     <state x="688" y="326" width="538" height="399" key="search.everywhere.popup" timestamp="1581933410303">
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
     <state x="688" y="326" width="538" height="399" key="search.everywhere.popup/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1581933410303" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/lib/datashift_spree/loading.rb</url>
+          <line>83</line>
+          <properties myBlockOrdinal="-1">
+            <option name="block-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -59,7 +59,7 @@ module DatashiftSpree
 
       require 'shopify_promotions_migrator'
 
-      loader = DataShiftSpree::ShopifyPromotionsMigrator.new(:verbose => options[:verbose])
+      loader = DatashiftSpree::ShopifyPromotionsMigrator.new(:verbose => options[:verbose])
 
       # YAML configuration file to drive defaults etc
 
@@ -125,7 +125,7 @@ module DatashiftSpree
 
       require 'shopify_order_migrator'
 
-      loader = DataShiftSpree::ShopifyOrderLoader.new( Spree::Order, {:verbose => options[:verbose]})
+      loader = DatashiftSpree::ShopifyOrderLoader.new( Spree::Order, {:verbose => options[:verbose]})
 
       # YAML configuration file to drive defaults etc
 

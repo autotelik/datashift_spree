@@ -6,11 +6,11 @@
 
 require_relative 'loading'
 
-module DataShiftSpree
+module DatashiftSpree
 
   class ProductLoader
 
-    include DataShiftSpree::Loading
+    include DatashiftSpree::Loading
 
     attr_accessor :file_name
 
@@ -49,7 +49,7 @@ module DataShiftSpree
     def run
       logger.info "Product load from File [#{file_name}]"
 
-      DataShift::PopulatorFactory.global_populator_class = DataShiftSpree::ProductPopulator
+      DataShift::PopulatorFactory.global_populator_class = DatashiftSpree::ProductPopulator
 
       DataShift::Configuration.call.force_inclusion_of_columns = force_inclusion_columns
 

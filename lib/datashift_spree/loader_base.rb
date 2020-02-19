@@ -6,12 +6,12 @@
 #
 require_relative 'loading'
 
-module DataShiftSpree
+module DatashiftSpree
 
   class LoaderBase
 
     include DataShift::ImageLoading
-    include DataShiftSpree::Loading
+    include DatashiftSpree::Loading
 
     def initialize
       super

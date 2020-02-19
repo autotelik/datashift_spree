@@ -51,7 +51,7 @@ describe 'Spree Variants Loader' do
 
   def test_variants_creation( source )
 
-    product_loader = DataShiftSpree::ProductLoader.new(ifixture_file(source))
+    product_loader = DatashiftSpree::ProductLoader.new(ifixture_file(source))
 
     expect(Spree::Product.count).to eq 0
     expect(Spree::Variant.count).to eq 0
@@ -127,7 +127,7 @@ describe 'Spree Variants Loader' do
   context("Multiple Variants") do
 
     let(:product_loader) {
-      DataShiftSpree::ProductLoader.new( ifixture_file('SpreeMultiVariant.csv'))
+      DatashiftSpree::ProductLoader.new( ifixture_file('SpreeMultiVariant.csv'))
     }
 
     # Composite Variant Syntax is option_type_A_name:value;option_type_B_name:value

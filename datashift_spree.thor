@@ -1,10 +1,9 @@
-# Copyright:: (c) Autotelik B.V 2011
+# Copyright:: (c) Autotelik B.V 2020
 # Author ::   Tom Statter
-# Date ::     Aug 2010
 #
 # License::   MIT - Free, OpenSource
 #
-# Details::   General tools related to DataShiftSpree Gem : specification, build, deploy
+# Details::   General tools related to DatashiftSpree Gem : specification, build, deploy
 # 
 #
 module Datashift

@@ -6,9 +6,9 @@
 #               Currently covers :
 #                 Orders
 #
-module DataShiftSpree
+module DatashiftSpree
 
-  class ShopifyOrderLoader < DataShiftSpree::LoaderBase
+  class ShopifyOrderLoader < DatashiftSpree::LoaderBase
 
     # Options
     #

@@ -9,9 +9,9 @@
 require_relative 'promotions_rules_actions'
 require_relative 'loader_base'
 
-module DataShiftSpree
+module DatashiftSpree
 
-    class ShopifyPromotionsMigrator < DataShiftSpree::LoaderBase
+    class ShopifyPromotionsMigrator < DatashiftSpree::LoaderBase
 
       # Options
       #  

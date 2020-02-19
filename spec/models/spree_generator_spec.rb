@@ -10,7 +10,7 @@
 #
 require 'rails_helper'
 
-module DataShiftSpree
+module DatashiftSpree
 
   describe 'SpreeGenerator' do
 
@@ -21,13 +21,8 @@ module DataShiftSpree
       # Create some test data
       root = ::Spree::Taxonomy.create( :name => 'Paintings' )
 
-      if(DataShiftSpree::version.to_f > 1 )
-        root.taxons.create( :name => 'Landscape' )
-        root.taxons.create( :name => 'Sea' )
-      else
-        ::Spree::Taxon.create( :name => 'Landscape', :taxonomy => root )
-        ::Spree::Taxon.create( :name => 'Sea', :taxonomy => root )
-      end
+      root.taxons.create( :name => 'Landscape' )
+      root.taxons.create( :name => 'Sea' )
     end
 
     it "should export any Spree model to .xls spreedsheet" do
@@ -64,7 +59,7 @@ module DataShiftSpree
 
       expect(File.exists?(expected)).to eq true
 
-      excel = Excel.new
+      excel = DataShift::Excel.new
       excel.open(expected)
 
       expect(excel.worksheets.size).to eq 1

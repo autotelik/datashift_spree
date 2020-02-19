@@ -16,6 +16,7 @@ require "sprockets/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+require "byebug"
 require "devise"
 require "spree_auth_devise"
 require "spree"

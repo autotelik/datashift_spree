@@ -4,60 +4,18 @@
 #
 # Details::   Specific support for Loading Spree data
 #
-require 'mechanize'
-require 'loaders/paperclip/image_loading'
-
 module DatashiftSpree
 
-  module Loading
+  class ImagePopulator < ::DataShift::Populator
 
     include DataShift::ImageLoading
-    include DataShift::Delimiters
 
-    # These originally required to support early versions when Spree went from no namespace to Spree namespace
+    # Global path to prefix to load paths coming from import data
+    attr_accessor :image_path_prefix
 
-    def image_klass
-      @image_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Image')
+    def initialize(image_path_prefix: nil)
+      @image_path_prefix = image_path_prefix
     end
-
-    def option_type_klass
-      @option_type_klass  ||= DataShift::MapperUtils::class_from_string('Spree::OptionType')
-    end
-
-    def option_value_klass
-      @option_value_klass  ||= DataShift::MapperUtils::class_from_string('Spree::OptionValue')
-    end
-
-    def property_klass
-      @property_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Property')
-    end
-
-    def product_property_klass
-      @product_property_klass  ||= DataShift::MapperUtils::class_from_string('Spree::ProductProperty')
-    end
-
-    def stock_location_klass
-      @stock_location_klass  ||= DataShift::MapperUtils::class_from_string('Spree::StockLocation')
-    end
-
-    def stock_movement_klass
-      @stock_movement_klass  ||= DataShift::MapperUtils::class_from_string('Spree::StockMovement')
-    end
-
-    def taxonomy_klass
-      ::Spree::Taxonomy  ||= DataShift::MapperUtils::class_from_string('Spree::Taxonomy')
-    end
-
-    def taxon_klass
-      ::Spree::Taxon  ||= DataShift::MapperUtils::class_from_string('Spree::Taxon')
-    end
-
-    def variant_klass
-      @variant_klass  ||= DataShift::MapperUtils::class_from_string('Spree::Variant')
-    end
-
-
-
     # If no owner class specified will attach Image to Spree image Owner (varies depending on version)
     #
     # Special case for Images
@@ -73,13 +31,13 @@ module DatashiftSpree
     #   Example => path_1{:alt => text}|path_2{:alt => more alt blah blah,
     # :position => 5}|path_3{:alt => the alt text for this path}
     #
-    def add_images( record, owner = nil )
+    def call(load_data, record, owner = nil )
 
-      # Spree 3 - Images stored on Variant (record.master if record is a Product)
-      byebug
+      # Spree > 3 - Images stored on Variant (record.master if record is a Product)
+
       owner ||=  record.is_a?(Spree::Product) ? record.master : record
 
-      value.to_s.split(multi_assoc_delim).each do |image|
+      load_data.to_s.split(multi_assoc_delim).each do |image|
 
         if(image.match(DatashiftSpree::SPREE_URI_REGEX))
 
@@ -100,11 +58,11 @@ module DatashiftSpree
           agent = Mechanize.new
 
           image = begin
-            agent.get(uri)
-          rescue => e
-            puts "ERROR: Failed to fetch image from URL #{uri}", e.message
-            raise DataShift::BadUri.new("Failed to fetch image from URL #{uri}")
-          end
+                    agent.get(uri)
+                  rescue => e
+                    puts "ERROR: Failed to fetch image from URL #{uri}", e.message
+                    raise DataShift::BadUri.new("Failed to fetch image from URL #{uri}")
+                  end
 
           # Expected image is_a Mechanize::Image
           # image.filename& image.extract_filename do not handle query string well e,g blah.jpg?v=1234
@@ -149,7 +107,7 @@ module DatashiftSpree
 
           logger.debug("Processing IMAGE from PATH #{path.inspect} #{alt_text.inspect}")
 
-          path = File.join(Configuration.call.image_path_prefix, path) if(Configuration.call.image_path_prefix)
+          path = File.join(image_path_prefix, path) if(image_path_prefix.present?)
 
           begin
             attachment = create_attachment(Spree::Image, path, nil, nil, :alt => alt_text)

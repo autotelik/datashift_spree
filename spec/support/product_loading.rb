@@ -8,21 +8,19 @@ RSpec.shared_context 'Populate dictionary ready for Product loading' do
 
   let(:product_klass) { ::Spree::Product }
 
-  let(:image_klass) {  DataShiftSpree::get_spree_class 'Image' }
+  let(:image_klass) { ::Spree::Image }
 
-  config.before(:each) do
+  before(:each) do
     DataShift::Configuration.reset
     DataShift::Exporters::Configuration.reset
     DataShift::Loaders::Configuration.reset
     DataShift::Transformation::Factory.reset
   end
 
-  before do
+  before(:all) do
     begin
-
       DataShift::ModelMethods::Catalogue.clear
       DataShift::ModelMethods::Manager.clear
-
     rescue => e
       puts e.inspect
       puts e.backtrace

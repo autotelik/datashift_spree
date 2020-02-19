@@ -7,11 +7,11 @@
 require 'mechanize'
 require_relative 'loading'
 
-module DataShiftSpree
+module DatashiftSpree
 
   class ProductPopulator < ::DataShift::Populator
 
-    include DataShiftSpree::Loading
+    include DatashiftSpree::Loading
 
     include DataShift::Logging
     extend DataShift::Logging
@@ -22,11 +22,6 @@ module DataShiftSpree
 
       value, attribute_hash = prepare_data(method_binding, data)
 
-=begin
-        puts "Prepared data for #{method_binding}"
-        pp value
-        pp attribute_hash
-=end
       @product_load_object = record
 
       logger.debug("Populating data via Spree ProductPopulator [#{method_binding.operator}] - [#{value}]")
@@ -41,14 +36,14 @@ module DataShiftSpree
 
         add_taxons
 
-      elsif(method_binding.operator?('product_properties')|| method_binding.operator?('properties') )
+      elsif(method_binding.operator?('product_properties') || method_binding.operator?('properties') )
 
         add_properties
 
         # This loads images to Product or Product Master Variant depending on Spree version
-      elsif(method_binding.operator?('images') || method_binding.operator?('Images'))
+      elsif(method_binding.operator?('images'))
 
-        add_images( product_load_object.master )
+        DatashiftSpree::ImagePopulator.new().call(value, product_load_object.master)
 
         # This loads images to Product Variants
       elsif(method_binding.operator?('variant_images'))
@@ -490,9 +485,8 @@ module DataShiftSpree
           # Image processing...
           logger.debug "Images to process: #{images.inspect} for variant #{variants[i].name}"
           images.each do |image|
-            @spree_uri_regexp ||= Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' )
 
-            if(image.match(@spree_uri_regexp))
+            if(image.match(DatashiftSpree::SPREE_URI_REGEX))
 
               uri, attributes = image.split(attribute_list_start)
 
@@ -603,9 +597,8 @@ module DataShiftSpree
 
         # Image processing...
         images.each do |image|
-          @spree_uri_regexp ||= Regexp::new('(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?' )
 
-          if(image.match(@spree_uri_regexp))
+          if(image.match(DatashiftSpree::SPREE_URI_REGEX))
 
             uri, attributes = image.split(attribute_list_start)
 
@@ -670,7 +663,6 @@ module DataShiftSpree
             end
 
           else
-
             path, alt_text = image.split(name_value_delim)
 
             alt_text = @product_load_object.master.name if !alt_text #ensure alt_text is filled

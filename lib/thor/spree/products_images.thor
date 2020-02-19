@@ -36,7 +36,7 @@ module DatashiftSpree
 
       input = options[:input]
 
-      loader = DataShiftSpree::ProductLoader.new(input)
+      loader = DatashiftSpree::ProductLoader.new(input)
 
       # YAML configuration file to drive defaults etc
 
@@ -72,7 +72,7 @@ module DatashiftSpree
 
       require 'image_loader'
 
-      loader = DataShiftSpree::ImageLoader.new(nil, options)
+      loader = DatashiftSpree::ImageLoader.new(nil, options)
 
       loader.run( options[:input], options )
     end
@@ -129,7 +129,7 @@ module DatashiftSpree
       loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
 
       # WTF  ... this works in the specs but thor gives me
-      # products_images.thor:131:in `images': uninitialized constant Thor::Sandbox::DataShiftSpree::Variant (NameError)
+      # products_images.thor:131:in `images': uninitialized constant Thor::Sandbox::DatashiftSpree::Variant (NameError)
       # loader_options[:attach_to_find_by_field] = (owner_klass. == Spree::Variant) ? :sku : :name
 
       # so for now just sku lookup available .... TOFIX - name wont currently work for Variant and sku won't work for Product

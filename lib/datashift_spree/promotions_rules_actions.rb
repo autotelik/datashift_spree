@@ -4,7 +4,7 @@
 #
 # Details::   Helpers to build Spree Promo Rules+ Actions
 #
-module DataShiftSpree
+module DatashiftSpree
 
   # Adjustment can only be applied Once per Order
   #     $36.00 off of the Picks (once per order)

@@ -51,7 +51,7 @@ describe 'SpreeLoader' do
 
     #  should perform identically regardless of source, whether csv, .xls etc
 
-    it "should load basic Products .xls via Spree loader" do
+    it "should load basic Products .xls via Spree loader", ffs: true do
       test_basic_product('SpreeProductsSimple.xls')
     end
 
@@ -61,7 +61,7 @@ describe 'SpreeLoader' do
 
     def test_basic_product( source )
 
-      product_loader =  DataShiftSpree::ProductLoader.new(ifixture_file(source))
+      product_loader =  DatashiftSpree::ProductLoader.new(ifixture_file(source))
 
       product_loader.run
 
@@ -76,7 +76,7 @@ describe 'SpreeLoader' do
       expect(loader.failed_count).to eq 0
       expect(loader.loaded_count).to eq 3
 
-      expect(loader.loaded_count).to eq  Spree::Product.count
+      expect(loader.loaded_count).to eq Spree::Product.count
 
       p = Spree::Product.first
 
@@ -91,13 +91,9 @@ describe 'SpreeLoader' do
 
       expect(p.has_variants?).to eq false
 
-      if(DataShiftSpree::version.to_f < 2  )
-        expect(p.master.count_on_hand).to eq 12
-        expect(Spree::Product.last.master.count_on_hand).to eq 23
-      else
-        puts p.master.stock_items.first.count_on_hand.inspect
-        # expect(p.master.stock_items.first.count_on_hand).to eq 12
-      end
+      byebug
+      puts p.master.stock_items.first.count_on_hand.inspect
+      expect(p.master.stock_items.first.count_on_hand).to eq 12
 
     end
 
@@ -119,14 +115,14 @@ describe 'SpreeLoader' do
         factory.set_prefix_on(Spree::Product, 'SKU', 'SPEC_')
       end
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
 
       test_default_values(product_loader)
     end
 
     it "should support default values from config for Spree Products loader" do
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file('SpreeProductsMandatoryOnly.xls'))
 
       product_loader.configure_from(  ifixture_file('SpreeProductsDefaults.yml') )
 
@@ -180,7 +176,7 @@ describe 'SpreeLoader' do
 
     def test_properties_creation( source )
 
-      product_loader = DataShiftSpree::ProductLoader.new(ifixture_file(source))
+      product_loader = DatashiftSpree::ProductLoader.new(ifixture_file(source))
 
       # want to test both lookup and dynamic creation - this Prop should be found, rest created
       Spree::Property.create( :name => 'test_pp_001', :presentation => 'Test PP 001' )
@@ -227,7 +223,7 @@ describe 'SpreeLoader' do
       end
 
       let(:product_loader) {
-        DataShiftSpree::ProductLoader.new(negative_fixture_file('SpreeProdMissManyMandatory.xls'))
+        DatashiftSpree::ProductLoader.new(negative_fixture_file('SpreeProdMissManyMandatory.xls'))
       }
 
       it "should raise exception when mandatory columns missing from .xls", :ex => true do

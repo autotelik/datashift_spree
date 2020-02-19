@@ -1,3 +1,5 @@
+.byebug_history
+
 log/*.log
 pkg/
 spec/dummy/db/*.sqlite3

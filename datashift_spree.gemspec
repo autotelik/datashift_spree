@@ -33,6 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'spree_gateway', '~> 3.7'
 
   spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "byebug"
   spec.add_development_dependency "rspec-rails"
 
 end

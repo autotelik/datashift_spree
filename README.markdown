@@ -2,11 +2,11 @@
 
 Import and Export Spree E-Commerce models through .xls or CSV  files, including all associations.
 
-Create and assign taxons, properties, shipping, tax categories and more through single spreadsheet.
+Create and assign images, taxons, properties, shipping categories, tax categories and more through single spreadsheet.
 
 ### Versions
 
-This release has been tested against Spree 3.1
+This release has been tested against Spree 3.1 and Spree 4
 
 ## Installation
 
@@ -32,7 +32,7 @@ require 'datashift'
 require 'datashift_spree'
 
 DataShift::load_commands
-DataShiftSpree::load_commands
+DatashiftSpree::load_commands
 ```
 
 To check the available tasks run thor list with a search term, for example

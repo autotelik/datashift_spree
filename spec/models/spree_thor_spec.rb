@@ -9,11 +9,11 @@ require "rails_helper"
 
 describe 'Datshift Spree Thor tasks' do
 
-  let(:spree_sandbox_app_path) { DataShiftSpree::spree_sandbox_path }
+  let(:spree_sandbox_app_path) { DatashiftSpree::spree_sandbox_path }
 
   before(:all) do
     DataShift.load_commands
-    DataShiftSpree.load_commands
+    DatashiftSpree.load_commands
   end
 
   it 'should list available datashift thor tasks' do
