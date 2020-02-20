@@ -18,7 +18,7 @@ describe 'Datshift Spree Thor tasks' do
 
   it 'should list available datashift thor tasks' do
     x = run_in(spree_sandbox_app_path) do
-      capture(:stdout){ Thor::Runner.start(["list"]) }
+      capture(:stdout){ ::Thor::Runner.start(["list"]) }
     end
 
     expect(x).to include("datashift_spree\n--------")
@@ -68,8 +68,6 @@ describe 'Datshift Spree Thor tasks' do
       puts "Running attach with: #{args}"
 
       run_in(@spree_sandbox_app_path) do
-
-
         x = capture(:stdout){ system("bundle exec thor datashift:paperclip:attach " +  args)  }
         x.should start_with("datashift\n--------")
         x.should =~ / csv -i/

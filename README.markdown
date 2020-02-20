@@ -111,7 +111,9 @@ E, [2020-02-13T12:12:31.469757 #24410] ERROR -- : 	Shipping Category can't be bl
 E, [2020-02-13T12:12:31.469762 #24410] ERROR -- : 	Price can't be blank
 ```
 
-###### Simple Product
+##### Product
+
+###### Variants and Options on a Product
 
 **Variant Prices/SKUs**
 
@@ -126,15 +128,53 @@ These should contain pipe '|' delimited lists of the prices, or SKUs, to assign,
 
 Example
 
-    variant_price	                 variant_sku
-
 ```
-171.56|260.44|171.56|260.44	TARR.SFOP424EW0|TARR.SFOP424EW3|TARR.SFOP414EW0|TARR.SFOP414EW3     
+    variant_price	                 variant_sku
+-------------------------------------------------
+171.56|260.44|171.56|260.44     ARR.SFOP424EW0|TARR.SFOP424EW3|TARR.SFOP414EW0|TARR.SFOP414EW3     
 119.33|208.23	                MOLE.SFOP140EA0|MOLE.SFOP140EA3
 110.00|198.00	                TALL.SFOP140EW0|TALL.SFOP140EW3
-54.89|109.78|69.24	        CHET.SFOP128EW3|CHET.SFOP140EW0|CHET.SFOP140EW3
+54.89|109.78|69.24              CHET.SFOP128EW3|CHET.SFOP140EW0|CHET.SFOP140EW3
 42.22	                        LOST.REDL218EW0
 ```
+
+##### Stock
+
+Use a column called count_on_hand to manage initial stock levels of a product or variants on a Product
+
+> **N.B** We don't yet have smart ordering of columns  - so these columns should come AFTER the Variant creation columns, 
+as the Variants must exists when these columns are processed.
+ 
+ For a simple single Product just specify the stock level as an integer 
+ 
+   ```
+   count_on_hand
+   -------------
+   13
+   ```
+   
+This will use the default stock location. YOu can use the ':' delimiter to also set the stock_location name in form :
+  
+     ```
+     count_on_hand
+     -------------
+     stock_location_name:13
+     ```
+   
+To specify different stock levels for multiple variants use the pipe '|' to delimit each stock entry.
+
+Currently expects the **same number of stock entries as variants**, that is we only support 1 stock entry per variant.
+
+However you can still specify the single stock location if non default.
+
+     ```
+     Variants                       count_on_hand
+     -----------------------------------------------
+     size:small, medium, large        12|shop:6|7
+     ```
+   
+Three variants by option type size,  with three different stock levels.
+   
 
 ###### Creating Association data - Excel or CSV
 

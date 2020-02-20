@@ -2,37 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cdfdf3c1-1291-4207-8cc5-2ce7e84d15ea" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/datashift_spree/image_populator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/datashift_spree.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/datashift_spree.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.markdown" beforeDir="false" afterPath="$PROJECT_DIR$/README.markdown" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/datashift_spree.gemspec" beforeDir="false" afterPath="$PROJECT_DIR$/datashift_spree.gemspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datashift_spree.thor" beforeDir="false" afterPath="$PROJECT_DIR$/datashift_spree.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/image_loader.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/image_loader.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/loader_base.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/loader_base.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/loading.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/loading.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/product_loader.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/product_loader.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/datashift_spree/product_populator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/product_populator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/promotions_rules_actions.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/promotions_rules_actions.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/shopify_order_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/shopify_order_migrator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datashift_spree/shopify_promotions_migrator.rb" beforeDir="false" afterPath="$PROJECT_DIR$/lib/datashift_spree/shopify_promotions_migrator.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/products_images.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" beforeDir="false" afterPath="$PROJECT_DIR$/lib/thor/spree/shopify.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/datashift_spree.thor" beforeDir="false" afterPath="$PROJECT_DIR$/spec/datashift_spree.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/dummy/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/spec/dummy/Gemfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/dummy/config/application.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/dummy/config/application.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/dummy/spree_sandbox.thor" beforeDir="false" afterPath="$PROJECT_DIR$/spec/dummy/spree_sandbox.thor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/models/spree_generator_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_generator_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/models/spree_images_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_images_loader_spec.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spec/models/spree_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/models/spree_taxons_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_taxons_loader_spec.rb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spec/models/spree_thor_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_thor_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/models/spree_variants_loader_spec.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/models/spree_variants_loader_spec.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/support/product_loading.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/product_loading.rb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" beforeDir="false" afterPath="$PROJECT_DIR$/spec/support/sandbox_helper.rb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +78,8 @@
       <workItem from="1582025271806" duration="6638000" />
       <workItem from="1582037023201" duration="2323000" />
       <workItem from="1582043349199" duration="7577000" />
-      <workItem from="1582126076109" duration="1836000" />
+      <workItem from="1582126076109" duration="1959000" />
+      <workItem from="1582204350055" duration="9081000" />
     </task>
     <servers />
   </component>
@@ -143,10 +119,10 @@
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
     <state x="731" y="238" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582110922541" />
-    <state x="676" y="334" width="728" height="466" key="find.popup" timestamp="1582111210348">
+    <state x="676" y="334" width="728" height="466" key="find.popup" timestamp="1582210461299">
       <screen x="37" y="24" width="1883" height="1056" />
     </state>
-    <state x="676" y="334" width="728" height="466" key="find.popup/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582111210348" />
+    <state x="676" y="334" width="728" height="466" key="find.popup/1920.0.1920.1080/37.24.1883.1056@37.24.1883.1056" timestamp="1582210461299" />
     <state x="688" y="326" width="538" height="399" key="search.everywhere.popup" timestamp="1581933410303">
       <screen x="37" y="24" width="1883" height="1056" />
     </state>

@@ -80,6 +80,7 @@ describe 'SpreeLoader' do
 
       p = Spree::Product.first
 
+      pp p
       expect(p.sku).to eq  "SIMPLE_001"
       expect(p.price).to eq  345.78
       expect(p.name).to eq  "Simple Product for AR Loader"
@@ -87,11 +88,9 @@ describe 'SpreeLoader' do
       expect(p.cost_price).to eq  320.00
 
       expect(p.option_types.size).to eq 1
-      expect(p.option_types.size).to eq 1
 
       expect(p.has_variants?).to eq false
 
-      byebug
       puts p.master.stock_items.first.count_on_hand.inspect
       expect(p.master.stock_items.first.count_on_hand).to eq 12
 

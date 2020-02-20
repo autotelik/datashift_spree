@@ -33,16 +33,18 @@ module DatashiftSpree
     # See delegate_belongs_to :master @ https://github.com/spree/spree/blob/master/core/app/models/spree/product.rb
     #
     def force_inclusion_columns
-      @force_inclusion_columns ||= %w{ cost_price
-                                         images
-                                         price
-                                         shipping_category
-                                         sku
-                                         stock_items
-                                         variant_sku
-                                         variant_cost_price
-                                         variant_price
-                                         variant_images
+      @force_inclusion_columns ||= %w{  cost_price
+                                        count_on_hand
+                                        images
+                                        option_types
+                                        price
+                                        shipping_category
+                                        sku
+                                        stock_items
+                                        variant_sku
+                                        variant_cost_price
+                                        variant_price
+                                        variant_images
         }
     end
 

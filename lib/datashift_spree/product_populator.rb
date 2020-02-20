@@ -26,11 +26,19 @@ module DatashiftSpree
 
       logger.debug("Populating data via Spree ProductPopulator [#{method_binding.operator}] - [#{value}]")
 
-      # Special cases for Products, generally where a simple one stage lookup won't suffice
-      # otherwise simply use default processing from base class
+      puts "\n***** Populating data via Spree ProductPopulator [#{method_binding.operator}] - [#{value}]"
+
+      # Special cases for Products, generally where default processing in base won't suffice
+      #
+      # Check takes care of headers in different forms like 'Option Types' 'option types' etc
+      #
       if(method_binding.operator?('variants') || method_binding.operator?('option_types'))
 
         add_options_variants
+
+      elsif(method_binding.operator?('price') )
+
+        product_load_object.price = value.to_f
 
       elsif(method_binding.operator?('taxons'))
 
@@ -95,14 +103,12 @@ module DatashiftSpree
           end
         end
 
-      elsif(data && method_binding.operator?('stock_items'))
-
+      elsif( method_binding.operator?('stock_items') || method_binding.operator?('count_on_hand'))
         logger.info "Adding Variants Stock Items (count_on_hand)"
 
         product_load_object.save_if_new
 
         add_variants_stock(value)
-
       else
         super(method_binding, product_load_object, value) if(value.present?)
       end
@@ -366,7 +372,13 @@ module DatashiftSpree
 
     def add_variants_stock(data)
 
+      return if data.blank?
+
       product_load_object.save_if_new
+
+      # location = Spree::StockLocation.find_or_create_by!(name: 'default')
+
+      # product_load_object.master.stock_items.find_by!(stock_location: location).update!(count_on_hand: 1)
 
       # do we have Variants?
       if(@product_load_object.variants.size > 0)
@@ -380,8 +392,10 @@ module DatashiftSpree
           raise "WARNING: Count on hand entries did not match number of Variants - None Set" unless (@product_load_object.variants.size == values.size)
         end
 
-        variants = @product_load_object.variants # just for readability and logic
-        logger.info "Variants: #{@product_load_object.variants.inspect}"
+        variants = @product_load_object.variants
+        logger.info "Variants: #{variants.inspect}"
+
+        byebug
 
         stock_coh_list = value.to_s.split(multi_assoc_delim) # we expect to get corresponding stock_location:count_on_hand for every variant
 
