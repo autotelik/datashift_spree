@@ -2,11 +2,11 @@
 
 Import and Export Spree E-Commerce models through .xls or CSV  files, including all associations.
 
-Create and assign taxons, properties, shipping, tax categories and more through single spreadsheet.
+Create and assign images, taxons, properties, shipping categories, tax categories and more through single spreadsheet.
 
 ### Versions
 
-This release has been tested against Spree 3.1
+This release has been tested against Spree 3.1 and Spree 4
 
 ## Installation
 
@@ -32,7 +32,7 @@ require 'datashift'
 require 'datashift_spree'
 
 DataShift::load_commands
-DataShift::SpreeEcom::load_commands
+DatashiftSpree::load_commands
 ```
 
 To check the available tasks run thor list with a search term, for example
@@ -55,16 +55,16 @@ for example
 
 For loading data, probably the first thing you'll want to do is create an Excel template for the model(s) you wish to import. There is a general task `datashift:generate:excel` ( or ```datashift:generate:csv ```) for generating a template for any model.
 
-There are some higher level tasks, specifically for producing the specific template for loading Spree Products
+There is a task available for producing the template for loading a basic Spree Product :
 
 ```ruby
 thor datashift_spree:template:product -t tmp/product_template.xls
 ```
 
-To also include all possible associations
+To generate the full Product template including all possible associations :
 
 ```ruby
-thor datashift_spree:template:product -m Spree::Product --associations -t tmp/full_product_template.xls
+thor datashift_spree:template:full -t tmp/full_product_template.xls
 ```
 
 A large number of example Spreadsheets with headers and comments, can be found in the **spec/fixtures** directory - including .xls and csv versions for simple Products or complex Products with multiple/nested Taxons, Variants, Properties etc 
@@ -80,10 +80,11 @@ For example to understand the `promotionable` field see . https://guides.spreeco
 
 ##### Data Import/Export
 
-Once you have data prepared you can import it using task : 
+Once you have data prepared you can import it using task `thor datashift_spree:load:products` : 
+
+Details
 
 ```
-
 thor datashift_spree:load:products
 
   -i, --input=INPUT                            # The import file (.xls or .csv)
@@ -92,6 +93,10 @@ thor datashift_spree:load:products
   -v, [--verbose], [--no-verbose]              # Verbose logging
   -c, [--config=CONFIG]                        # Configuration file containg defaults or over rides in YAML
   -d, [--dummy], [--no-dummy]                  # Dummy run, do not actually save Image or Product
+```
+
+```ruby
+thor datashift_spree:load:products -v -d -i tmp/product_template.xls
 ```
 
 Dummy Run is very useful to drive out any issues without actually impacting the database. All changes are rolled back.
@@ -106,7 +111,9 @@ E, [2020-02-13T12:12:31.469757 #24410] ERROR -- : 	Shipping Category can't be bl
 E, [2020-02-13T12:12:31.469762 #24410] ERROR -- : 	Price can't be blank
 ```
 
-###### Simple Product
+##### Product
+
+###### Variants and Options on a Product
 
 **Variant Prices/SKUs**
 
@@ -121,15 +128,53 @@ These should contain pipe '|' delimited lists of the prices, or SKUs, to assign,
 
 Example
 
-    variant_price	                 variant_sku
-
 ```
-171.56|260.44|171.56|260.44	TARR.SFOP424EW0|TARR.SFOP424EW3|TARR.SFOP414EW0|TARR.SFOP414EW3     
+    variant_price	                 variant_sku
+-------------------------------------------------
+171.56|260.44|171.56|260.44     ARR.SFOP424EW0|TARR.SFOP424EW3|TARR.SFOP414EW0|TARR.SFOP414EW3     
 119.33|208.23	                MOLE.SFOP140EA0|MOLE.SFOP140EA3
 110.00|198.00	                TALL.SFOP140EW0|TALL.SFOP140EW3
-54.89|109.78|69.24	        CHET.SFOP128EW3|CHET.SFOP140EW0|CHET.SFOP140EW3
+54.89|109.78|69.24              CHET.SFOP128EW3|CHET.SFOP140EW0|CHET.SFOP140EW3
 42.22	                        LOST.REDL218EW0
 ```
+
+##### Stock
+
+Use a column called count_on_hand to manage initial stock levels of a product or variants on a Product
+
+> **N.B** We don't yet have smart ordering of columns  - so these columns should come AFTER the Variant creation columns, 
+as the Variants must exists when these columns are processed.
+ 
+ For a simple single Product just specify the stock level as an integer 
+ 
+   ```
+   count_on_hand
+   -------------
+   13
+   ```
+   
+This will use the default stock location. YOu can use the ':' delimiter to also set the stock_location name in form :
+  
+     ```
+     count_on_hand
+     -------------
+     stock_location_name:13
+     ```
+   
+To specify different stock levels for multiple variants use the pipe '|' to delimit each stock entry.
+
+Currently expects the **same number of stock entries as variants**, that is we only support 1 stock entry per variant.
+
+However you can still specify the single stock location if non default.
+
+     ```
+     Variants                       count_on_hand
+     -----------------------------------------------
+     size:small, medium, large        12|shop:6|7
+     ```
+   
+Three variants by option type size,  with three different stock levels.
+   
 
 ###### Creating Association data - Excel or CSV
 
@@ -138,40 +183,39 @@ Example
 
 We use RSpec, so tests located in the spec subdirectory.
 
-To test this gem we require an actual Spree store, so when the specs are first run 
-a dummy Rails app is created containing a Spree store, whose version we can control in `spec/Gemfile`
-so it's easy to change the Spree version and re-run the specs.
+This is a Rail engine so to test this gem requires an actual Spree store, so there is a dummy Rails app
+with a Gemfile pointing to a Spree store. 
 
-It's therefor recommended that all testing be done in spec dir itself, so first cd into spec
+The versions of Rails, Spree and Datashift to test can be controlled in `spec/dummy/Gemfile`
 
-Edit `spec/Gemfile` and set the version of Spree you wish to test against and run bundler :
+Edit `spec/dummy/Gemfile` and set the version of Spree you wish to test against and run bundler :
 
 ```ruby 
-    cd spec
+    cd spec/dummy
     bundle install
 ```
 
-When changing Spree versions, you should force a rebuild of a clean sandbox, and removing the Gemfile.lock will 
-resolve any funny version issues, so  run:
+When changing Spree versions, you might need to force a Spree reinstallm in a clean dummy area.
 
 ```ruby 
-    cd spec
-    rm -rf dummy
-    rm -rf Gemfile.lock
+    rm -rf spec/dummy/spree_sandbox_installed.txt
 ```
 
-thor datashift:spree_tasks:build_sandbox
-
+This will trigger an installation.
 
 The next time you run rspec the sandbox will be regenerated using the latest versions of Rails/Spree specified in your Gemfile
 
+##### Manual Spree Install
+
 ```ruby 
-    bundle exec rspec -c .
+    cd spec/dummy
+    bundle install
+    bundle exec rails g spree:install --force --user_class=Spree::User --sample=false --seed=false --copy_storefront=false
 ```
 
 ## License
 
-Copyright:: (c) Autotelik Media Ltd 2012
+Copyright:: (c) Autotelik B.V 2012
 
 Author ::   Tom Statter
 

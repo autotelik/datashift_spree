@@ -1,15 +1,27 @@
-# DATASHIFT
+.byebug_history
 
-dummy
-spec/.bundle
-spec/dummy
-spec/dummy/**
+log/*.log
+pkg/
+spec/dummy/db/*.sqlite3
+spec/dummy/db/*.sqlite3-journal
+spec/dummy/db/*.sqlite3-*
+spec/dummy/log/*.log
+spec/dummy/storage/
+spec/dummy/tmp/
+
+spec/.bundle*
 spec/logs
 spec/fixtures/results
 /spec/MissingAttachmentRecords
 /spec/tmp/*
 /spec/rspec_spree_sandbox
 /spec/rspec_spree_sandbox/*
+
+spec/dummy/db/*.sqlite3
+spec/dummy/db/*.sqlite3-journal
+spec/dummy/db/log/*.log
+spec/dummy/tmp/
+spec/dummy/.sass-cache
 
 sandbox
 sandbox/**

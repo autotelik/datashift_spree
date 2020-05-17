@@ -1,4 +1,4 @@
-# Copyright:: (c) Autotelik Media Ltd 2012
+# Copyright:: (c) Autotelik B.V 2012
 # Author ::   Tom Statter
 # Date ::     March 2012
 # License::   MIT. Free, Open Source.
@@ -21,7 +21,7 @@ module DatashiftSpree
 
     include DataShift::Logging
 
-    desc "products", "Populate Spree Product/Variant data from .xls (Excel) or CSV file"
+    desc "products", 'Populate Spree Product/Variant data from .xls (Excel) or CSV file'
 
     method_option :input, :aliases => '-i', :required => true, :desc => "The import file (.xls or .csv)"
     method_option :sku_prefix, :aliases => '-s', :desc => "Prefix to add to each SKU before saving Product"
@@ -32,28 +32,24 @@ module DatashiftSpree
 
     def products()
 
-      # TODO - We're assuming run from a rails app/top level dir...
-      # ...can we make this more robust ? e.g what about when using active record but not in Rails app,
       require File.expand_path('config/environment.rb')
 
       input = options[:input]
 
-      require 'product_loader'
-
-      loader = DataShift::SpreeEcom::ProductLoader.new(input)
+      loader = DatashiftSpree::ProductLoader.new(input)
 
       # YAML configuration file to drive defaults etc
 
       if(options[:config])
         raise "Bad Config - Cannot find specified file #{options[:config]}" unless File.exists?(options[:config])
 
-        puts "DataShift::Product proccssing config from: #{options[:config]}"
+        puts "DataShift::Product processing config from: #{options[:config]}"
         loader.configure_from( options[:config] )
       else
          DataShift::Transformation.factory do |factory|
-          factory.set_default_on(Spree::Product, 'available_on', Time.now.to_s(:db) )
-          factory.set_default_on(Spree::Product, 'cost_price', 0.0 )
-          factory.set_default_on(Spree::Product, 'price', 0.0 )
+          factory.set_default_on(::Spree::Product, 'available_on', Time.now.to_s(:db) )
+          factory.set_default_on(::Spree::Product, 'cost_price', 0.0 )
+          factory.set_default_on(::Spree::Product, 'price', 0.0 )
         end
 
       end
@@ -76,7 +72,7 @@ module DatashiftSpree
 
       require 'image_loader'
 
-      loader = DataShift::SpreeEcom::ImageLoader.new(nil, options)
+      loader = DatashiftSpree::ImageLoader.new(nil, options)
 
       loader.run( options[:input], options )
     end
@@ -133,7 +129,7 @@ module DatashiftSpree
       loader_options[:attach_to_klass] = owner_klass    # Pass in real Ruby class not string class name
 
       # WTF  ... this works in the specs but thor gives me
-      # products_images.thor:131:in `images': uninitialized constant Thor::Sandbox::Datashift::Spree::Variant (NameError)
+      # products_images.thor:131:in `images': uninitialized constant Thor::Sandbox::DatashiftSpree::Variant (NameError)
       # loader_options[:attach_to_find_by_field] = (owner_klass. == Spree::Variant) ? :sku : :name
 
       # so for now just sku lookup available .... TOFIX - name wont currently work for Variant and sku won't work for Product

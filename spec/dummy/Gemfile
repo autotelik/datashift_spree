@@ -1,0 +1,39 @@
+source 'https://rubygems.org'
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
+  "https://github.com/#{repo_name}.git"
+end
+
+# RAILS
+gem 'rails', '~> 6.0.2', '>= 6.0.2.1'
+
+gem 'jbuilder'
+
+gem 'sass-rails'
+gem 'sqlite3'
+gem 'turbolinks'
+gem 'uglifier'
+
+# This Gemfile is only really for TESTING - Project is a gem that sits inside a Spree Rails APP
+
+# DEFINE VERSIONS YOU WANT TO TEST AGAINST HERE
+# THIS SHOULD BASICALLY REPLICATE WHAT IS IN THE SANDBOX GEMFILE
+
+# N.B Spree will update the sandbox Gemfile with additional Spree gems
+# e,g User model and Authorisation
+# For rspec you  may need to add them in here or you'll get missing Spree constants
+# TODO - update  sandbox code so it automatically adds Spree gems in here
+
+gem 'spree', '~> 4.1.0.rc1'
+gem 'spree_auth_devise', '~> 4.1.0.rc1'
+gem 'spree_gateway', '~> 3.7'
+
+gem 'spree_digital', github: 'spree-contrib/spree_digital', branch: 'master'
+
+gem 'datashift', path: '../../..' #, :git => 'https://github.com/autotelik/datashift.git', branch: 'update-to-support-rails-6'
+
+gem "datashift_spree", path: '../..'
+
+gem 'byebug'
+
+

@@ -1,18 +1,12 @@
-# Copyright:: (c) Autotelik Media Ltd 2014
+# Copyright:: (c) Autotelik B.V 2020
 # Author ::   Tom Statter
-# Date ::     June 2014
 # License::   MIT
 #
-# Details::   Helper for creating testing sandbox
+# Details::   Helper for creating a Spree store in a Rails engine 'dummy' sandbox
 #
+module DatashiftSpree
 
-$:.unshift File.expand_path("#{File.dirname(__FILE__)}/../lib")
-
-require 'datashift_spree'
-
-module DataShift
-
-  module SpreeEcom
+  class Sandbox
 
     def self.run_in(dir)
       puts "Running cmd in [#{dir}]"
@@ -30,7 +24,19 @@ module DataShift
     end
 
     def self.spree_sandbox_path
-      File.join(DatashiftSpreeLibraryBase, 'spec', spree_sandbox_name)
+      @spree_sandbox_path ||= File.expand_path( File.join(File.dirname(__FILE__), '../', spree_sandbox_name) )
+    end
+
+    def self.installed_flag_file
+      "#{spree_sandbox_path}/spree_sandbox_installed.txt"
+    end
+
+    def self.flag_installed
+      File.open(installed_flag_file, 'w') { |f| f << Time.now.to_s }
+    end
+
+    def self.installed?
+      File.exists?(installed_flag_file)
     end
 
     # The SPREE INSTALL COMMANDS based on current Gemfile Spree versions
@@ -38,41 +44,28 @@ module DataShift
     # SEE  https://github.com/spree/spree#getting-started
     #
     def self.spree_install_cmds
-      system("rails g spree:install --user_class=Spree::User --auto-accept --migrate --no-seed")
-      system("rails g spree:auth:install")
-      system("rails g spree_gateway:install")
-      system('rails g spree_digital:install --auto-run-migrations')
+      system("bundle exec rails g spree:install --force --user_class=Spree::User --sample=false --seed=false --copy_storefront=false")
+      system("bundle exec rails g spree:auth:install")
+      system("bundle exec rails g spree_gateway:install")
+
+        #system('rails g spree_digital:install --auto-run-migrations')
     end
 
-    def self.build_sandbox
+    def self.install_spree
 
-      spree_sandbox_path = DataShift::SpreeEcom::spree_sandbox_path
+      pp File.exists?(installed_flag_file)
 
-      puts "Creating new Rails sandbox for Spree : #{spree_sandbox_path}"
+      return if installed?
 
-      FileUtils::rm_rf(spree_sandbox_path) if(File.exists?(spree_sandbox_path))
+      puts "Creating new Spree store in Rails sandbox : #{spree_sandbox_path}"
 
-      rails_sandbox_root = File.expand_path("#{spree_sandbox_path}/..")
-
-      run_in(rails_sandbox_root)  do
-        system('rails new ' + spree_sandbox_name)
+      run_in(spree_sandbox_path) do
+        system("bundle install")
       end
 
-      # Now add any gems required specifically for datashift_spree to the Gemfile
-
-      gem_string = "\n\n#RSPEC datashift-spree testing\ngem 'datashift_spree',  :path => \"#{File.expand_path(rails_sandbox_root + '/..')}\"\n"
-
-      gem_string += "\ngem 'datashift', :git => 'https://github.com/autotelik/datashift.git', branch: :master\n"
-
-      gem_string += "\ngem 'spree_digital', github: 'spree-contrib/spree_digital', :branch => spree_version\n"
-
-      File.open("#{spree_sandbox_path}/Gemfile", 'a') { |f| f << gem_string }
-
-      # ***** SPREE INSTALL COMMANDS ****
-
-      run_in(spree_sandbox_path)  do
+      run_in(spree_sandbox_path) do
+        puts "Running SPREE INSTALLATION"
         spree_install_cmds
-
       end
 
       puts "Created Spree sandbox store : #{spree_sandbox_path}"
@@ -85,12 +78,15 @@ module DataShift
 require 'datashift'
 require 'datashift_spree'
 
-DataShift::SpreeEcom::load_commands
+DatashiftSpree::load_commands
 DataShift::load_commands
         EOS
         f << thor_code
       end
-     
+
+      flag_installed
+
     end
   end
+
 end

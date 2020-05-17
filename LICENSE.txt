@@ -2,7 +2,7 @@
 
 ## License
 
-Copyright:: (c) Autotelik Media Ltd 2012
+Copyright:: (c) Autotelik B.V 2012
 Author ::   Tom Statter
 Date ::     Sept 2012
 

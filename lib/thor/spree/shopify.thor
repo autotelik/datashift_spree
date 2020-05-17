@@ -1,4 +1,4 @@
-# Copyright:: (c) Autotelik Media Ltd 2015
+# Copyright:: (c) Autotelik B.V 2015
 # Author ::   Tom Statter
 # Date ::     March 2015
 # License::   MIT. Free, Open Source.
@@ -59,7 +59,7 @@ module DatashiftSpree
 
       require 'shopify_promotions_migrator'
 
-      loader = DataShift::SpreeEcom::ShopifyPromotionsMigrator.new(:verbose => options[:verbose])
+      loader = DatashiftSpree::ShopifyPromotionsMigrator.new(:verbose => options[:verbose])
 
       # YAML configuration file to drive defaults etc
 
@@ -125,7 +125,7 @@ module DatashiftSpree
 
       require 'shopify_order_migrator'
 
-      loader = DataShift::SpreeEcom::ShopifyOrderLoader.new( Spree::Order, {:verbose => options[:verbose]})
+      loader = DatashiftSpree::ShopifyOrderLoader.new( Spree::Order, {:verbose => options[:verbose]})
 
       # YAML configuration file to drive defaults etc
 
